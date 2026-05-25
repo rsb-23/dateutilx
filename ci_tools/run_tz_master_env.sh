@@ -95,4 +95,3 @@ python ${REPO_DIR}/updatezinfo.py $ZONEFILE_METADATA_NAME
 
 # Run the tests
 python -m pytest ${REPO_DIR}/tests $EXTRA_TEST_ARGS -x --pdb
-

@@ -8,4 +8,3 @@ Presented here is a solution to the :ref:`Martin Luther King Day exercises <mlk-
 
 .. include:: mlk_day_rrule_solution.py
    :code: python3
-
