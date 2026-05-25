@@ -1,5 +1,8 @@
 name: Validate
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -30,12 +33,12 @@ jobs:
           sudo apt-get install -y lzip curl
           mkdir -p tzdata_built
           TMP_DIR=$(mktemp -d)
-          cd $TMP_DIR
+          cd "$TMP_DIR"
           curl --fail --location "https://data.iana.org/time-zones/releases/tzdb-${{ env.TZDATA_VERSION }}.tar.lz" -o tzdb.tar.lz
           tar --lzip -xf tzdb.tar.lz
           cd tzdb-${{ env.TZDATA_VERSION }}
           # TODO: Don't use fat when slim builds are available
-          make install DESTDIR=$GITHUB_WORKSPACE/tzdata_built \
+          make install DESTDIR="$GITHUB_WORKSPACE"/tzdata_built \
                         DATAFORM=main \
                         ZFLAGS="-b fat"
 
@@ -59,7 +62,7 @@ jobs:
           "pypy-2.7",
           "pypy-3.8",
         ]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
         include:
           # Older versions (<=3.7) are included separately since they need
           # special handling (using an older os or a container)
@@ -97,14 +100,19 @@ jobs:
       SUDO: ${{ !matrix.use-container && 'sudo' || '' }}
       TZ: ${{ !startsWith(matrix.os, 'windows-latest') && 'America/New_York' || null }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - &checkout_step
+        name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
       - name: Set timezone (Windows)
         if: startsWith(matrix.os, 'windows-latest')
         run: tzutil /s "Eastern Standard Time"
       - if: ${{ !matrix.use-container }}
         name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }} (non-containers)
-        uses: actions/setup-python@v5
+        uses: &py-setup actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
@@ -127,8 +135,8 @@ jobs:
         run: python -m pip install -U tox six
       - name: Install zic (Windows)
         run: |
-          curl https://get.enterprisedb.com/postgresql/postgresql-9.5.21-2-windows-x64-binaries.zip --output $env:GITHUB_WORKSPACE\postgresql9.5.21.zip
-          unzip -oq $env:GITHUB_WORKSPACE\postgresql9.5.21.zip -d .postgresql
+          curl https://get.enterprisedb.com/postgresql/postgresql-9.5.21-2-windows-x64-binaries.zip --output $env:GITHUB_WORKSPACE/postgresql9.5.21.zip
+          unzip -oq $env:GITHUB_WORKSPACE/postgresql9.5.21.zip -d .postgresql
         if: startsWith(matrix.os, 'windows')
       - name: Run updatezinfo.py (Windows)
         run: |
@@ -143,9 +151,9 @@ jobs:
       - name: Generate coverage.xml
         run: python -m tox -e coverage
       - name: Report coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
-          file: ./.tox/coverage.xml
+          files: ./.tox/coverage.xml
           name: ${{ matrix.os }}:${{ matrix.python-version }}
           fail_ci_if_error: false
           # codecov/codecov-action@v3 needs v0.7.3 to work on macos-15-intel
@@ -157,20 +165,19 @@ jobs:
     needs: build-tzdata
     strategy:
       matrix:
-        toxenv: ["docs", "tz", "precommit"]
+        toxenv: [ "docs", "tz", "precommit" ]
     env:
       TOXENV: ${{ matrix.toxenv }}
       TZ: ${{ !startsWith(matrix.os, 'windows-latest') && 'America/New_York' || null }}
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - *checkout_step
+
       - name: Set timezone (Windows)
         if: startsWith(matrix.os, 'windows-latest')
         run: tzutil /s "Eastern Standard Time"
       - name: ${{ matrix.toxenv }}
-        uses: actions/setup-python@v5
+        uses: *py-setup
         with:
           python-version: "3.13"
       - name: Download tzdata artifact
@@ -194,10 +201,9 @@ jobs:
   darker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - *checkout_step
+
+      - uses: *py-setup
       - uses: akaihola/darker@0fb2501a3f6c1b2d64976afa57885aeec0601182
         # pinned due to unreleased fix: https://github.com/akaihola/darker/issues/489
         with:
@@ -208,9 +214,10 @@ jobs:
   build-dist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - *checkout_step
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: *py-setup
         with:
           python-version: "3.10"
       - name: Install tox
@@ -220,8 +227,8 @@ jobs:
       - name: Check generation
         run: |
           exactly_one() {
-            value=$(find dist -iname $1 | wc -l)
-            if [ $value -ne 1 ]; then
+            value=$(find dist -iname "$1" | wc -l)
+            if [ "$value" -ne 1 ]; then
               echo "Found $value instances of $1, not 1"
               return 1
             else
