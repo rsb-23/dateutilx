@@ -15,7 +15,7 @@ readme = "README.rst"
 requires-python = ">=3.10"
 [project.optional-dependencies]
 lint = ["pre-commit", "pylint"]
-test = ["pytest", "pytest-cov"]
+test = ["freezegun", "hypothesis", "pytest", "pytest-cov"]
 
 [tool.towncrier]
 package = "dateutil"
