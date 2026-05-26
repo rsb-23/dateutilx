@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import io
 import os
 import sys
 import warnings
@@ -7,7 +6,7 @@ from distutils.version import LooseVersion
 from os.path import isfile
 
 import setuptools
-from setuptools import find_packages, setup
+from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
 if isfile("MANIFEST"):
@@ -28,7 +27,7 @@ class Unsupported(TestCommand):
 
 
 def README():
-    with io.open("README.rst", encoding="utf-8") as f:
+    with open("README.rst", encoding="utf-8") as f:
         readme_lines = f.readlines()
 
     # The .. doctest directive is not supported by PyPA

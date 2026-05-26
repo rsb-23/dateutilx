@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 import pickle
 import subprocess
@@ -9,7 +7,7 @@ import time
 import pytest
 
 
-class PicklableMixin(object):
+class PicklableMixin:
     def _get_nobj_bytes(self, obj, dump_kwargs, load_kwargs):
         """
         Pickle and unpickle an object using ``pickle.dumps`` / ``pickle.loads``
@@ -45,7 +43,7 @@ class PicklableMixin(object):
         self.assertEqual(obj, nobj)
 
 
-class TZContextBase(object):
+class TZContextBase:
     """
     Base class for a context manager which allows changing of time zones.
 
@@ -163,7 +161,7 @@ class TZWinContext(TZContextBase):
 
 ###
 # Utility classes
-class NotAValueClass(object):
+class NotAValueClass:
     """
     A class analogous to NaN that has operations defined for any type.
     """
@@ -191,7 +189,7 @@ class NotAValueClass(object):
 NotAValue = NotAValueClass()
 
 
-class ComparesEqualClass(object):
+class ComparesEqualClass:
     """
     A class that is always equal to whatever you compare it to.
     """
@@ -225,7 +223,7 @@ class ComparesEqualClass(object):
 ComparesEqual = ComparesEqualClass()
 
 
-class UnsetTzClass(object):
+class UnsetTzClass:
     """Sentinel class for unset time zone variable"""
 
     pass

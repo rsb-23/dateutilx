@@ -1,2 +1,2 @@
 # tzwin has moved to dateutil.tz.win
-from .tz.win import *
+from .tz.win import *  # noqa

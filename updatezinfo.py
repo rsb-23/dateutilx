@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 import hashlib
-import io
 import json
 import os
-
-from six.moves.urllib import error as urllib_error
-from six.moves.urllib import request
+from urllib import error as urllib_error
+from urllib import request
 
 try:
     import dateutil
@@ -23,7 +21,7 @@ METADATA_FILE = "zonefile_metadata.json"
 
 
 def main(metadata_file):
-    with io.open(metadata_file, "r") as f:
+    with open(metadata_file) as f:
         metadata = json.load(f)
 
     releases_urls = metadata["releases_url"]

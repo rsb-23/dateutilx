@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from ._parser import DEFAULTPARSER, DEFAULTTZPARSER, ParserError, UnknownTimezoneWarning, parse, parser, parserinfo
 from .isoparser import isoparse, isoparser
 
@@ -42,7 +41,7 @@ def __deprecate_private_class(c):
 
         def __init__(self, *args, **kwargs):
             warnings.warn(msg, DeprecationWarning)
-            super(private_class, self).__init__(*args, **kwargs)
+            super().__init__(*args, **kwargs)
 
     private_class.__name__ = c.__name__
 

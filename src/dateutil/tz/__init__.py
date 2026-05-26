@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .tz import (
     UTC,
     datetime_ambiguous,
