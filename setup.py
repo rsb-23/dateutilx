@@ -1,19 +1,13 @@
 #!/usr/bin/python
 import os
 import sys
-import warnings
-from distutils.version import LooseVersion
 from os.path import isfile
 
-import setuptools
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
 if isfile("MANIFEST"):
     os.unlink("MANIFEST")
-
-if LooseVersion(setuptools.__version__) <= LooseVersion("24.3"):
-    warnings.warn("python_requires requires setuptools version > 24.3", UserWarning)
 
 
 class Unsupported(TestCommand):

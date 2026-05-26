@@ -101,7 +101,7 @@ class TZContextBase:
     def get_current_tz(self):
         raise NotImplementedError
 
-    def set_current_tz(self):
+    def set_current_tz(self, tzname):
         raise NotImplementedError
 
 

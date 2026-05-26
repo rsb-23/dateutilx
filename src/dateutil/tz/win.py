@@ -9,8 +9,13 @@ Attempting to import this module on a non-Windows platform will raise an
 # This code was originally contributed by Jeffrey Harris.
 import datetime
 import struct
+import sys
 
-from six.moves import winreg
+if sys.platform == "win32":
+    import winreg
+else:
+    winreg = None
+
 
 try:
     import ctypes

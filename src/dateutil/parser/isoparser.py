@@ -37,7 +37,7 @@ def _takes_ascii(f):
     return func
 
 
-class isoparser:
+class IsoParser:
     def __init__(self, sep=None):
         """
         :param sep:
@@ -197,7 +197,7 @@ class isoparser:
     # Constants
     _DATE_SEP = b"-"
     _TIME_SEP = b":"
-    _FRACTION_REGEX = re.compile(b"[\\.,]([0-9]+)")
+    _FRACTION_REGEX = re.compile(b"[.,]([0-9]+)")
 
     def _parse_isodate(self, dt_str):
         try:
@@ -289,7 +289,8 @@ class isoparser:
         components = [base_date.year, base_date.month, base_date.day]
         return components, pos
 
-    def _calculate_weekdate(self, year, week, day):
+    @staticmethod
+    def _calculate_weekdate(year, week, day):
         """
         Calculate the day of corresponding to the ISO year-week-day calendar.
 
@@ -407,5 +408,6 @@ class isoparser:
             return tz.tzoffset(None, mult * (hours * 60 + minutes) * 60)
 
 
+isoparser = IsoParser
 DEFAULT_ISOPARSER = isoparser()
 isoparse = DEFAULT_ISOPARSER.isoparse

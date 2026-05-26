@@ -12,7 +12,6 @@ from functools import partial
 from io import BytesIO, StringIO
 
 import pytest
-from six import PY2
 
 from dateutil import tz as tz
 from dateutil import zoneinfo
@@ -162,7 +161,7 @@ def get_timezone_tuple(dt):
 
 ###
 # Mix-ins
-class context_passthrough:
+class ContextPassthrough:
     def __init__(*args, **kwargs):
         pass
 
@@ -183,7 +182,7 @@ class TzFoldMixin:
         return tzname
 
     def _gettz_context(self, tzname):
-        return context_passthrough()
+        return ContextPassthrough()
 
     def testFoldPositiveUTCOffset(self):
         # Test that we can resolve ambiguous times
@@ -1081,7 +1080,7 @@ def test_gettz_badzone_unicode():
             b"America/New_York",
             ".*should be str, not bytes.*",
             id="bytes on Python 3",
-            marks=[pytest.mark.skipif(PY2, reason="bytes arguments accepted in Python 2")],
+            marks=[pytest.mark.skipif(False, reason="bytes arguments accepted in Python 2")],
         ),
         pytest.param(
             object(),

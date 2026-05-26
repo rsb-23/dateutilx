@@ -2,7 +2,6 @@ import itertools as it
 from datetime import date, datetime, time, timedelta
 
 import pytest
-import six
 
 from dateutil import tz
 from dateutil.parser import isoparse, isoparser
@@ -326,7 +325,7 @@ def test_isoparser_invalid_sep(sep):
 
 
 # This only fails on Python 3
-@pytest.mark.xfail(not six.PY2, reason="Fails on Python 3 only")
+@pytest.mark.xfail(True, reason="Fails on Python 3 only")
 def test_isoparser_byte_sep():
     dt = datetime(2017, 12, 6, 12, 30, 45)
     dt_str = dt.isoformat(sep="T")
@@ -373,10 +372,7 @@ def test_parse_tzstr_fails(tzstr, exception):
 ###
 # Test parse_isodate
 def __make_date_examples():
-    dates_no_day = [date(1999, 12, 1), date(2016, 2, 1)]
-
-    # strftime does not support dates before 1900 in Python 2
-    dates_no_day.append(date(1000, 11, 1))
+    dates_no_day = [date(1999, 12, 1), date(2016, 2, 1), date(1000, 11, 1)]
 
     # Only one supported format for dates with no day
     o = zip(dates_no_day, it.repeat("%Y-%m"))
@@ -424,7 +420,6 @@ def test_parse_isodate_error_text():
     with pytest.raises(ValueError) as excinfo:
         isoparser().parse_isodate("2014-0423")
 
-    # ensure the error message does not contain b' prefixes
     expected_error = "String contains unknown ISO components: '2014-0423'"
     assert expected_error == str(excinfo.value)
 
