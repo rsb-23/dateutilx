@@ -17,10 +17,7 @@ import time
 import weakref
 from collections import OrderedDict
 
-import six
-from six import string_types
-
-from ._common import _tzinfo, _validate_fromutc_inputs, enfold, tzname_in_python2, tzrangebase
+from ._common import _tzinfo, _validate_fromutc_inputs, enfold, tzrangebase
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
 
 try:
@@ -73,7 +70,6 @@ class tzutc(datetime.tzinfo, metaclass=_TzSingleton):
     def dst(self, dt):
         return ZERO
 
-    @tzname_in_python2
     def tzname(self, dt):
         return "UTC"
 
@@ -152,7 +148,6 @@ class tzoffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
     def dst(self, dt):
         return ZERO
 
-    @tzname_in_python2
     def tzname(self, dt):
         return self._name
 
@@ -227,7 +222,6 @@ class tzlocal(_tzinfo):
         else:
             return ZERO
 
-    @tzname_in_python2
     def tzname(self, dt):
         return self._tznames[self._isdst(dt)]
 
@@ -321,12 +315,12 @@ class _ttinfo:
             setattr(self, attr, None)
 
     def __repr__(self):
-        l = []
+        _tmp_list = []
         for attr in self.__slots__:
             value = getattr(self, attr)
             if value is not None:
-                l.append("{}={}".format(attr, repr(value)))
-        return "{}({})".format(self.__class__.__name__, ", ".join(l))
+                _tmp_list.append("{}={}".format(attr, repr(value)))
+        return "{}({})".format(self.__class__.__name__, ", ".join(_tmp_list))
 
     def __eq__(self, other):
         if not isinstance(other, _ttinfo):
@@ -830,7 +824,6 @@ class tzfile(_tzinfo):
         # be constant for every dt.
         return tti.dstoffset
 
-    @tzname_in_python2
     def tzname(self, dt):
         if not self._ttinfo_std or dt is None:
             return None
@@ -1225,7 +1218,6 @@ class _tzicalvtz(_tzinfo):
         else:
             return ZERO
 
-    @tzname_in_python2
     def tzname(self, dt):
         return self._find_comp(dt).tzname
 

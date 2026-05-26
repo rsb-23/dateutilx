@@ -10,7 +10,6 @@ Attempting to import this module on a non-Windows platform will raise an
 import datetime
 import struct
 
-from six import text_type
 from six.moves import winreg
 
 try:

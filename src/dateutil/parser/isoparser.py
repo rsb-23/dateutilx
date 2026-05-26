@@ -12,8 +12,6 @@ import re
 from datetime import date, datetime, time, timedelta
 from functools import wraps
 
-import six
-
 from dateutil import tz
 
 __all__ = ["isoparse", "isoparser"]

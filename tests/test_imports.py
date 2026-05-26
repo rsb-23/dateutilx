@@ -1,7 +1,6 @@
 import sys
 
 import pytest
-import six
 
 MODULE_TYPE = type(sys)
 
@@ -153,8 +152,7 @@ def test_import_rrule_all():
     )
 
     rr_all = (rrule, rruleset, rrulestr,
-              YEARLY, MONTHLY, WEEKLY, DAILY,
-              HOURLY, MINUTELY, SECONDLY,
+              YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY,
               MO, TU, WE, TH, FR, SA, SU)
     # fmt: on
 
@@ -178,7 +176,7 @@ def test_import_tz_from():
 
 def test_import_tz_all():
     # fmt: off
-    from dateutil.tz import (
+    from dateutil.tz import (  # noqa: F401
         UTC,
         datetime_ambiguous,
         datetime_exists,

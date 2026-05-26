@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 import pytest
-from six import assertRaisesRegex
 
 from dateutil import tz
 from dateutil.parser import ParserError, UnknownTimezoneWarning, parse, parserinfo
@@ -441,11 +440,7 @@ class ParserTest(unittest.TestCase):
         assert res == expected
 
     def testParseWithNulls(self):
-        # This relies on the from __future__ import unicode_literals, because
-        # explicitly specifying a unicode literal is a syntax error in Py 3.2
-        # May want to switch to u'...' if we ever drop Python 3.2 support.
         pstring = "\x00\x00August 29, 1924"
-
         assert parse(pstring) == datetime(1924, 8, 29)
 
     def testDateCommandFormat(self):

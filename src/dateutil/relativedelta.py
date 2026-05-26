@@ -4,8 +4,6 @@ import operator
 from math import copysign
 from warnings import warn
 
-from six import integer_types
-
 from ._common import weekday
 
 MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(weekday(x) for x in range(7))
@@ -13,7 +11,7 @@ MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(weekday(x) for x in range(7))
 __all__ = ["relativedelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
 
 
-class relativedelta:
+class RelativeDelta:
     """
     The relativedelta type is designed to be applied to an existing datetime and
     can replace specific components of that datetime, or represents an interval
@@ -124,7 +122,6 @@ class relativedelta:
         second=None,
         microsecond=None,
     ):
-
         if dt1 and dt2:
             # datetime is a subclass of date. So both must be date
             if not (isinstance(dt1, datetime.date) and isinstance(dt2, datetime.date)):
@@ -604,20 +601,21 @@ class relativedelta:
     __truediv__ = __div__
 
     def __repr__(self):
-        l = []
+        _tmp_list = []
         for attr in ["years", "months", "days", "leapdays", "hours", "minutes", "seconds", "microseconds"]:
             value = getattr(self, attr)
             if value:
-                l.append("{attr}={value:+g}".format(attr=attr, value=value))
+                _tmp_list.append("{attr}={value:+g}".format(attr=attr, value=value))
         for attr in ["year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"]:
             value = getattr(self, attr)
             if value is not None:
-                l.append("{attr}={value}".format(attr=attr, value=repr(value)))
-        return "{classname}({attrs})".format(classname=self.__class__.__name__, attrs=", ".join(l))
+                _tmp_list.append("{attr}={value}".format(attr=attr, value=repr(value)))
+        return "{classname}({attrs})".format(classname=self.__class__.__name__, attrs=", ".join(_tmp_list))
 
 
 def _sign(x):
     return int(copysign(1, x))
 
 
+relativedelta = RelativeDelta
 # vim:ts=4:sw=4:et

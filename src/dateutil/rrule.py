@@ -17,8 +17,6 @@ from functools import wraps
 # For warning about deprecation of until and count
 from warnings import warn
 
-from six import advance_iterator, integer_types
-
 from ._common import weekday as weekdaybase
 
 try:
@@ -26,42 +24,22 @@ try:
 except ImportError:
     from fractions import gcd
 
+# fmt: off
 __all__ = [
-    "rrule",
-    "rruleset",
-    "rrulestr",
-    "YEARLY",
-    "MONTHLY",
-    "WEEKLY",
-    "DAILY",
-    "HOURLY",
-    "MINUTELY",
-    "SECONDLY",
-    "MO",
-    "TU",
-    "WE",
-    "TH",
-    "FR",
-    "SA",
-    "SU",
+    "rrule", "rruleset", "rrulestr",
+    "YEARLY", "MONTHLY", "WEEKLY", "DAILY",
+    "HOURLY", "MINUTELY", "SECONDLY",
+    "MO", "TU", "WE", "TH", "FR", "SA", "SU",
 ]
 
 # Every mask is 7 days longer to handle cross-year weekly periods.
 M366MASK = tuple(
-    [1] * 31
-    + [2] * 29
-    + [3] * 31
-    + [4] * 30
-    + [5] * 31
-    + [6] * 30
-    + [7] * 31
-    + [8] * 31
-    + [9] * 30
-    + [10] * 31
-    + [11] * 30
-    + [12] * 31
+    [1] * 31 + [2] * 29 + [3] * 31 + [4] * 30 + [5] * 31 + [6] * 30
+    + [7] * 31 + [8] * 31 + [9] * 30 + [10] * 31 + [11] * 30 + [12] * 31
     + [1] * 7
 )
+# fmt: on
+
 M365MASK = list(M366MASK)
 M29, M30, M31 = list(range(1, 30)), list(range(1, 31)), list(range(1, 32))
 MDAY366MASK = tuple(M31 + M29 + M31 + M30 + M31 + M30 + M31 + M31 + M30 + M31 + M30 + M31 + M31[:7])
@@ -273,10 +251,10 @@ class rrulebase:
             gen = self
 
         # Select the comparison function
-        if inc:
-            comp = lambda dc, dtc: dc >= dtc
-        else:
-            comp = lambda dc, dtc: dc > dtc
+        def comp(dc, dtc):
+            if inc:
+                return dc >= dtc
+            return dc > dtc
 
         # Generate dates
         n = 0
@@ -299,7 +277,8 @@ class rrulebase:
         else:
             gen = self
         started = False
-        l = []
+
+        _output = []
         if inc:
             for i in gen:
                 if i > before:
@@ -307,9 +286,9 @@ class rrulebase:
                 elif not started:
                     if i >= after:
                         started = True
-                        l.append(i)
+                        _output.append(i)
                 else:
-                    l.append(i)
+                    _output.append(i)
         else:
             for i in gen:
                 if i >= before:
@@ -317,10 +296,10 @@ class rrulebase:
                 elif not started:
                     if i > after:
                         started = True
-                        l.append(i)
+                        _output.append(i)
                 else:
-                    l.append(i)
-        return l
+                    _output.append(i)
+        return _output
 
 
 class rrule(rrulebase):
@@ -1539,7 +1518,7 @@ class _rrulestr:
         """
         Two ways to specify this: +1MO or MO(+1)
         """
-        l = []
+        _tmp_list = []
         for wday in value.split(","):
             if "(" in wday:
                 # If it's of the form TH(+1), etc.
@@ -1558,8 +1537,8 @@ class _rrulestr:
             else:
                 raise ValueError("Invalid (empty) BYDAY specification.")
 
-            l.append(weekdays[self._weekday_map[w]](n))
-        rrkwargs["byweekday"] = l
+            _tmp_list.append(weekdays[self._weekday_map[w]](n))
+        rrkwargs["byweekday"] = _tmp_list
 
     _handle_BYDAY = _handle_BYWEEKDAY
 

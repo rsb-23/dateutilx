@@ -6,7 +6,7 @@ from urllib import error as urllib_error
 from urllib import request
 
 try:
-    import dateutil
+    import dateutil  # noqa
 except ImportError:
     print("dateutil not installed locally, adding src to Python path")
     import sys
@@ -30,7 +30,6 @@ def main(metadata_file):
         releases_urls = [releases_urls]
 
     if not os.path.isfile(metadata["tzdata_file"]):
-
         for ii, releases_url in enumerate(releases_urls):
             print("Downloading tz file from mirror {ii}".format(ii=ii))
             try:
