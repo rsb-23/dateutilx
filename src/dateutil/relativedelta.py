@@ -605,11 +605,11 @@ class RelativeDelta:
         for attr in ["years", "months", "days", "leapdays", "hours", "minutes", "seconds", "microseconds"]:
             value = getattr(self, attr)
             if value:
-                _tmp_list.append("{attr}={value:+g}".format(attr=attr, value=value))
+                _tmp_list.append(f"{attr}={value:+g}")
         for attr in ["year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"]:
             value = getattr(self, attr)
             if value is not None:
-                _tmp_list.append("{attr}={value}".format(attr=attr, value=repr(value)))
+                _tmp_list.append(f"{attr}={repr(value)}")
         return "{classname}({attrs})".format(classname=self.__class__.__name__, attrs=", ".join(_tmp_list))
 
 

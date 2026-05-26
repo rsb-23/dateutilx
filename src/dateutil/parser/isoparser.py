@@ -282,7 +282,7 @@ class IsoParser:
             pos += 3
 
             if ordinal_day < 1 or ordinal_day > (365 + calendar.isleap(year)):
-                raise ValueError("Invalid ordinal day" + " {} for year {}".format(ordinal_day, year))
+                raise ValueError("Invalid ordinal day" + f" {ordinal_day} for year {year}")
 
             base_date = date(year, 1, 1) + timedelta(days=ordinal_day - 1)
 
@@ -310,10 +310,10 @@ class IsoParser:
             Returns a :class:`datetime.date`
         """
         if not 0 < week < 54:
-            raise ValueError("Invalid week: {}".format(week))
+            raise ValueError(f"Invalid week: {week}")
 
         if not 0 < day < 8:  # Range is 1-7
-            raise ValueError("Invalid weekday: {}".format(day))
+            raise ValueError(f"Invalid weekday: {day}")
 
         # Get week 1 for the specific year:
         jan_4 = date(year, 1, 4)  # Week 1 always has January 4th in it

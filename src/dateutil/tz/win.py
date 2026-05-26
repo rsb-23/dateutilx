@@ -220,7 +220,7 @@ class tzwin(tzwinbase):
         self._name = name
 
         with winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE) as handle:
-            tzkeyname = "{kn}\\{name}".format(kn=TZKEYNAME, name=name)
+            tzkeyname = f"{TZKEYNAME}\\{name}"
             with winreg.OpenKey(handle, tzkeyname) as tzkey:
                 keydict = valuestodict(tzkey)
 
@@ -291,7 +291,7 @@ class tzwinlocal(tzwinbase):
             self._dst_abbr = keydict["DaylightName"]
 
             try:
-                tzkeyname = "{kn}\\{sn}".format(kn=TZKEYNAME, sn=self._std_abbr)
+                tzkeyname = f"{TZKEYNAME}\\{self._std_abbr}"
                 with winreg.OpenKey(handle, tzkeyname) as tzkey:
                     _keydict = valuestodict(tzkey)
                     self._display = _keydict["Display"]

@@ -732,7 +732,7 @@ class rrule(rrulebase):
             wday_strings = []
             for wday in original_rule["byweekday"]:
                 if wday.n:
-                    wday_strings.append("{n:+d}{wday}".format(n=wday.n, wday=repr(wday)[0:2]))
+                    wday_strings.append(f"{wday.n:+d}{repr(wday)[0:2]}")
                 else:
                     wday_strings.append(repr(wday))
 
@@ -1559,7 +1559,7 @@ class _rrulestr:
             except AttributeError:
                 raise ValueError("unknown parameter '%s'" % name)
             except (KeyError, ValueError):
-                raise ValueError("invalid '{}': {}".format(name, value))
+                raise ValueError(f"invalid '{name}': {value}")
         return rrule(dtstart=dtstart, cache=cache, **rrkwargs)
 
     def _parse_date_value(self, date_value, parms, rule_tzids, ignoretz, tzids, tzinfos):

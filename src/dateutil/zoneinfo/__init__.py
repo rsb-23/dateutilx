@@ -21,7 +21,7 @@ def getzoneinfofile_stream():
     try:
         return BytesIO(get_data(__name__, ZONEFILENAME))
     except OSError as e:  # TODO  switch to FileNotFoundError?
-        warnings.warn("I/O error({}): {}".format(e.errno, e.strerror))
+        warnings.warn(f"I/O error({e.errno}): {e.strerror}")
         return None
 
 

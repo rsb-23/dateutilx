@@ -58,7 +58,7 @@ else:
 
             for arg, argname in zip(args, argnames):
                 if argname in kwargs:
-                    raise TypeError("Duplicate argument: {}".format(argname))
+                    raise TypeError(f"Duplicate argument: {argname}")
 
                 kwargs[argname] = arg
 

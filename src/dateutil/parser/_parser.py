@@ -215,7 +215,7 @@ class _resultbase:
         for attr in self.__slots__:
             value = getattr(self, attr)
             if value is not None:
-                _tmp_list.append("{}={}".format(attr, repr(value)))
+                _tmp_list.append(f"{attr}={repr(value)}")
         return "{}({})".format(classname, ", ".join(_tmp_list))
 
     def __len__(self):
@@ -1591,7 +1591,7 @@ class ParserError(ValueError):
 
     def __repr__(self):
         args = ", ".join("'%s'" % arg for arg in self.args)
-        return "{}({})".format(self.__class__.__name__, args)
+        return f"{self.__class__.__name__}({args})"
 
 
 class UnknownTimezoneWarning(RuntimeWarning):

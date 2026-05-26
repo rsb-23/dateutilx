@@ -1497,7 +1497,7 @@ def test_tzstr_weakref():
     assert tz.tzstr("EST5EDT") is tz_t2_ref()
 
     for offset in range(5, 15):
-        tz.tzstr("GMT+{}".format(offset))
+        tz.tzstr(f"GMT+{offset}")
     gc.collect()
 
     assert tz_t2_ref() is None
@@ -2098,9 +2098,7 @@ class TZTest(unittest.TestCase):
         # ttinfo list may contain more entries than isstd file content
         isstd = tuple(isstd[: len(isstd_expected)])
         self.assertEqual(
-            isstd_expected,
-            isstd,
-            "isstd UTC/local indicators parsed: {} != tzfile contents: {}".format(isstd, isstd_expected),
+            isstd_expected, isstd, f"isstd UTC/local indicators parsed: {isstd} != tzfile contents: {isstd_expected}"
         )
 
     def testGMTHasNoDaylight(self):

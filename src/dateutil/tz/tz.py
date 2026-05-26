@@ -181,7 +181,7 @@ class tzoffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
         return not (self == other)
 
     def __repr__(self):
-        return "{}({}, {})".format(self.__class__.__name__, repr(self._name), int(self._offset.total_seconds()))
+        return f"{self.__class__.__name__}({repr(self._name)}, {int(self._offset.total_seconds())})"
 
     __reduce__ = object.__reduce__
 
@@ -319,7 +319,7 @@ class _ttinfo:
         for attr in self.__slots__:
             value = getattr(self, attr)
             if value is not None:
-                _tmp_list.append("{}={}".format(attr, repr(value)))
+                _tmp_list.append(f"{attr}={repr(value)}")
         return "{}({})".format(self.__class__.__name__, ", ".join(_tmp_list))
 
     def __eq__(self, other):
@@ -844,7 +844,7 @@ class tzfile(_tzinfo):
         return not (self == other)
 
     def __repr__(self):
-        return "{}({})".format(self.__class__.__name__, repr(self._filename))
+        return f"{self.__class__.__name__}({repr(self._filename)})"
 
     def __reduce__(self):
         return self.__reduce_ex__(None)
@@ -1130,7 +1130,7 @@ class tzstr(tzrange, metaclass=_TzStrFactory):
         return relativedelta.relativedelta(**kwargs)
 
     def __repr__(self):
-        return "{}({})".format(self.__class__.__name__, repr(self._s))
+        return f"{self.__class__.__name__}({repr(self._s)})"
 
 
 class _tzicalvtzcomp:
@@ -1388,7 +1388,7 @@ class tzical:
                         rrulelines.append(line)
                     elif name == "TZOFFSETFROM":
                         if parms:
-                            raise ValueError("unsupported {} parm: {} ".format(name, parms[0]))
+                            raise ValueError(f"unsupported {name} parm: {parms[0]} ")
                         tzoffsetfrom = self._parse_offset(value)
                     elif name == "TZOFFSETTO":
                         if parms:
@@ -1417,7 +1417,7 @@ class tzical:
                 invtz = True
 
     def __repr__(self):
-        return "{}({})".format(self.__class__.__name__, repr(self._s))
+        return f"{self.__class__.__name__}({repr(self._s)})"
 
 
 if sys.platform != "win32":
@@ -1775,20 +1775,8 @@ def _datetime_to_timestamp(dt):
     return (dt.replace(tzinfo=None) - EPOCH).total_seconds()
 
 
-if sys.version_info >= (3, 6):
-
-    def _get_supported_offset(second_offset):
-        return second_offset
-
-else:
-
-    def _get_supported_offset(second_offset):
-        # For python pre-3.6, round to full-minutes if that's not the case.
-        # Python's datetime doesn't accept sub-minute timezones. Check
-        # http://python.org/sf/1447945 or https://bugs.python.org/issue5288
-        # for some information.
-        calculated_offset = 60 * ((second_offset + 30) // 60)
-        return calculated_offset
+def _get_supported_offset(second_offset):
+    return second_offset
 
 
 try:
