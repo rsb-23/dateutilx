@@ -22,49 +22,33 @@ max-statements = 180
 disable=
 	I,
 	# E
-	access-member-before-definition, #3
 	import-error, #15
-	invalid-unary-operand-type, #1
 	no-member, #69
-	no-self-argument, #7
-	possibly-used-before-assignment, #2
-	unsubscriptable-object, #2
+	unsubscriptable-object, #2keep
 	# W
-	abstract-method, #4
-	arguments-renamed, #2
+	abstract-method, #4keep
 	attribute-defined-outside-init, #79
-	broad-exception-caught, #1
-	dangerous-default-value, #2
-	expression-not-assigned, #3
 	fixme, #24
 	global-statement, #7
 	implicit-str-concat, #28
 	possibly-unused-variable, #14
 	protected-access, #39
-	raise-missing-from, #6
-	raising-format-tuple, #2
-	redefined-builtin, #2
 	redefined-outer-name, #20
-	unspecified-encoding, #3
 	unused-argument, #29
-	unused-import, #1
 	unused-variable, #24
-	unused-wildcard-import, #2
-	wildcard-import, #2
+	unused-wildcard-import, #2keep
+	wildcard-import, #2keep
 	# C
 	consider-using-f-string, #25
 	import-outside-toplevel, #34
 	invalid-name, #1034
 	missing-docstring, #keep
 	superfluous-parens, #13
-	unidiomatic-typecheck, #1
 	use-implicit-booleaness-not-comparison-to-zero, #29
-	useless-import-alias, #1
-	wrong-import-position, #3
+	wrong-import-position, #3keep
 	# R
-	cyclic-import, #5
+	cyclic-import, #5keep
 	duplicate-code, #keep
 	no-else-return, #33
-	redefined-argument-from-local, #4
-	stop-iteration-return, #2
+	stop-iteration-return, #2keep
 	too-few-public-methods, #19

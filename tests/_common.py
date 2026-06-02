@@ -92,7 +92,7 @@ class TZContextBase:
         self._old_tz = self.get_current_tz()
         self.set_current_tz(self.tzval)
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         if self._old_tz is not None:
             self.set_current_tz(self._old_tz)
 
@@ -121,11 +121,11 @@ class TZEnvContext(TZContextBase):
     def get_current_tz(self):
         return os.environ.get("TZ", UnsetTz)
 
-    def set_current_tz(self, tzval):
-        if tzval is UnsetTz and "TZ" in os.environ:
+    def set_current_tz(self, tzname):
+        if tzname is UnsetTz and "TZ" in os.environ:
             del os.environ["TZ"]
         else:
-            os.environ["TZ"] = tzval
+            os.environ["TZ"] = tzname
 
         time.tzset()
 

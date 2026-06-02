@@ -351,7 +351,7 @@ def test_parse_tzstr(tzoffset):
 def test_parse_tzstr_zero_as_utc(tzstr, zero_as_utc):
     tzi = isoparser().parse_tzstr(tzstr, zero_as_utc=zero_as_utc)
     assert tzi == UTC
-    assert (type(tzi) is tz.tzutc) == zero_as_utc
+    assert isinstance(tzi, tz.tzutc) == zero_as_utc
 
 
 @pytest.mark.parametrize(

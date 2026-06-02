@@ -624,10 +624,10 @@ class Parser:
         res, skipped_tokens = self._parse(timestr, **kwargs)
 
         if res is None:
-            raise ParserError("Unknown string format: %s", timestr)
+            raise ParserError("Unknown string format: %s" % timestr)
 
         if len(res) == 0:
-            raise ParserError("String does not contain a date: %s", timestr)
+            raise ParserError("String does not contain a date: %s" % timestr)
 
         try:
             ret = self._build_naive(res, default)

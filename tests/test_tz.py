@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import copy
 import gc
 import os
@@ -12,8 +13,7 @@ from io import BytesIO, StringIO
 
 import pytest
 
-from dateutil import tz as tz
-from dateutil import zoneinfo
+from dateutil import tz, zoneinfo
 from dateutil.helper import is_windows_os
 from dateutil.parser import parse
 
@@ -157,19 +157,6 @@ def get_timezone_tuple(dt):
     return dt.tzname(), dt.utcoffset(), dt.dst()
 
 
-###
-# Mix-ins
-class ContextPassthrough:
-    def __init__(*args, **kwargs):
-        pass
-
-    def __enter__(*args, **kwargs):
-        pass
-
-    def __exit__(*args, **kwargs):
-        pass
-
-
 class TzFoldMixin:
     """Mix-in class for testing ambiguous times"""
 
@@ -180,7 +167,7 @@ class TzFoldMixin:
         return tzname
 
     def _gettz_context(self, tzname):
-        return ContextPassthrough()
+        return contextlib.nullcontext()
 
     def testFoldPositiveUTCOffset(self):
         # Test that we can resolve ambiguous times
@@ -405,18 +392,10 @@ class TzFoldMixin:
 
 
 class TzWinFoldMixin:
+    context = contextlib.nullcontext
+
     def get_args(self, tzname):
         return (tzname,)
-
-    class context:
-        def __init__(*args, **kwargs):
-            pass
-
-        def __enter__(*args, **kwargs):
-            pass
-
-        def __exit__(*args, **kwargs):
-            pass
 
     def get_utc_transitions(self, tzi, year, gap):
         dston, dstoff = tzi.transitions(year)
@@ -707,7 +686,7 @@ class TzOffsetTest(unittest.TestCase):
 def test_tzoffset_weakref():
     UTC1 = tz.tzoffset("UTC", 0)
     UTC_ref = weakref.ref(tz.tzoffset("UTC", 0))
-    UTC1 is UTC_ref()
+    _ = UTC1 is UTC_ref()
     del UTC1
     gc.collect()
 
@@ -1154,9 +1133,9 @@ def test_gettz_weakref():
 
 
 class ZoneInfoGettzTest(GettzTest):
-    def gettz(self, name):
+    def gettz(self, tzname):
         zoneinfo_file = zoneinfo.get_zonefile_instance()
-        return zoneinfo_file.get(name)
+        return zoneinfo_file.get(tzname)
 
     def testZoneInfoFileStart1(self):
         tz = self.gettz("EST5EDT")

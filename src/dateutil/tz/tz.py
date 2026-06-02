@@ -9,6 +9,7 @@ timezone.
 
 import _thread
 import bisect
+import contextlib
 import datetime
 import os
 import struct
@@ -466,7 +467,7 @@ class tzfile(_tzinfo):
 
         if fileobj is not None:
             if not file_opened_here:
-                fileobj = _nullcontext(fileobj)
+                fileobj = contextlib.nullcontext(fileobj)
 
             with fileobj as file_stream:
                 tzobj = self._read_tzfile(file_stream)
@@ -577,7 +578,8 @@ class tzfile(_tzinfo):
         # time or wall clock time, and are used when
         # a time zone file is used in handling POSIX-style
         # time zone environment variables.
-
+        isstd = ()
+        isgmt = ()
         if ttisstdcnt:
             isstd = struct.unpack(">%db" % ttisstdcnt, fileobj.read(ttisstdcnt))
 
@@ -1146,11 +1148,11 @@ class _tzicalvtzcomp:
 
 
 class _tzicalvtz(_tzinfo):
-    def __init__(self, tzid, comps=[]):
+    def __init__(self, tzid, comps: list | None = None):
         super().__init__()
 
         self._tzid = tzid
-        self._comps = comps
+        self._comps = comps or []
         self._cachedate = []
         self._cachecomp = []
         self._cache_lock = _thread.allocate_lock()
@@ -1249,10 +1251,10 @@ class tzical:
         if isinstance(fileobj, str):
             self._s = fileobj
             # ical should be encoded in UTF-8 with CRLF
-            fileobj = open(fileobj)
+            fileobj = open(fileobj, encoding="U8")
         else:
             self._s = getattr(fileobj, "name", repr(fileobj))
-            fileobj = _nullcontext(fileobj)
+            fileobj = contextlib.nullcontext(fileobj)
 
         self._vtz = {}
 
@@ -1708,10 +1710,8 @@ def datetime_ambiguous(dt, tz=None):
     # If a time zone defines its own "is_ambiguous" function, we'll use that.
     is_ambiguous_fn = getattr(tz, "is_ambiguous", None)
     if is_ambiguous_fn is not None:
-        try:
+        with contextlib.suppress(Exception):
             return tz.is_ambiguous(dt)
-        except Exception:
-            pass
 
     # If it doesn't come out and tell us it's ambiguous, we'll just check if
     # the fold attribute has any effect on this particular date and time.
@@ -1781,27 +1781,6 @@ def _datetime_to_timestamp(dt):
 
 def _get_supported_offset(second_offset):
     return second_offset
-
-
-try:
-    # Python 3.7 feature
-    from contextlib import nullcontext as _nullcontext
-except ImportError:
-
-    class _nullcontext:
-        """
-        Class for wrapping contexts so that they are passed through in a
-        with statement.
-        """
-
-        def __init__(self, context):
-            self.context = context
-
-        def __enter__(self):
-            return self.context
-
-        def __exit__(*args, **kwargs):
-            pass
 
 
 # vim:ts=4:sw=4:et

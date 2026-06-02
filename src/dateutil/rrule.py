@@ -156,8 +156,8 @@ class rrulebase:
             try:
                 for i in range(item + 1):
                     res = next(gen)
-            except StopIteration:
-                raise IndexError
+            except StopIteration as e:
+                raise IndexError from e
             return res
         else:
             return list(iter(self))[item]
@@ -1107,6 +1107,7 @@ class rrule(rrulebase):
         return None
 
 
+# pylint: disable=E0203
 class _iterinfo:
     __slots__ = [
         "rrule",
@@ -1228,8 +1229,8 @@ class _iterinfo:
             ranges = []
             if rr._freq == YEARLY:
                 if rr._bymonth:
-                    for month in rr._bymonth:
-                        ranges.append(self.mrange[month - 1 : month + 1])
+                    for month_ in rr._bymonth:
+                        ranges.append(self.mrange[month_ - 1 : month_ + 1])
                 else:
                     ranges = [(0, self.yearlen)]
             elif rr._freq == MONTHLY:
@@ -1293,17 +1294,17 @@ class _iterinfo:
     def htimeset(self, hour, minute, second):
         tset = []
         rr = self.rrule
-        for minute in rr._byminute:
-            for second in rr._bysecond:
-                tset.append(datetime.time(hour, minute, second, tzinfo=rr._tzinfo))
+        for minute_ in rr._byminute:
+            for second_ in rr._bysecond:
+                tset.append(datetime.time(hour, minute_, second_, tzinfo=rr._tzinfo))
         tset.sort()
         return tset
 
     def mtimeset(self, hour, minute, second):
         tset = []
         rr = self.rrule
-        for second in rr._bysecond:
-            tset.append(datetime.time(hour, minute, second, tzinfo=rr._tzinfo))
+        for second_ in rr._bysecond:
+            tset.append(datetime.time(hour, minute, second_, tzinfo=rr._tzinfo))
         tset.sort()
         return tset
 
@@ -1492,8 +1493,8 @@ class _RRuleStr:
             from dateutil import parser
         try:
             rrkwargs["until"] = parser.parse(value, ignoretz=kwargs.get("ignoretz"), tzinfos=kwargs.get("tzinfos"))
-        except ValueError:
-            raise ValueError("invalid until date")
+        except ValueError as e:
+            raise ValueError("invalid until date") from e
 
     def _handle_WKST(self, rrkwargs, name, value, **kwargs):
         rrkwargs["wkst"] = Day[value]
@@ -1535,10 +1536,10 @@ class _RRuleStr:
             value = value.upper()
             try:
                 getattr(self, "_handle_" + name)(rrkwargs, name, value, ignoretz=ignoretz, tzinfos=tzinfos)
-            except AttributeError:
-                raise ValueError("unknown parameter '%s'" % name)
-            except (KeyError, ValueError):
-                raise ValueError(f"invalid '{name}': {value}")
+            except AttributeError as e:
+                raise ValueError("unknown parameter '%s'" % name) from e
+            except (KeyError, ValueError) as e:
+                raise ValueError(f"invalid '{name}': {value}") from e
         return rrule(dtstart=dtstart, cache=cache, **rrkwargs)
 
     def _parse_date_value(self, date_value, parms, rule_tzids, ignoretz, tzids, tzinfos):

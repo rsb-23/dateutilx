@@ -12,20 +12,20 @@ import struct
 
 from dateutil.helper import is_windows_os
 
+from ._common import tzrangebase
+
 if is_windows_os():
     import winreg
 else:
     winreg = None
 
-
 try:
     import ctypes
     from ctypes import wintypes
-except ValueError:
+except ValueError as e:
     # ValueError is raised on non-Windows systems for some horrible reason.
-    raise ImportError("Running tzwin on non-Windows system")
+    raise ImportError("Running tzwin on non-Windows system") from e
 
-from ._common import tzrangebase
 
 __all__ = ["tzwin", "tzwinlocal", "tzres"]
 
@@ -119,8 +119,8 @@ class tzres:
         name_splt = tzname_str.split(",-")
         try:
             offset = int(name_splt[-1])
-        except ValueError:
-            raise ValueError("Malformed timezone string.")
+        except ValueError as e:
+            raise ValueError("Malformed timezone string.") from e
 
         return self.load_name(offset)
 

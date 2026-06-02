@@ -30,7 +30,7 @@ class RelativeDeltaTest(unittest.TestCase):
 
         self.assertEqual(type(ccRD - rd), type(ccRD), msg="Subtraction does not inherit type.")
 
-        self.assertEqual(type(-ccRD), type(ccRD), msg="Negation does not inherit type.")
+        self.assertEqual(type(-ccRD), type(ccRD), msg="Negation does not inherit type.")  # pylint: disable=e1130
 
         self.assertEqual(type(ccRD * 5.0), type(ccRD), msg="Multiplication does not inherit type.")
 
@@ -173,7 +173,7 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def testAdditionInvalidType(self):
         with self.assertRaises(TypeError):
-            relativedelta(days=3) + 9
+            _ = relativedelta(days=3) + 9
 
     def testAdditionUnsupportedType(self):
         # For unsupported types that define their own comparators, etc.
@@ -212,7 +212,7 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def testSubtractionInvalidType(self):
         with self.assertRaises(TypeError):
-            relativedelta(hours=12) - 14
+            _ = relativedelta(hours=12) - 14
 
     def testSubtractionUnsupportedType(self):
         self.assertIs(relativedelta(days=1) + NotAValue, NotAValue)
