@@ -1,7 +1,7 @@
-from ._parser import DEFAULTPARSER, DEFAULTTZPARSER, ParserError, UnknownTimezoneWarning, parse, parser, parserinfo
+from ._parser import DEFAULTPARSER, DEFAULTTZPARSER, parse, parser, parserinfo
 from .isoparser import isoparse, isoparser
 
-__all__ = ["parse", "parser", "parserinfo", "isoparse", "isoparser", "ParserError", "UnknownTimezoneWarning"]
+__all__ = ["parse", "parser", "parserinfo", "isoparse", "isoparser"]
 
 
 ###
@@ -36,16 +36,16 @@ def __deprecate_private_class(c):
     )
     msg = msg.format(name=c.__name__)
 
-    class private_class(c):
+    class PrivateClass(c):
         __doc__ = c.__doc__
 
         def __init__(self, *args, **kwargs):
             warnings.warn(msg, DeprecationWarning)
             super().__init__(*args, **kwargs)
 
-    private_class.__name__ = c.__name__
+    PrivateClass.__name__ = c.__name__
 
-    return private_class
+    return PrivateClass
 
 
 from ._parser import _parsetz, _resultbase, _timelex, _tzparser  # noqa

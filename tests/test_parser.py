@@ -1,5 +1,4 @@
 import itertools
-import sys
 import unittest
 from datetime import datetime, timedelta
 from io import StringIO
@@ -7,13 +6,15 @@ from io import StringIO
 import pytest
 
 from dateutil import tz
-from dateutil.parser import ParserError, UnknownTimezoneWarning, parse, parserinfo
+from dateutil.errors import ParserError, UnknownTimezoneWarning
+from dateutil.helper import is_windows_os
+from dateutil.parser import parse, parserinfo
 from dateutil.tz import tzoffset
 
 from ._common import TZEnvContext
 
 # Platform info
-IS_WIN = sys.platform.startswith("win")
+IS_WIN = is_windows_os()
 
 PLATFORM_HAS_DASH_D = False
 try:

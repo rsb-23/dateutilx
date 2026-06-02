@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timedelta
 
 import pytest
@@ -12,7 +11,6 @@ NEGATIVE_EPOCHALYPSE = datetime.fromtimestamp(0) - timedelta(seconds=2147483648)
 
 
 @pytest.mark.gettz
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="Not supported on Python 2")
 @pytest.mark.parametrize("gettz_arg", [None, ""])
 # TODO: Remove bounds when GH #590 is resolved
 @given(dt=st.datetimes(min_value=NEGATIVE_EPOCHALYPSE, max_value=EPOCHALYPSE, timezones=st.just(tz.UTC)))
