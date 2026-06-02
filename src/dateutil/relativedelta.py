@@ -182,7 +182,7 @@ class RelativeDelta:
         else:
             # Check for non-integer values in integer-only quantities
             if any(x is not None and x != int(x) for x in (years, months)):
-                raise ValueError("Non-integer years and months are " "ambiguous and not currently supported.")
+                raise ValueError("Non-integer years and months are ambiguous and not currently supported.")
 
             # Relative information
             self.years = int(years)
@@ -235,7 +235,7 @@ class RelativeDelta:
                             self.day = yday - ydayidx[idx - 1]
                         break
                 else:
-                    raise ValueError("invalid year day (%d)" % yday)
+                    raise ValueError(f"invalid year day ({yday})")
 
         self._fix()
 
@@ -611,7 +611,7 @@ class RelativeDelta:
             value = getattr(self, attr)
             if value is not None:
                 _tmp_list.append(f"{attr}={repr(value)}")
-        return "{classname}({attrs})".format(classname=self.__class__.__name__, attrs=", ".join(_tmp_list))
+        return f"{self.__class__.__name__}({', '.join(_tmp_list)})"
 
 
 def _sign(x):

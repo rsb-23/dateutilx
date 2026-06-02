@@ -35,7 +35,7 @@ class weekday:
         if not self.n:
             return s
         else:
-            return "%s(%+d)" % (s, self.n)
+            return f"{s}({self.n:+})"
 
 
 # vim:ts=4:sw=4:et

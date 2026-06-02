@@ -29,7 +29,7 @@ except ImportError as e:
     if IS_WIN:
         raise e
 
-MISSING_TARBALL = "This test fails if you don't have the dateutil " "timezone file installed. Please read the README"
+MISSING_TARBALL = "This test fails if you don't have the dateutil timezone file installed. Please read the README"
 
 TZFILE_EST5EDT = b"""
 VFppZgAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABAAAAAAAAADrAAAABAAAABCeph5wn7rrYKCGAHCh

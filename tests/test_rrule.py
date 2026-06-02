@@ -29,7 +29,7 @@ class RRuleTest(unittest.TestCase):
         # property is appended properly, so give it a dedicated test
         self.assertEqual(
             str(rrule(YEARLY, count=5, dtstart=datetime(1997, 9, 2, 9, 0))),
-            "DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=5",
+            "DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=5",
         )
 
         rr_str = "DTSTART:19970105T083000\nRRULE:FREQ=YEARLY;INTERVAL=2"
@@ -2172,14 +2172,14 @@ class RRuleTest(unittest.TestCase):
 
     def testStr(self):
         self.assertEqual(
-            list(rrulestr("DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=3\n")),
+            list(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=3\n")),
             [datetime(1997, 9, 2, 9, 0), datetime(1998, 9, 2, 9, 0), datetime(1999, 9, 2, 9, 0)],
         )
 
     def testStrWithTZID(self):
         NYC = tz.gettz("America/New_York")
         self.assertEqual(
-            list(rrulestr("DTSTART;TZID=America/New_York:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=3\n")),
+            list(rrulestr("DTSTART;TZID=America/New_York:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=3\n")),
             [
                 datetime(1997, 9, 2, 9, 0, tzinfo=NYC),
                 datetime(1998, 9, 2, 9, 0, tzinfo=NYC),
@@ -2242,12 +2242,11 @@ class RRuleTest(unittest.TestCase):
             rrulestr("DTSTART;TZID=America/New_York:19970902T090000Z\n" + "RRULE:FREQ=YEARLY;COUNT=3\n")
 
     def testStrType(self):
-        self.assertEqual(isinstance(rrulestr("DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=3\n"), rrule), True)
+        self.assertEqual(isinstance(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=3\n"), rrule), True)
 
     def testStrForceSetType(self):
         self.assertEqual(
-            isinstance(rrulestr("DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=3\n", forceset=True), rruleset),
-            True,
+            isinstance(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=3\n", forceset=True), rruleset), True
         )
 
     def testStrSetType(self):
@@ -2265,19 +2264,19 @@ class RRuleTest(unittest.TestCase):
 
     def testStrCase(self):
         self.assertEqual(
-            list(rrulestr("dtstart:19970902T090000\n" "rrule:freq=yearly;count=3\n")),
+            list(rrulestr("dtstart:19970902T090000\nrrule:freq=yearly;count=3\n")),
             [datetime(1997, 9, 2, 9, 0), datetime(1998, 9, 2, 9, 0), datetime(1999, 9, 2, 9, 0)],
         )
 
     def testStrSpaces(self):
         self.assertEqual(
-            list(rrulestr(" DTSTART:19970902T090000 " " RRULE:FREQ=YEARLY;COUNT=3 ")),
+            list(rrulestr(" DTSTART:19970902T090000  RRULE:FREQ=YEARLY;COUNT=3 ")),
             [datetime(1997, 9, 2, 9, 0), datetime(1998, 9, 2, 9, 0), datetime(1999, 9, 2, 9, 0)],
         )
 
     def testStrSpacesAndLines(self):
         self.assertEqual(
-            list(rrulestr(" DTSTART:19970902T090000 \n" " \n" " RRULE:FREQ=YEARLY;COUNT=3 \n")),
+            list(rrulestr(" DTSTART:19970902T090000 \n \n RRULE:FREQ=YEARLY;COUNT=3 \n")),
             [datetime(1997, 9, 2, 9, 0), datetime(1998, 9, 2, 9, 0), datetime(1999, 9, 2, 9, 0)],
         )
 
@@ -2480,33 +2479,33 @@ class RRuleTest(unittest.TestCase):
 
     def testStrNWeekDay(self):
         self.assertEqual(
-            list(rrulestr("DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=3;BYDAY=1TU,-1TH\n")),
+            list(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=3;BYDAY=1TU,-1TH\n")),
             [datetime(1997, 12, 25, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 12, 31, 9, 0)],
         )
 
     def testStrUntil(self):
         self.assertEqual(
-            list(rrulestr("DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;" "UNTIL=19990101T000000;BYDAY=1TU,-1TH\n")),
+            list(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;UNTIL=19990101T000000;BYDAY=1TU,-1TH\n")),
             [datetime(1997, 12, 25, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 12, 31, 9, 0)],
         )
 
     def testStrValueDatetime(self):
-        rr = rrulestr("DTSTART;VALUE=DATE-TIME:19970902T090000\n" "RRULE:FREQ=YEARLY;COUNT=2")
+        rr = rrulestr("DTSTART;VALUE=DATE-TIME:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=2")
 
         self.assertEqual(list(rr), [datetime(1997, 9, 2, 9, 0, 0), datetime(1998, 9, 2, 9, 0, 0)])
 
     def testStrValueDate(self):
-        rr = rrulestr("DTSTART;VALUE=DATE:19970902\n" "RRULE:FREQ=YEARLY;COUNT=2")
+        rr = rrulestr("DTSTART;VALUE=DATE:19970902\nRRULE:FREQ=YEARLY;COUNT=2")
 
         self.assertEqual(list(rr), [datetime(1997, 9, 2, 0, 0, 0), datetime(1998, 9, 2, 0, 0, 0)])
 
     def testStrMultipleDTStartComma(self):
         with pytest.raises(ValueError):
-            _ = rrulestr("DTSTART:19970101T000000,19970202T000000\n" "RRULE:FREQ=YEARLY;COUNT=1")
+            _ = rrulestr("DTSTART:19970101T000000,19970202T000000\nRRULE:FREQ=YEARLY;COUNT=1")
 
     def testStrInvalidUntil(self):
         with self.assertRaises(ValueError):
-            list(rrulestr("DTSTART:19970902T090000\n" "RRULE:FREQ=YEARLY;" "UNTIL=TheCowsComeHome;BYDAY=1TU,-1TH\n"))
+            list(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;UNTIL=TheCowsComeHome;BYDAY=1TU,-1TH\n"))
 
     def testStrUntilMustBeUTC(self):
         with self.assertRaises(ValueError):
@@ -2520,9 +2519,7 @@ class RRuleTest(unittest.TestCase):
 
     def testStrUntilWithTZ(self):
         NYC = tz.gettz("America/New_York")
-        rr = list(
-            rrulestr("DTSTART;TZID=America/New_York:19970101T000000\n" "RRULE:FREQ=YEARLY;" "UNTIL=19990101T000000Z\n")
-        )
+        rr = list(rrulestr("DTSTART;TZID=America/New_York:19970101T000000\nRRULE:FREQ=YEARLY;UNTIL=19990101T000000Z\n"))
         self.assertEqual(
             list(rr), [datetime(1997, 1, 1, 0, 0, 0, tzinfo=NYC), datetime(1998, 1, 1, 0, 0, 0, tzinfo=NYC)]
         )

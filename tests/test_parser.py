@@ -490,11 +490,11 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(parse("Sep of 03", default=self.default), datetime(2003, 9, 25))
 
     def testFuzzy(self):
-        s = "Today is 25 of September of 2003, exactly " "at 10:49:41 with timezone -03:00."
+        s = "Today is 25 of September of 2003, exactly at 10:49:41 with timezone -03:00."
         self.assertEqual(parse(s, fuzzy=True), datetime(2003, 9, 25, 10, 49, 41, tzinfo=self.brsttz))
 
     def testFuzzyWithTokens(self):
-        s1 = "Today is 25 of September of 2003, exactly " "at 10:49:41 with timezone -03:00."
+        s1 = "Today is 25 of September of 2003, exactly at 10:49:41 with timezone -03:00."
         self.assertEqual(
             parse(s1, fuzzy_with_tokens=True),
             (
@@ -822,9 +822,7 @@ class TestParseUnimplementedCases:
     @pytest.mark.xfail
     def test_extraneous_year2(self):
         # This was found in the wild at insidertrading.org
-        dstr = (
-            "Berylson Amy Smith 1998 Grantor Retained Annuity Trust " "u/d/t November 2, 1998 f/b/o Jennifer L Berylson"
-        )
+        dstr = "Berylson Amy Smith 1998 Grantor Retained Annuity Trust u/d/t November 2, 1998 f/b/o Jennifer L Berylson"
         res = parse(dstr, fuzzy_with_tokens=True)
         expected = datetime(1998, 11, 2)
         assert res == expected

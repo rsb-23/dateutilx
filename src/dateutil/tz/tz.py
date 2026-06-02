@@ -112,7 +112,7 @@ class tzutc(datetime.tzinfo, metaclass=_TzSingleton):
         return not (self == other)
 
     def __repr__(self):
-        return "%s()" % self.__class__.__name__
+        return f"{self.__class__.__name__}()"
 
     __reduce__ = object.__reduce__
 
@@ -305,7 +305,7 @@ class tzlocal(_tzinfo):
         return not (self == other)
 
     def __repr__(self):
-        return "%s()" % self.__class__.__name__
+        return f"{self.__class__.__name__}()"
 
     __reduce__ = object.__reduce__
 
@@ -323,7 +323,7 @@ class _ttinfo:
             value = getattr(self, attr)
             if value is not None:
                 _tmp_list.append(f"{attr}={repr(value)}")
-        return "{}({})".format(self.__class__.__name__, ", ".join(_tmp_list))
+        return f'{self.__class__.__name__}({", ".join(_tmp_list)})'
 
     def __eq__(self, other):
         if not isinstance(other, _ttinfo):
@@ -524,7 +524,7 @@ class tzfile(_tzinfo):
         # change.
 
         if timecnt:
-            out.trans_list_utc = list(struct.unpack(">%dl" % timecnt, fileobj.read(timecnt * 4)))
+            out.trans_list_utc = list(struct.unpack(f">{timecnt}l", fileobj.read(timecnt * 4)))
         else:
             out.trans_list_utc = []
 
@@ -536,7 +536,7 @@ class tzfile(_tzinfo):
         # appears next in the file.
 
         if timecnt:
-            out.trans_idx = struct.unpack(">%dB" % timecnt, fileobj.read(timecnt))
+            out.trans_idx = struct.unpack(f">{timecnt}B", fileobj.read(timecnt))
         else:
             out.trans_idx = []
 
@@ -581,7 +581,7 @@ class tzfile(_tzinfo):
         isstd = ()
         isgmt = ()
         if ttisstdcnt:
-            isstd = struct.unpack(">%db" % ttisstdcnt, fileobj.read(ttisstdcnt))
+            isstd = struct.unpack(f">{ttisstdcnt}b", fileobj.read(ttisstdcnt))
 
         # Finally, there are tzh_ttisgmtcnt UTC/local
         # indicators, each stored as a one-byte value;
@@ -592,7 +592,7 @@ class tzfile(_tzinfo):
         # ronment variables.
 
         if ttisgmtcnt:
-            isgmt = struct.unpack(">%db" % ttisgmtcnt, fileobj.read(ttisgmtcnt))
+            isgmt = struct.unpack(f">{ttisgmtcnt}b", fileobj.read(ttisgmtcnt))
 
         # Build ttinfo list
         out.ttinfo_list = []
@@ -1226,7 +1226,7 @@ class _tzicalvtz(_tzinfo):
         return self._find_comp(dt).tzname
 
     def __repr__(self):
-        return "<tzicalvtz %s>" % repr(self._tzid)
+        return f"<tzicalvtz {self._tzid!r}>"
 
     __reduce__ = object.__reduce__
 

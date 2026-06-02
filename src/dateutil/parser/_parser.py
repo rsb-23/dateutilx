@@ -58,9 +58,7 @@ class _TimeLex:
         if isinstance(instream, str):
             instream = StringIO(instream)
         elif getattr(instream, "read", None) is None:
-            raise TypeError(
-                "Parser must be a string or character stream, not " "{itype}".format(itype=instream.__class__.__name__)
-            )
+            raise TypeError(f"Parser must be a string or character stream, not {instream.__class__.__name__}")
 
         self.instream = instream
         self.charstack = []
@@ -218,7 +216,7 @@ class _ResultBase:
             value = getattr(self, attr)
             if value is not None:
                 _tmp_list.append(f"{attr}={repr(value)}")
-        return "{}({})".format(classname, ", ".join(_tmp_list))
+        return f"{classname}({', '.join(_tmp_list)})"
 
     def __len__(self):
         return sum(getattr(self, attr) is not None for attr in self.__slots__)
@@ -624,10 +622,10 @@ class Parser:
         res, skipped_tokens = self._parse(timestr, **kwargs)
 
         if res is None:
-            raise ParserError("Unknown string format: %s" % timestr)
+            raise ParserError(f"Unknown string format: {timestr}")
 
         if len(res) == 0:
-            raise ParserError("String does not contain a date: %s" % timestr)
+            raise ParserError(f"String does not contain a date: {timestr}")
 
         try:
             ret = self._build_naive(res, default)
@@ -1133,7 +1131,7 @@ class Parser:
             if not decimal_value.is_finite():
                 raise ValueError("Converted decimal value is infinite or NaN")
         except Exception as e:
-            msg = "Could not convert %s to decimal" % val
+            msg = f"Could not convert {val} to decimal"
             raise ValueError(msg) from e
 
         return decimal_value
@@ -1157,7 +1155,7 @@ class Parser:
         elif isinstance(tzdata, int):
             tzinfo = tz.tzoffset(tzname, tzdata)
         else:
-            raise TypeError("Offset must be tzinfo subclass, tz string, " "or int offset.")
+            raise TypeError("Offset must be tzinfo subclass, tz string, or int offset.")
         return tzinfo
 
     def _build_tzaware(self, naive, res, tzinfos):
@@ -1190,11 +1188,9 @@ class Parser:
             # tz-like string was parsed but we don't know what to do
             # with it
             warnings.warn(
-                "tzname {tzname} identified but not understood.  "
-                "Pass `tzinfos` argument in order to correctly "
-                "return a timezone-aware datetime.  In a future "
-                "version, this will raise an "
-                "exception.".format(tzname=res.tzname),
+                f"tzname {res.tzname} identified but not understood.  "
+                "Pass `tzinfos` argument in order to correctly return a timezone-aware datetime.  "
+                "In a future version, this will raise an exception.",
                 category=UnknownTimezoneWarning,
             )
             aware = naive
@@ -1474,7 +1470,7 @@ class _TzParser:
 
                 # This was a made-up format that is not in normal use
                 warn(
-                    ('Parsed time zone "%s"' % tzstr)
+                    f'Parsed time zone "{tzstr}"'
                     + "is in a non-standard dateutil-specific format, which "
                     + "is now deprecated; support for parsing this format "
                     + "will be removed in future versions. It is recommended "

@@ -197,7 +197,7 @@ class _tzinfo(tzinfo):
         # Re-implement the algorithm from Python's datetime.py
         dtoff = dt.utcoffset()
         if dtoff is None:
-            raise ValueError("fromutc() requires a non-None utcoffset() " "result")
+            raise ValueError("fromutc() requires a non-None utcoffset() result")
 
         # The original datetime.py code assumes that `dst()` defaults to
         # zero during ambiguous times. PEP 495 inverts this presumption, so
@@ -212,7 +212,7 @@ class _tzinfo(tzinfo):
         # ambiguous dates.
         dtdst = enfold(dt, fold=1).dst()
         if dtdst is None:
-            raise ValueError("fromutc(): dt.dst gave inconsistent " "results; cannot convert")
+            raise ValueError("fromutc(): dt.dst gave inconsistent results; cannot convert")
         return dt + dtdst
 
     @_validate_fromutc_inputs
@@ -388,6 +388,6 @@ class tzrangebase(_tzinfo):
         return not (self == other)
 
     def __repr__(self):
-        return "%s(...)" % self.__class__.__name__
+        return f"{self.__class__.__name__}(...)"
 
     __reduce__ = object.__reduce__

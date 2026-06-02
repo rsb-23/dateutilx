@@ -14,7 +14,7 @@ class ParserError(ValueError):
             return super().__str__()
 
     def __repr__(self):
-        args = ", ".join("'%s'" % arg for arg in self.args)
+        args = ", ".join(f"'{arg}'" for arg in self.args)
         return f"{self.__class__.__name__}({args})"
 
 

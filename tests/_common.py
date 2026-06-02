@@ -77,7 +77,7 @@ class TZContextBase:
     @classmethod
     def tz_change_disallowed_message(cls):
         """Generate instructions on how to allow tz changes"""
-        msg = "Changing time zone not allowed. Set {envar} to {gval} " "if you would like to allow this behavior"
+        msg = "Changing time zone not allowed. Set {envar} to {gval} if you would like to allow this behavior"
 
         return msg.format(envar=cls._guard_var_name, gval=cls._guard_allows_change)
 

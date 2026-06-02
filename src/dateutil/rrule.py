@@ -477,7 +477,7 @@ class rrule(rrulebase):
                 # > time or a date with local time and time zone reference,
                 # > then the UNTIL rule part MUST be specified as a date with
                 # > UTC time.
-                raise ValueError("RRULE UNTIL values must be specified in UTC when DTSTART " "is timezone-aware")
+                raise ValueError("RRULE UNTIL values must be specified in UTC when DTSTART is timezone-aware")
 
         if count is not None and until:
             warn(
@@ -498,13 +498,13 @@ class rrule(rrulebase):
             self._bysetpos = None
         elif isinstance(bysetpos, int):
             if bysetpos == 0 or not (-366 <= bysetpos <= 366):
-                raise ValueError("bysetpos must be between 1 and 366, " "or between -366 and -1")
+                raise ValueError("bysetpos must be between 1 and 366, or between -366 and -1")
             self._bysetpos = (bysetpos,)
         else:
             self._bysetpos = tuple(bysetpos)
             for pos in self._bysetpos:
                 if pos == 0 or not (-366 <= pos <= 366):
-                    raise ValueError("bysetpos must be between 1 and 366, " "or between -366 and -1")
+                    raise ValueError("bysetpos must be between 1 and 366, or between -366 and -1")
 
         if self._bysetpos:
             self._original_rule["bysetpos"] = self._bysetpos
@@ -1537,7 +1537,7 @@ class _RRuleStr:
             try:
                 getattr(self, "_handle_" + name)(rrkwargs, name, value, ignoretz=ignoretz, tzinfos=tzinfos)
             except AttributeError as e:
-                raise ValueError("unknown parameter '%s'" % name) from e
+                raise ValueError(f"unknown parameter '{name}'") from e
             except (KeyError, ValueError) as e:
                 raise ValueError(f"invalid '{name}': {value}") from e
         return rrule(dtstart=dtstart, cache=cache, **rrkwargs)
@@ -1566,7 +1566,7 @@ class _RRuleStr:
                 else:
                     tzlookup = getattr(tzids, "get", None)
                     if tzlookup is None:
-                        msg = "tzids must be a callable, mapping, or None, " "not %s" % tzids
+                        msg = f"tzids must be a callable, mapping, or None, not {tzids}"
                         raise ValueError(msg)
 
                 TZID = tzlookup(tzkey)

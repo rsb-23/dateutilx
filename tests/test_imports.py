@@ -50,7 +50,7 @@ def test_lazy_import(clean_import, module):
     mod_obj = getattr(dateutil, module, None)
     assert isinstance(mod_obj, MODULE_TYPE)
 
-    mod_imported = importlib.import_module("dateutil.%s" % module)
+    mod_imported = importlib.import_module(f"dateutil.{module}")
     assert mod_obj is mod_imported
 
 

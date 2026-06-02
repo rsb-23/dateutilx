@@ -259,10 +259,10 @@ class tzwin(tzwinbase):
         self.hasdst = self._get_hasdst()
 
     def __repr__(self):
-        return "tzwin(%s)" % repr(self._name)
+        return f"tzwin({self._name!r})"
 
     def __reduce__(self):
-        return (self.__class__, (self._name,))
+        return self.__class__, (self._name,)
 
 
 class tzwinlocal(tzwinbase):
@@ -327,10 +327,10 @@ class tzwinlocal(tzwinbase):
 
     def __str__(self):
         # str will return the standard name, not the daylight name.
-        return "tzwinlocal(%s)" % repr(self._std_abbr)
+        return f"tzwinlocal({self._std_abbr!r})"
 
     def __reduce__(self):
-        return (self.__class__, ())
+        return self.__class__, ()
 
 
 def picknthweekday(year, month, dayofweek, hour, minute, whichweek):

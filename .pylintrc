@@ -30,7 +30,6 @@ disable=
 	attribute-defined-outside-init, #79
 	fixme, #24
 	global-statement, #7
-	implicit-str-concat, #28
 	possibly-unused-variable, #14
 	protected-access, #39
 	redefined-outer-name, #20
@@ -39,7 +38,6 @@ disable=
 	unused-wildcard-import, #2keep
 	wildcard-import, #2keep
 	# C
-	consider-using-f-string, #25
 	import-outside-toplevel, #34
 	invalid-name, #1034
 	missing-docstring, #keep
