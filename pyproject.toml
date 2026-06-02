@@ -1,9 +1,5 @@
 [build-system]
-requires = [
-    "setuptools; python_version != '3.3'",
-    "setuptools<40.0; python_version == '3.3'",
-    "setuptools_scm<8.0"
-]
+requires = ["setuptools", "setuptools_scm<8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -13,6 +9,8 @@ description = "Modern extension to the standard Python datetime module"
 readme = "README.rst"
 
 requires-python = ">=3.10"
+dependencies = ["tzdata; sys_platform == 'win32'"]
+
 [project.optional-dependencies]
 lint = ["pre-commit", "pylint"]
 test = ["freezegun", "hypothesis", "pytest", "pytest-cov"]

@@ -13,22 +13,18 @@ import itertools
 import re
 import sys
 from functools import wraps
+from math import gcd
 
 # For warning about deprecation of until and count
 from warnings import warn
 
 from ._common import weekday as weekdaybase
-
-try:
-    from math import gcd
-except ImportError:
-    from fractions import gcd
+from .helper import Day, Frequency
 
 # fmt: off
 __all__ = [
     "rrule", "rruleset", "rrulestr",
-    "YEARLY", "MONTHLY", "WEEKLY", "DAILY",
-    "HOURLY", "MINUTELY", "SECONDLY",
+    "YEARLY", "MONTHLY", "WEEKLY", "DAILY", "HOURLY", "MINUTELY", "SECONDLY",
     "MO", "TU", "WE", "TH", "FR", "SA", "SU",
 ]
 
@@ -54,9 +50,8 @@ del M29, M30, M31, M365MASK[59], MDAY365MASK[59], NMDAY365MASK[31]
 MDAY365MASK = tuple(MDAY365MASK)
 M365MASK = tuple(M365MASK)
 
-FREQNAMES = ["YEARLY", "MONTHLY", "WEEKLY", "DAILY", "HOURLY", "MINUTELY", "SECONDLY"]
 
-YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = list(range(7))
+YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 
 # Imported on demand.
 easter = None
@@ -712,7 +707,7 @@ class rrule(rrulebase):
             output.append(self._dtstart.strftime("DTSTART:%Y%m%dT%H%M%S"))
             h, m, s = self._dtstart.timetuple()[3:6]
 
-        parts = ["FREQ=" + FREQNAMES[self._freq]]
+        parts = ["FREQ=" + self._freq.name]
         if self._interval != 1:
             parts.append("INTERVAL=" + str(self._interval))
 
@@ -1424,7 +1419,7 @@ class rruleset(rrulebase):
         self._len = total
 
 
-class _rrulestr:
+class _RRuleStr:
     """Parses a string representation of a recurrence rule or set of
     recurrence rules.
 
@@ -1469,18 +1464,6 @@ class _rrulestr:
         :class:`dateutil.rrule.rrule`
     """
 
-    _freq_map = {
-        "YEARLY": YEARLY,
-        "MONTHLY": MONTHLY,
-        "WEEKLY": WEEKLY,
-        "DAILY": DAILY,
-        "HOURLY": HOURLY,
-        "MINUTELY": MINUTELY,
-        "SECONDLY": SECONDLY,
-    }
-
-    _weekday_map = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
-
     def _handle_int(self, rrkwargs, name, value, **kwargs):
         rrkwargs[name.lower()] = int(value)
 
@@ -1500,7 +1483,7 @@ class _rrulestr:
     _handle_BYSECOND = _handle_int_list
 
     def _handle_FREQ(self, rrkwargs, name, value, **kwargs):
-        rrkwargs["freq"] = self._freq_map[value]
+        rrkwargs["freq"] = Frequency[value]
 
     def _handle_UNTIL(self, rrkwargs, name, value, **kwargs):
         global parser
@@ -1512,7 +1495,7 @@ class _rrulestr:
             raise ValueError("invalid until date")
 
     def _handle_WKST(self, rrkwargs, name, value, **kwargs):
-        rrkwargs["wkst"] = self._weekday_map[value]
+        rrkwargs["wkst"] = Day[value]
 
     def _handle_BYWEEKDAY(self, rrkwargs, name, value, **kwargs):
         """
@@ -1537,7 +1520,7 @@ class _rrulestr:
             else:
                 raise ValueError("Invalid (empty) BYDAY specification.")
 
-            _tmp_list.append(weekdays[self._weekday_map[w]](n))
+            _tmp_list.append(weekdays[Day[w]](n))
         rrkwargs["byweekday"] = _tmp_list
 
     _handle_BYDAY = _handle_BYWEEKDAY
@@ -1715,6 +1698,6 @@ class _rrulestr:
         return self._parse_rfc(s, **kwargs)
 
 
-rrulestr = _rrulestr()
+rrulestr = _RRuleStr()
 
 # vim:ts=4:sw=4:et

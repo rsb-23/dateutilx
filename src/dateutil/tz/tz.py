@@ -12,10 +12,11 @@ import bisect
 import datetime
 import os
 import struct
-import sys
 import time
 import weakref
 from collections import OrderedDict
+
+from dateutil.helper import is_windows_os
 
 from ._common import _tzinfo, _validate_fromutc_inputs, enfold, tzrangebase
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
@@ -26,6 +27,7 @@ except ImportError:
     tzwin = tzwinlocal = None
 
 
+rrule = None
 ZERO = datetime.timedelta(0)
 EPOCH = datetime.datetime(1970, 1, 1, 0, 0)
 EPOCHORDINAL = EPOCH.toordinal()
@@ -1240,7 +1242,9 @@ class tzical:
     """
 
     def __init__(self, fileobj):
-        global rrule  # noqa
+        global rrule
+        if not rrule:
+            from dateutil import rrule
 
         if isinstance(fileobj, str):
             self._s = fileobj
@@ -1420,12 +1424,12 @@ class tzical:
         return f"{self.__class__.__name__}({repr(self._s)})"
 
 
-if sys.platform != "win32":
-    TZFILES = ["/etc/localtime", "localtime"]
-    TZPATHS = ["/usr/share/zoneinfo", "/usr/lib/zoneinfo", "/usr/share/lib/zoneinfo", "/etc/zoneinfo"]
-else:
+if is_windows_os():
     TZFILES = []
     TZPATHS = []
+else:
+    TZFILES = ["/etc/localtime", "localtime"]
+    TZPATHS = ["/usr/share/zoneinfo", "/usr/lib/zoneinfo", "/usr/share/lib/zoneinfo", "/etc/zoneinfo"]
 
 
 def __get_gettz():

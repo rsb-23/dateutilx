@@ -5,25 +5,10 @@ import pytest
 from freezegun import freeze_time
 
 from dateutil import tz
-from dateutil.rrule import (
-    DAILY,
-    FR,
-    HOURLY,
-    MINUTELY,
-    MO,
-    MONTHLY,
-    SA,
-    SECONDLY,
-    SU,
-    TH,
-    TU,
-    WE,
-    WEEKLY,
-    YEARLY,
-    rrule,
-    rruleset,
-    rrulestr,
-)
+from dateutil.helper import Frequency
+from dateutil.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
+
+YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 
 
 @pytest.mark.rrule

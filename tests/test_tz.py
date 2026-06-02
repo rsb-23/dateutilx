@@ -1755,7 +1755,6 @@ def test_tzstr_default_cmp(tzstr_1, tzstr_2):
     assert tz1 == tz2
 
 
-@pytest.mark.skip
 class TZICalTest(unittest.TestCase, TzFoldMixin):
     def _gettz_str_tuple(self, tzname):
         TZ_EST = (

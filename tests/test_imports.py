@@ -2,8 +2,10 @@ import sys
 
 import pytest
 
-MODULE_TYPE = type(sys)
+from dateutil.helper import is_windows_os
 
+MODULE_TYPE = type(sys)
+HOST_IS_WINDOWS = is_windows_os()
 
 # Tests live in datetutil/test which cause a RuntimeWarning for Python2 builds.
 # But since we expect lazy imports tests to fail for Python < 3.7  we'll ignore those
@@ -45,17 +47,11 @@ def test_lazy_import(clean_import, module):
 
     import dateutil
 
-    if sys.version_info < (3, 7):
-        pytest.xfail("Lazy loading does not work for Python < 3.7")
-
     mod_obj = getattr(dateutil, module, None)
     assert isinstance(mod_obj, MODULE_TYPE)
 
     mod_imported = importlib.import_module("dateutil.%s" % module)
     assert mod_obj is mod_imported
-
-
-HOST_IS_WINDOWS = sys.platform.startswith("win")
 
 
 def test_import_version_str():
@@ -115,9 +111,9 @@ def test_import_relative_delta_all():
         assert var is not None
 
     # In the public interface but not in all
-    from dateutil.relativedelta import weekday
+    from dateutil.relativedelta import weekdays
 
-    assert weekday is not None
+    assert weekdays is not None
 
 
 # Test that dateutil.rrule related imports work properly
@@ -131,28 +127,10 @@ def test_import_rrule_from():
 
 def test_import_rrule_all():
     # fmt: off
-    from dateutil.rrule import (
-        DAILY,
-        FR,
-        HOURLY,
-        MINUTELY,
-        MO,
-        MONTHLY,
-        SA,
-        SECONDLY,
-        SU,
-        TH,
-        TU,
-        WE,
-        WEEKLY,
-        YEARLY,
-        rrule,
-        rruleset,
-        rrulestr,
-    )
+    from dateutil.helper import Frequency
+    from dateutil.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
 
-    rr_all = (rrule, rruleset, rrulestr,
-              YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY,
+    rr_all = (rrule, rruleset, rrulestr, Frequency,
               MO, TU, WE, TH, FR, SA, SU)
     # fmt: on
 
@@ -198,7 +176,7 @@ def test_import_tz_all():
               "datetime_exists", "resolve_imaginary", "UTC"]
     # fmt: on
 
-    tz_all += ["tzwin", "tzwinlocal"] if sys.platform.startswith("win") else []
+    tz_all += ["tzwin", "tzwinlocal"] if HOST_IS_WINDOWS else []
     lvars = locals()
 
     for var in tz_all:

@@ -61,8 +61,7 @@ def default_tzinfo(dt, tzinfo):
 
 def within_delta(dt1, dt2, delta):
     """
-    Useful for comparing two datetimes that may have a negligible difference
-    to be considered equal.
+    Useful for comparing two datetimes that may have a negligible difference to be considered equal.
     """
     delta = abs(delta)
     difference = dt1 - dt2
