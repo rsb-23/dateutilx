@@ -1286,7 +1286,7 @@ class tzical:
         if tzid is None:
             if len(self._vtz) == 0:
                 raise ValueError("no timezones defined")
-            elif len(self._vtz) > 1:
+            if len(self._vtz) > 1:
                 raise ValueError("more than one timezone available")
             tzid = next(iter(self._vtz))
 
@@ -1586,8 +1586,8 @@ def __get_gettz():
                     if isinstance(name, bytes):
                         new_msg = "gettz argument should be str, not bytes"
                         raise TypeError(new_msg) from e
-                    else:
-                        raise
+                    raise
+
                 if os.path.isabs(name):
                     if os.path.isfile(name):
                         tz = tzfile(name)

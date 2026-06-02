@@ -278,7 +278,7 @@ class rrulebase:
             for i in gen:
                 if i > before:
                     break
-                elif not started:
+                if not started:
                     if i >= after:
                         started = True
                         _output.append(i)
@@ -288,7 +288,7 @@ class rrulebase:
             for i in gen:
                 if i >= before:
                     break
-                elif not started:
+                if not started:
                     if i > after:
                         started = True
                         _output.append(i)
@@ -765,7 +765,7 @@ class rrule(rrulebase):
             "freq": self._freq,
             "until": self._until,
             "wkst": self._wkst,
-            "cache": False if self._cache is None else True,
+            "cache": bool(self._cache),
         }
         new_kwargs.update(self._original_rule)
         new_kwargs.update(kwargs)
@@ -1103,7 +1103,8 @@ class rrule(rrulebase):
             div, value = divmod(value + self._interval, base)
             accumulator += div
             if value in byxxx:
-                return (accumulator, value)
+                return accumulator, value
+        return None
 
 
 class _iterinfo:
@@ -1510,13 +1511,8 @@ class _RRuleStr:
                 n = int(splt[1][:-1])
             elif len(wday):
                 # If it's of the form +1MO
-                for i in range(len(wday)):
-                    if wday[i] not in "+-0123456789":
-                        break
-                n = wday[:i] or None
-                w = wday[i:]
-                if n:
-                    n = int(n)
+                w = wday[-2:]
+                n = int(wday[:-2] or 0) or None
             else:
                 raise ValueError("Invalid (empty) BYDAY specification.")
 
@@ -1579,11 +1575,11 @@ class _RRuleStr:
             # only once.
             if parm not in {"VALUE=DATE-TIME", "VALUE=DATE"}:
                 raise ValueError("unsupported parm: " + parm)
-            else:
-                if value_found:
-                    msg = "Duplicate value parameter found in: " + parm
-                    raise ValueError(msg)
-                value_found = True
+
+            if value_found:
+                msg = "Duplicate value parameter found in: " + parm
+                raise ValueError(msg)
+            value_found = True
 
         for datestr in date_value.split(","):
             date = parser.parse(datestr, ignoretz=ignoretz, tzinfos=tzinfos)

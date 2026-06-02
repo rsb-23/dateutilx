@@ -377,7 +377,7 @@ class IsoParser:
         return components
 
     def _parse_tzstr(self, tzstr, zero_as_utc=True):
-        if tzstr == b"Z" or tzstr == b"z":
+        if tzstr in (b"Z", b"z"):
             return tz.UTC
 
         if len(tzstr) not in {3, 5, 6}:

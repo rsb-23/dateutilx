@@ -140,10 +140,9 @@ class TZWinContext(TZContextBase):
     """
 
     def get_current_tz(self):
-        p = subprocess.Popen(["tzutil", "/g"], stdout=subprocess.PIPE)
-
-        ctzname, err = p.communicate()
-        ctzname = ctzname.decode()  # Popen returns
+        with subprocess.Popen(["tzutil", "/g"], stdout=subprocess.PIPE) as p:
+            ctzname, err = p.communicate()
+            ctzname = ctzname.decode()  # Popen returns
 
         if p.returncode:
             raise OSError("Failed to get current time zone: " + err)
@@ -151,9 +150,8 @@ class TZWinContext(TZContextBase):
         return ctzname
 
     def set_current_tz(self, tzname):
-        p = subprocess.Popen('tzutil /s "' + tzname + '"')
-
-        out, err = p.communicate()
+        with subprocess.Popen(["tzutil", "/s", tzname], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+            out, err = p.communicate()
 
         if p.returncode:
             raise OSError("Failed to set current time zone: " + (err or "Unknown error."))
@@ -225,8 +223,6 @@ ComparesEqual = ComparesEqualClass()
 
 class UnsetTzClass:
     """Sentinel class for unset time zone variable"""
-
-    pass
 
 
 UnsetTz = UnsetTzClass()

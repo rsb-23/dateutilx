@@ -592,7 +592,7 @@ class ParserTest(unittest.TestCase):
 
     def testCustomParserInfo(self):
         # Custom parser info wasn't working, as Michael Elsdörfer discovered.
-        from dateutil.parser import parser, parserinfo
+        from dateutil.parser import parser
 
         class myparserinfo(parserinfo):
             MONTHS = parserinfo.MONTHS[:]
@@ -606,7 +606,7 @@ class ParserTest(unittest.TestCase):
         # Horacio Hoyos discovered that day names shorter than 3 characters,
         # for example two letter German day name abbreviations, don't work:
         # https://github.com/dateutil/dateutil/issues/343
-        from dateutil.parser import parser, parserinfo
+        from dateutil.parser import parser
 
         class GermanParserInfo(parserinfo):
             WEEKDAYS = [
@@ -815,7 +815,7 @@ class TestParseUnimplementedCases:
         # is a problem.
         dstr = "2012 MARTIN CHILDREN'S IRREVOCABLE TRUST u/a/d NOVEMBER 7, 2012"
         expected = datetime(2012, 11, 7)
-        res, tokens = parse(dstr, fuzzy_with_tokens=True)
+        res, tokens = parse(dstr, fuzzy_with_tokens=True)  # pylint: disable=e0633
         assert res == expected
         assert tokens == ("2012 MARTIN CHILDREN'S IRREVOCABLE TRUST u/a/d ",)
 

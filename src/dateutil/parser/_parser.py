@@ -103,7 +103,8 @@ class _TimeLex:
             if not nextchar:
                 self.eof = True
                 break
-            elif not state:
+
+            if not state:
                 # First character of the token - determines if we're starting
                 # to parse a word, a number or something else.
                 token = nextchar
@@ -369,7 +370,7 @@ class ParserInfo:
         if res.year is not None:
             res.year = self.convertyear(res.year, res.century_specified)
 
-        if (res.tzoffset == 0 and not res.tzname) or (res.tzname == "Z" or res.tzname == "z"):
+        if (res.tzoffset == 0 and not res.tzname) or (res.tzname and res.tzname in "zZ"):
             res.tzname = "UTC"
             res.tzoffset = 0
         elif res.tzoffset != 0 and res.tzname and self.utczone(res.tzname):
@@ -471,7 +472,8 @@ class _YMD(list):
 
         if len_ymd > 3:
             raise ValueError("More than three YMD values")
-        elif len_ymd == 1 or (mstridx is not None and len_ymd == 2):
+
+        if len_ymd == 1 or (mstridx is not None and len_ymd == 2):
             # One member, or two members with a month string
             if mstridx is not None:
                 month = self[mstridx]
@@ -1133,8 +1135,8 @@ class Parser:
         except Exception as e:
             msg = "Could not convert %s to decimal" % val
             raise ValueError(msg) from e
-        else:
-            return decimal_value
+
+        return decimal_value
 
     # ------------------------------------------------------------------
     # Post-Parsing construction of datetime output.  These are kept as
@@ -1372,7 +1374,7 @@ class _TzParser:
     def parse(self, tzstr):
         res = self._result()
         _tmp_list = [x for x in re.split(r"([,:.]|[a-zA-Z]+|[0-9]+)", tzstr) if x]
-        used_idxs = list()
+        used_idxs = []
         try:
             len_l = len(_tmp_list)
 

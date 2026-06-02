@@ -267,7 +267,7 @@ class RelativeDeltaTest(unittest.TestCase):
         wday_mo_2 = relativedelta(year=1997, month=4, weekday=MO(+2))
         wday_tu = relativedelta(year=1997, month=4, weekday=TU)
 
-        self.assertTrue(wday_mo_1 == wday_mo_1)
+        self.assertTrue(wday_mo_1 == wday_mo_1)  # pylint: disable=r0124
 
         self.assertFalse(no_wday == wday_mo_1)
         self.assertFalse(wday_mo_1 == no_wday)

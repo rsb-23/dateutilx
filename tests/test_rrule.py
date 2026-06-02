@@ -1829,7 +1829,7 @@ class RRuleTest(unittest.TestCase):
         """
 
         self.assertRaises(
-            ValueError, rrule, HOURLY, **dict(interval=4, byhour=(7, 11, 15, 19), dtstart=datetime(1997, 9, 2, 9, 0))
+            ValueError, rrule, HOURLY, interval=4, byhour=(7, 11, 15, 19), dtstart=datetime(1997, 9, 2, 9, 0)
         )
 
     def testMinutelyBadRRule(self):
@@ -1838,10 +1838,7 @@ class RRuleTest(unittest.TestCase):
         """
 
         self.assertRaises(
-            ValueError,
-            rrule,
-            MINUTELY,
-            **dict(interval=12, byminute=(10, 11, 25, 39, 50), dtstart=datetime(1997, 9, 2, 9, 0)),
+            ValueError, rrule, MINUTELY, interval=12, byminute=(10, 11, 25, 39, 50), dtstart=datetime(1997, 9, 2, 9, 0)
         )
 
     def testSecondlyBadRRule(self):
@@ -1850,10 +1847,7 @@ class RRuleTest(unittest.TestCase):
         """
 
         self.assertRaises(
-            ValueError,
-            rrule,
-            SECONDLY,
-            **dict(interval=10, bysecond=(2, 15, 37, 42, 59), dtstart=datetime(1997, 9, 2, 9, 0)),
+            ValueError, rrule, SECONDLY, interval=10, bysecond=(2, 15, 37, 42, 59), dtstart=datetime(1997, 9, 2, 9, 0)
         )
 
     def testMinutelyBadComboRRule(self):
@@ -2236,7 +2230,6 @@ class RRuleTest(unittest.TestCase):
         def tzinfos(tzstr):
             if tzstr == "America/New_York":
                 raise TzInfoError("Invalid!")
-            return None
 
         with self.assertRaises(TzInfoError):
             rrulestr(rrstr, tzids=tzinfos)

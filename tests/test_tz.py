@@ -28,8 +28,6 @@ try:
 except ImportError as e:
     if IS_WIN:
         raise e
-    else:
-        pass
 
 MISSING_TARBALL = "This test fails if you don't have the dateutil " "timezone file installed. Please read the README"
 
@@ -2719,7 +2717,7 @@ class TestEnfold:
         dt = tz.enfold(datetime(1999, 1, 3), fold=1)
 
         with pytest.raises(TypeError):
-            dt.replace(1950, year=2000)
+            dt.replace(1950, year=2000)  # pylint: disable=e1124
 
 
 @pytest.mark.tz_resolve_imaginary

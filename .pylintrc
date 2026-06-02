@@ -1,0 +1,70 @@
+[MASTER]
+jobs=2
+ignore-paths=(?!(src|tests))/*
+
+[FORMAT]
+max-line-length = 130
+
+[DESIGN]
+max-args = 22
+max-attributes = 22
+max-bool-expr = 21
+max-branches = 83
+max-locals = 52
+max-module-lines = 4000
+max-nested-blocks = 8
+max-positional-arguments = 22
+max-public-methods = 537
+max-returns = 7
+max-statements = 180
+
+[MESSAGES CONTROL]
+disable=
+	I,
+	# E
+	access-member-before-definition, #3
+	import-error, #15
+	invalid-unary-operand-type, #1
+	no-member, #69
+	no-self-argument, #7
+	possibly-used-before-assignment, #2
+	unsubscriptable-object, #2
+	# W
+	abstract-method, #4
+	arguments-renamed, #2
+	attribute-defined-outside-init, #79
+	broad-exception-caught, #1
+	dangerous-default-value, #2
+	expression-not-assigned, #3
+	fixme, #24
+	global-statement, #7
+	implicit-str-concat, #28
+	possibly-unused-variable, #14
+	protected-access, #39
+	raise-missing-from, #6
+	raising-format-tuple, #2
+	redefined-builtin, #2
+	redefined-outer-name, #20
+	unspecified-encoding, #3
+	unused-argument, #29
+	unused-import, #1
+	unused-variable, #24
+	unused-wildcard-import, #2
+	wildcard-import, #2
+	# C
+	consider-using-f-string, #25
+	import-outside-toplevel, #34
+	invalid-name, #1034
+	missing-docstring, #keep
+	superfluous-parens, #13
+	unidiomatic-typecheck, #1
+	use-implicit-booleaness-not-comparison-to-zero, #29
+	useless-import-alias, #1
+	wrong-import-position, #3
+	# R
+	cyclic-import, #5
+	duplicate-code, #keep
+	no-else-return, #33
+	redefined-argument-from-local, #4
+	stop-iteration-return, #2
+	too-few-public-methods, #19
