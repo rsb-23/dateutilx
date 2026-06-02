@@ -9,9 +9,10 @@ Attempting to import this module on a non-Windows platform will raise an
 # This code was originally contributed by Jeffrey Harris.
 import datetime
 import struct
-import sys
 
-if sys.platform == "win32":
+from dateutil.helper import is_windows_os
+
+if is_windows_os():
     import winreg
 else:
     winreg = None
@@ -89,8 +90,8 @@ class tzres:
 
         """
         resource = self.p_wchar()
-        lpBuffer = ctypes.cast(ctypes.byref(resource), wintypes.LPWSTR)
-        nchar = self.LoadStringW(self._tzres._handle, offset, lpBuffer, 0)
+        lp_buffer = ctypes.cast(ctypes.byref(resource), wintypes.LPWSTR)
+        nchar = self.LoadStringW(self._tzres._handle, offset, lp_buffer, 0)
         return resource[:nchar]
 
     def name_from_string(self, tzname_str):
@@ -117,7 +118,7 @@ class tzres:
 
         name_splt = tzname_str.split(",-")
         try:
-            offset = int(name_splt[1])
+            offset = int(name_splt[-1])
         except ValueError:
             raise ValueError("Malformed timezone string.")
 

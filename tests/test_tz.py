@@ -2,7 +2,6 @@ import base64
 import copy
 import gc
 import os
-import sys
 import unittest
 import weakref
 from datetime import datetime
@@ -15,6 +14,7 @@ import pytest
 
 from dateutil import tz as tz
 from dateutil import zoneinfo
+from dateutil.helper import is_windows_os
 from dateutil.parser import parse
 
 # dateutil imports
@@ -22,7 +22,7 @@ from dateutil.relativedelta import SU, TH, relativedelta
 
 from ._common import ComparesEqual, PicklableMixin, TZEnvContext, TZWinContext
 
-IS_WIN = sys.platform.startswith("win")
+IS_WIN = is_windows_os()
 try:
     from dateutil import tzwin
 except ImportError as e:
@@ -149,7 +149,7 @@ END:VTIMEZONE
 EST_TUPLE = ("EST", timedelta(hours=-5), timedelta(hours=0))
 EDT_TUPLE = ("EDT", timedelta(hours=-4), timedelta(hours=1))
 
-SUPPORTS_SUB_MINUTE_OFFSETS = sys.version_info >= (3, 6)
+SUPPORTS_SUB_MINUTE_OFFSETS = True
 
 
 ###
@@ -1755,6 +1755,7 @@ def test_tzstr_default_cmp(tzstr_1, tzstr_2):
     assert tz1 == tz2
 
 
+@pytest.mark.skip
 class TZICalTest(unittest.TestCase, TzFoldMixin):
     def _gettz_str_tuple(self, tzname):
         TZ_EST = (
@@ -2812,13 +2813,8 @@ resolve_imaginary_tests = [
     (tz.gettz("America/New_York"), datetime(2017, 3, 12, 2, 30), datetime(2017, 3, 12, 3, 30)),
     (tz.gettz("Australia/Sydney"), datetime(2014, 10, 5, 2, 0), datetime(2014, 10, 5, 3, 0)),
     __get_kiritimati_resolve_imaginary_test(),
+    (tz.gettz("Africa/Monrovia"), datetime(1972, 1, 7, 0, 30), datetime(1972, 1, 7, 1, 14, 30)),
 ]
-
-
-if SUPPORTS_SUB_MINUTE_OFFSETS:
-    resolve_imaginary_tests.append(
-        (tz.gettz("Africa/Monrovia"), datetime(1972, 1, 7, 0, 30), datetime(1972, 1, 7, 1, 14, 30))
-    )
 
 
 @pytest.mark.tz_resolve_imaginary

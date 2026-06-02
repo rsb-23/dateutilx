@@ -4,9 +4,10 @@ import operator
 from math import copysign
 from warnings import warn
 
-from ._common import weekday
+from dateutil.weekday import Weekday, weekdays
 
-MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(weekday(x) for x in range(7))
+weekday = Weekday
+MO, TU, WE, TH, FR, SA, SU = weekdays
 
 __all__ = ["relativedelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
 
@@ -618,4 +619,5 @@ def _sign(x):
 
 
 relativedelta = RelativeDelta
+relativedelta.__name__ = "relativedelta"
 # vim:ts=4:sw=4:et
