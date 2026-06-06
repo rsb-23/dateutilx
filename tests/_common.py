@@ -151,7 +151,7 @@ class TZWinContext(TZContextBase):
 
     def set_current_tz(self, tzname):
         with subprocess.Popen(["tzutil", "/s", tzname], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
-            out, err = p.communicate()
+            _, err = p.communicate()
 
         if p.returncode:
             raise OSError("Failed to set current time zone: " + (err or "Unknown error."))

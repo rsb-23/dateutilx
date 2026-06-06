@@ -16,8 +16,6 @@ import pytest
 from dateutil import tz, zoneinfo
 from dateutil.helper import is_windows_os
 from dateutil.parser import parse
-
-# dateutil imports
 from dateutil.relativedelta import SU, TH, relativedelta
 
 from ._common import ComparesEqual, PicklableMixin, TZEnvContext, TZWinContext
@@ -511,7 +509,7 @@ class TzWinFoldMixin:
             hour = timedelta(hours=1)
 
             # Firmly 2015-11-01 0:30 EDT-4
-            t_n, t0_u, t1_u = self.get_utc_transitions(NYC, 2015, False)
+            t_n = self.get_utc_transitions(NYC, 2015, False)[0]
 
             pre_dst = (t_n - hour).replace(tzinfo=NYC)
 
@@ -544,7 +542,7 @@ class TzWinFoldMixin:
             NYC = self.tzclass(*args)
             UTC = tz.UTC
 
-            t_n, t0_u, t1_u = self.get_utc_transitions(NYC, 2011, False)
+            t_n = self.get_utc_transitions(NYC, 2011, False)[0]
 
             dt0 = t_n.replace(tzinfo=NYC)
             dt1 = tz.enfold(dt0, fold=1)
@@ -2463,8 +2461,7 @@ class DatetimeAmbiguousTest(unittest.TestCase):
 
                 if dt_start <= dt_n < dt_end and getattr(dt_n, "fold", 0):
                     return timedelta(hours=1)
-                else:
-                    return timedelta(0)
+                return timedelta(0)
 
         return FoldingTzInfo
 

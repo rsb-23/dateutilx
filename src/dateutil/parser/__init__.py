@@ -1,3 +1,6 @@
+import warnings
+from functools import wraps
+
 from ._parser import DEFAULTPARSER, DEFAULTTZPARSER, parse, parser, parserinfo
 from .isoparser import isoparse, isoparser
 
@@ -10,8 +13,6 @@ __all__ = ["parse", "parser", "parserinfo", "isoparse", "isoparser"]
 
 
 def __deprecated_private_func(f):
-    import warnings
-    from functools import wraps
 
     msg = (
         "{name} is a private function and may break without warning, "
@@ -28,7 +29,6 @@ def __deprecated_private_func(f):
 
 
 def __deprecate_private_class(c):
-    import warnings
 
     msg = (
         "{name} is a private class and may break without warning, "

@@ -8,7 +8,7 @@ import pytest
 from dateutil import tz
 from dateutil.errors import ParserError, UnknownTimezoneWarning
 from dateutil.helper import is_windows_os
-from dateutil.parser import parse, parserinfo
+from dateutil.parser import parse, parser, parserinfo
 from dateutil.tz import tzoffset
 
 from ._common import TZEnvContext
@@ -413,14 +413,12 @@ class ParserTest(unittest.TestCase):
         cls.uni_str = "2014-05-01 08:00:00"
         cls.str_str = cls.uni_str.encode()
 
-    def testParserParseStr(self):
-        from dateutil.parser import parser
-
+    def test_parser_parse_str(self):
         assert parser().parse(self.str_str) == parser().parse(self.uni_str)
 
-    def testParseUnicodeWords(self):
+    def test_parse_unicode_words(self):
 
-        class rus_parserinfo(parserinfo):
+        class RusParserInfo(parserinfo):
             MONTHS = [
                 ("янв", "Январь"),
                 ("фев", "Февраль"),
@@ -437,7 +435,7 @@ class ParserTest(unittest.TestCase):
             ]
 
         expected = datetime(2015, 9, 10, 10, 20)
-        res = parse("10 Сентябрь 2015 10:20", parserinfo=rus_parserinfo())
+        res = parse("10 Сентябрь 2015 10:20", parserinfo=RusParserInfo())
         assert res == expected
 
     def testParseWithNulls(self):
@@ -565,14 +563,14 @@ class ParserTest(unittest.TestCase):
         # 1 second.
         delta = timedelta(days=365 + 31 + 1, seconds=1 + 60 + 60 * 60)
         dt = datetime(1900, 1, 1, 0, 0, 0, 0)
-        for i in range(200):
+        for _ in range(200):
             assert parse(dt.ctime()) == dt
             dt += delta
 
     def testIncreasingISOFormat(self):
         delta = timedelta(days=365 + 31 + 1, seconds=1 + 60 + 60 * 60)
         dt = datetime(1900, 1, 1, 0, 0, 0, 0)
-        for i in range(200):
+        for _ in range(200):
             assert parse(dt.isoformat()) == dt
             dt += delta
 
@@ -590,15 +588,13 @@ class ParserTest(unittest.TestCase):
             dt = datetime(2008, 2, 27, 21, 26, 1, ms)
             assert parse(dt.isoformat()) == dt
 
-    def testCustomParserInfo(self):
+    def test_custom_parser_info(self):
         # Custom parser info wasn't working, as Michael Elsdörfer discovered.
-        from dateutil.parser import parser
-
-        class myparserinfo(parserinfo):
+        class MyParserInfo(parserinfo):
             MONTHS = parserinfo.MONTHS[:]
             MONTHS[0] = ("Foo", "Foo")
 
-        myparser = parser(myparserinfo())
+        myparser = parser(MyParserInfo())
         dt = myparser.parse("01/Foo/2007")
         assert dt == datetime(2007, 1, 1)
 
@@ -606,7 +602,6 @@ class ParserTest(unittest.TestCase):
         # Horacio Hoyos discovered that day names shorter than 3 characters,
         # for example two letter German day name abbreviations, don't work:
         # https://github.com/dateutil/dateutil/issues/343
-        from dateutil.parser import parser
 
         class GermanParserInfo(parserinfo):
             WEEKDAYS = [

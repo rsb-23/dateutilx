@@ -381,9 +381,11 @@ class RelativeDelta:
                 second=self.second,
                 microsecond=self.microsecond,
             )
+
         if not isinstance(other, datetime.date):
             return NotImplemented
-        elif self._has_time and not isinstance(other, datetime.datetime):
+
+        if self._has_time and not isinstance(other, datetime.datetime):
             other = datetime.datetime.fromordinal(other.toordinal())
         year = (self.year or other.year) + self.years
         month = self.month or other.month

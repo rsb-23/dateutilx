@@ -16,6 +16,8 @@ import struct
 import time
 import weakref
 from collections import OrderedDict
+from dataclasses import dataclass
+from typing import Any
 
 from dateutil.helper import is_windows_os
 
@@ -108,9 +110,6 @@ class tzutc(datetime.tzinfo, metaclass=_TzSingleton):
 
     __hash__ = None
 
-    def __ne__(self, other):
-        return not (self == other)
-
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
@@ -180,9 +179,6 @@ class tzoffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
 
     __hash__ = None
 
-    def __ne__(self, other):
-        return not (self == other)
-
     def __repr__(self):
         return f"{self.__class__.__name__}({repr(self._name)}, {int(self._offset.total_seconds())})"
 
@@ -211,10 +207,7 @@ class tzlocal(_tzinfo):
         if dt is None and self._hasdst:
             return None
 
-        if self._isdst(dt):
-            return self._dst_offset
-        else:
-            return self._std_offset
+        return self._dst_offset if self._isdst(dt) else self._std_offset
 
     def dst(self, dt):
         if dt is None and self._hasdst:
@@ -222,8 +215,7 @@ class tzlocal(_tzinfo):
 
         if self._isdst(dt):
             return self._dst_offset - self._std_offset
-        else:
-            return ZERO
+        return ZERO
 
     def tzname(self, dt):
         return self._tznames[self._isdst(dt)]
@@ -282,27 +274,23 @@ class tzlocal(_tzinfo):
         fold = getattr(dt, "fold", None)
 
         if self.is_ambiguous(dt):
-            if fold is not None:
-                return not self._fold(dt)
-            else:
-                return True
+            return True if fold is None else not self._fold(dt)
 
         return dstval
 
     def __eq__(self, other):
         if isinstance(other, tzlocal):
             return self._std_offset == other._std_offset and self._dst_offset == other._dst_offset
-        elif isinstance(other, tzutc):
+
+        if isinstance(other, tzutc):
             return not self._hasdst and self._tznames[0] in {"UTC", "GMT"} and self._std_offset == ZERO
-        elif isinstance(other, tzoffset):
+
+        if isinstance(other, tzoffset):
             return not self._hasdst and self._tznames[0] == other._name and self._std_offset == other._offset
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     __hash__ = None
-
-    def __ne__(self, other):
-        return not (self == other)
 
     def __repr__(self):
         return f"{self.__class__.__name__}()"
@@ -341,9 +329,6 @@ class _ttinfo:
 
     __hash__ = None
 
-    def __ne__(self, other):
-        return not (self == other)
-
     def __getstate__(self):
         state = {}
         for name in self.__slots__:
@@ -356,26 +341,23 @@ class _ttinfo:
                 setattr(self, name, state[name])
 
 
-class _tzfile:
+@dataclass(slots=True)
+class _TzFile:
     """
-    Lightweight class for holding the relevant transition and time zone
-    information read from binary tzfiles.
+    Lightweight container for transition and time zone information read from binary tzfiles.
     """
 
-    attrs = [
-        "trans_list",
-        "trans_list_utc",
-        "trans_idx",
-        "ttinfo_list",
-        "ttinfo_std",
-        "ttinfo_dst",
-        "ttinfo_before",
-        "ttinfo_first",
-    ]
+    trans_list: list | None = None
+    trans_list_utc: list | None = None
+    trans_idx: list[int] | None = None
+    ttinfo_list: list | None = None
+    ttinfo_std: Any | None = None
+    ttinfo_dst: Any | None = None
+    ttinfo_before: Any | None = None
+    ttinfo_first: Any | None = None
 
-    def __init__(self, **kwargs):
-        for attr in self.attrs:
-            setattr(self, attr, kwargs.get(attr, None))
+
+_tzfile = _TzFile
 
 
 class tzfile(_tzinfo):
@@ -477,11 +459,11 @@ class tzfile(_tzinfo):
     def _set_tzdata(self, tzobj):
         """Set the time zone data of this object from a _tzfile object"""
         # Copy the relevant attributes over as private attributes
-        for attr in _tzfile.attrs:
+        for attr in _tzfile.__slots__:
             setattr(self, "_" + attr, getattr(tzobj, attr))
 
     def _read_tzfile(self, fileobj):
-        out = _tzfile()
+        out = _TzFile()
 
         # From tzfile(5):
         #
@@ -843,9 +825,6 @@ class tzfile(_tzinfo):
         )
 
     __hash__ = None
-
-    def __ne__(self, other):
-        return not (self == other)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({repr(self._filename)})"
@@ -1217,10 +1196,7 @@ class _tzicalvtz(_tzinfo):
 
     def dst(self, dt):
         comp = self._find_comp(dt)
-        if comp.isdst:
-            return comp.tzoffsetdiff
-        else:
-            return ZERO
+        return comp.tzoffsetdiff if comp.isdst else ZERO
 
     def tzname(self, dt):
         return self._find_comp(dt).tzname
@@ -1298,17 +1274,18 @@ class tzical:
         s = s.strip()
         if not s:
             raise ValueError("empty offset")
+
         if s[0] in ("+", "-"):
             signal = (-1, +1)[s[0] == "+"]
             s = s[1:]
         else:
             signal = +1
+
         if len(s) == 4:
             return (int(s[:2]) * 3600 + int(s[2:]) * 60) * signal
-        elif len(s) == 6:
+        if len(s) == 6:
             return (int(s[:2]) * 3600 + int(s[2:4]) * 60 + int(s[4:])) * signal
-        else:
-            raise ValueError("invalid offset: " + s)
+        raise ValueError("invalid offset: " + s)
 
     def _parse_rfc(self, s):
         lines = s.splitlines()

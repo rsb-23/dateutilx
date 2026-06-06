@@ -98,10 +98,7 @@ else:
         args = dt.timetuple()[:6]
         args += (dt.microsecond, dt.tzinfo)
 
-        if fold:
-            return _DatetimeWithFold(*args)
-        else:
-            return datetime(*args)
+        return _DatetimeWithFold(*args) if fold else datetime(*args)
 
 
 def _validate_fromutc_inputs(f):
@@ -269,26 +266,19 @@ class tzrangebase(_tzinfo):
 
         if isdst is None:
             return None
-        elif isdst:
-            return self._dst_offset
-        else:
-            return self._std_offset
+
+        return self._dst_offset if isdst else self._std_offset
 
     def dst(self, dt):
         isdst = self._isdst(dt)
 
         if isdst is None:
             return None
-        elif isdst:
-            return self._dst_base_offset
-        else:
-            return ZERO
+
+        return self._dst_base_offset if isdst else ZERO
 
     def tzname(self, dt):
-        if self._isdst(dt):
-            return self._dst_abbr
-        else:
-            return self._std_abbr
+        return self._dst_abbr if self._isdst(dt) else self._std_abbr
 
     def fromutc(self, dt):
         """Given a datetime in UTC, return local time"""
@@ -340,7 +330,7 @@ class tzrangebase(_tzinfo):
         if not self.hasdst:
             return False
 
-        start, end = self.transitions(dt.year)
+        _, end = self.transitions(dt.year)
 
         dt = dt.replace(tzinfo=None)
         return end <= dt < end + self._dst_base_offset
@@ -348,7 +338,7 @@ class tzrangebase(_tzinfo):
     def _isdst(self, dt):
         if not self.hasdst:
             return False
-        elif dt is None:
+        if dt is None:
             return None
 
         transitions = self.transitions(dt.year)
@@ -363,8 +353,7 @@ class tzrangebase(_tzinfo):
         # Handle ambiguous dates
         if not isdst and self.is_ambiguous(dt):
             return not self._fold(dt)
-        else:
-            return isdst
+        return isdst
 
     def _naive_isdst(self, dt, transitions):
         dston, dstoff = transitions

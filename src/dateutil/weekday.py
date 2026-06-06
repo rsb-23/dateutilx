@@ -27,9 +27,13 @@ class NthWeekday:
         return f"{name}({self.n:+d})" if self.n else name
 
 
+# pylint: disable=r0903
 class Weekday(NthWeekday):
-    def __init__(self, weekday: int, n: int | None = None):
-        super().__init__(weekday=Day(weekday), n=n)
+    def __init__(self, weekday_: int, n: int | None = None):
+        super().__init__(weekday=Day(weekday_), n=n)
 
 
 MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(Weekday(x) for x in range(7))
+
+# Alias
+weekday = Weekday

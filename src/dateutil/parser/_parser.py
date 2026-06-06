@@ -399,16 +399,18 @@ class _YMD(list):
     def could_be_day(self, value):
         if self.has_day:
             return False
-        elif not self.has_month:
+
+        if not self.has_month:
             return 1 <= value <= 31
-        elif not self.has_year:
+
+        if not self.has_year:
             # Be permissive, assume leap year
             month = self[self.mstridx]
             return 1 <= value <= monthrange(2000, month)[1]
-        else:
-            month = self[self.mstridx]
-            year = self[self.ystridx]
-            return 1 <= value <= monthrange(year, month)[1]
+
+        month = self[self.mstridx]
+        year = self[self.ystridx]
+        return 1 <= value <= monthrange(year, month)[1]
 
     def append(self, val, label=None):
         if hasattr(val, "__len__"):
@@ -637,8 +639,8 @@ class Parser:
 
         if kwargs.get("fuzzy_with_tokens", False):
             return ret, skipped_tokens
-        else:
-            return ret
+
+        return ret
 
     class _Result(_ResultBase):
         # fmt: off
@@ -854,8 +856,8 @@ class Parser:
         if fuzzy_with_tokens:
             skipped_tokens = self._recombine_skipped(_tokens, skipped_idxs)
             return res, tuple(skipped_tokens)
-        else:
-            return res, None
+
+        return res, None
 
     def _parse_numeric_token(self, tokens, idx, info, ymd, res, fuzzy):
         # Token is a number
@@ -1115,15 +1117,17 @@ class Parser:
     # Handling for individual tokens.  These are kept as methods instead
     #  of functions for the sake of customizability via subclassing.
 
-    def _parsems(self, value):
+    @staticmethod
+    def _parsems(value):
         """Parse a I[.F] seconds value into (seconds, microseconds)."""
         if "." not in value:
             return int(value), 0
-        else:
-            i, f = value.split(".")
-            return int(i), int(f.ljust(6, "0")[:6])
 
-    def _to_decimal(self, val):
+        i, f = value.split(".")
+        return int(i), int(f.ljust(6, "0")[:6])
+
+    @staticmethod
+    def _to_decimal(val):
         try:
             decimal_value = Decimal(val)
             # See GH 662, edge case, infinite value should not be converted
@@ -1348,8 +1352,8 @@ def parse(timestr, parserinfo=None, parser_info=None, **kwargs):
 
     if parser_info:
         return parser(parser_info).parse(timestr, **kwargs)
-    else:
-        return DEFAULTPARSER.parse(timestr, **kwargs)
+
+    return DEFAULTPARSER.parse(timestr, **kwargs)
 
 
 class _TzParser:

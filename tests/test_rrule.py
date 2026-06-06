@@ -2112,7 +2112,7 @@ class RRuleTest(unittest.TestCase):
 
     def testCachePost(self):
         rr = rrule(DAILY, count=15, cache=True, dtstart=datetime(1997, 9, 2, 9, 0))
-        for x in rr:
+        for _ in rr:
             pass
         self.assertEqual(
             list(rr),
@@ -2137,7 +2137,7 @@ class RRuleTest(unittest.TestCase):
 
     def testCachePostInternal(self):
         rr = rrule(DAILY, count=15, cache=True, dtstart=datetime(1997, 9, 2, 9, 0))
-        for x in rr:
+        for _ in rr:
             pass
         self.assertEqual(
             rr._cache,
@@ -2166,7 +2166,7 @@ class RRuleTest(unittest.TestCase):
 
     def testCachePostContains(self):
         rr = rrule(DAILY, count=3, cache=True, dtstart=datetime(1997, 9, 2, 9, 0))
-        for x in rr:
+        for _ in rr:
             pass
         self.assertEqual(datetime(1997, 9, 3, 9, 0) in rr, True)
 
@@ -3770,7 +3770,7 @@ class RRuleSetTest(unittest.TestCase):
         rrset = rruleset(cache=True)
         rrset.rrule(rrule(YEARLY, count=2, byweekday=TU, dtstart=datetime(1997, 9, 2, 9, 0)))
         rrset.rrule(rrule(YEARLY, count=1, byweekday=TH, dtstart=datetime(1997, 9, 2, 9, 0)))
-        for x in rrset:
+        for _ in rrset:
             pass
         self.assertEqual(
             list(rrset), [datetime(1997, 9, 2, 9, 0), datetime(1997, 9, 4, 9, 0), datetime(1997, 9, 9, 9, 0)]
@@ -3780,7 +3780,7 @@ class RRuleSetTest(unittest.TestCase):
         rrset = rruleset(cache=True)
         rrset.rrule(rrule(YEARLY, count=2, byweekday=TU, dtstart=datetime(1997, 9, 2, 9, 0)))
         rrset.rrule(rrule(YEARLY, count=1, byweekday=TH, dtstart=datetime(1997, 9, 2, 9, 0)))
-        for x in rrset:
+        for _ in rrset:
             pass
         self.assertEqual(
             list(rrset._cache), [datetime(1997, 9, 2, 9, 0), datetime(1997, 9, 4, 9, 0), datetime(1997, 9, 9, 9, 0)]
@@ -3892,19 +3892,19 @@ class WeekdayTest(unittest.TestCase):
                 super().__init__(weekday)
                 self.n = n
 
-        MO_Basic = BasicWeekday(0)
+        mo_basic = BasicWeekday(0)
 
-        self.assertNotEqual(MO, MO_Basic)
-        self.assertNotEqual(MO(1), MO_Basic)
+        self.assertNotEqual(MO, mo_basic)
+        self.assertNotEqual(MO(1), mo_basic)
 
-        TU_BasicN = BasicNWeekday(1)
+        tu_basicn = BasicNWeekday(1)
 
-        self.assertEqual(TU, TU_BasicN)
-        self.assertNotEqual(TU(3), TU_BasicN)
+        self.assertEqual(TU, tu_basicn)
+        self.assertNotEqual(TU(3), tu_basicn)
 
-        WE_Basic3 = BasicNWeekday(2, 3)
-        self.assertEqual(WE(3), WE_Basic3)
-        self.assertNotEqual(WE(2), WE_Basic3)
+        we_basic3 = BasicNWeekday(2, 3)
+        self.assertEqual(WE(3), we_basic3)
+        self.assertNotEqual(WE(2), we_basic3)
 
     def testWeekdayReprNoN(self):
         no_n_reprs = ("MO", "TU", "WE", "TH", "FR", "SA", "SU")

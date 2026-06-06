@@ -153,6 +153,7 @@ def test_import_tz_from():
 
 
 def test_import_tz_all():
+    # pylint: disable=w0641
     # fmt: off
     from dateutil.tz import (  # noqa: F401
         UTC,

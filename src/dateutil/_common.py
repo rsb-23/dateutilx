@@ -13,8 +13,7 @@ class weekday:
     def __call__(self, n):
         if n == self.n:
             return self
-        else:
-            return self.__class__(self.weekday, n)
+        return self.__class__(self.weekday, n)
 
     def __eq__(self, other):
         try:
@@ -27,15 +26,9 @@ class weekday:
     def __hash__(self):
         return hash((self.weekday, self.n))
 
-    def __ne__(self, other):
-        return not (self == other)
-
     def __repr__(self):
         s = ("MO", "TU", "WE", "TH", "FR", "SA", "SU")[self.weekday]
-        if not self.n:
-            return s
-        else:
-            return f"{s}({self.n:+})"
+        return f"{s}({self.n:+})" if self.n else s
 
 
 # vim:ts=4:sw=4:et

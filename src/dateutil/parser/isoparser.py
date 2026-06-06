@@ -232,8 +232,7 @@ class IsoParser:
         if pos >= len_str:
             if has_sep:
                 return components, pos
-            else:
-                raise ValueError("Invalid ISO format")
+            raise ValueError("Invalid ISO format")
 
         if has_sep:
             if dt_str[pos : pos + 1] != self._DATE_SEP:
@@ -398,14 +397,14 @@ class IsoParser:
 
         if zero_as_utc and hours == 0 and minutes == 0:
             return tz.UTC
-        else:
-            if minutes > 59:
-                raise ValueError("Invalid minutes in time zone offset")
 
-            if hours > 23:
-                raise ValueError("Invalid hours in time zone offset")
+        if minutes > 59:
+            raise ValueError("Invalid minutes in time zone offset")
 
-            return tz.tzoffset(None, mult * (hours * 60 + minutes) * 60)
+        if hours > 23:
+            raise ValueError("Invalid hours in time zone offset")
+
+        return tz.tzoffset(None, mult * (hours * 60 + minutes) * 60)
 
 
 isoparser = IsoParser

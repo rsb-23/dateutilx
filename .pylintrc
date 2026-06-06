@@ -22,31 +22,27 @@ max-statements = 180
 disable=
 	I,
 	# E
-	import-error, #15
-	no-member, #69
+	import-error, #15 keep
+	no-member, #69 k
 	unsubscriptable-object, #2keep
 	# W
 	abstract-method, #4keep
-	attribute-defined-outside-init, #79
+	attribute-defined-outside-init, #79 k
 	fixme, #24
-	global-statement, #7
-	possibly-unused-variable, #14
+	global-statement, #7 k
 	protected-access, #39
 	redefined-outer-name, #20
-	unused-argument, #29
-	unused-variable, #24
+	unused-argument, #keep
 	unused-wildcard-import, #2keep
 	wildcard-import, #2keep
 	# C
-	import-outside-toplevel, #34
+	import-outside-toplevel, #34 keep
 	invalid-name, #1034
 	missing-docstring, #keep
-	superfluous-parens, #13
-	use-implicit-booleaness-not-comparison-to-zero, #29
+	superfluous-parens, #13 keep
 	wrong-import-position, #3keep
 	# R
 	cyclic-import, #5keep
 	duplicate-code, #keep
-	no-else-return, #33
 	stop-iteration-return, #2keep
-	too-few-public-methods, #19
+	too-few-public-methods, #19 k
