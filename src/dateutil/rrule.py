@@ -406,6 +406,7 @@ class Rrule(RruleBase):
         times, enabling caching will improve the performance considerably.
     """
 
+    # pylint: disable=r0902,r0913
     def __init__(
         self,
         freq,
@@ -757,6 +758,16 @@ class Rrule(RruleBase):
         return rrule(**new_kwargs)
 
     def _iter(self):
+        def _byyear_check(i):
+            return byyearday and (
+                (i < ii.yearlen and i + 1 not in byyearday and -ii.yearlen + i not in byyearday)
+                or (
+                    i >= ii.yearlen
+                    and i + 1 - ii.yearlen not in byyearday
+                    and -ii.nextyearlen + i - ii.yearlen not in byyearday
+                )
+            )
+
         year, month, day, hour, minute, second, weekday, _, _ = self._dtstart.timetuple()
 
         # Some local variables to speed things up a bit
@@ -793,10 +804,13 @@ class Rrule(RruleBase):
             timeset = self._timeset
         else:
             gettimeset = {HOURLY: ii.htimeset, MINUTELY: ii.mtimeset, SECONDLY: ii.stimeset}[freq]
-            if (
-                (freq >= HOURLY and self._byhour and hour not in self._byhour)
-                or (freq >= MINUTELY and self._byminute and minute not in self._byminute)
-                or (freq >= SECONDLY and self._bysecond and second not in self._bysecond)
+            if any(
+                freq >= min_freq and by_set and val not in by_set
+                for min_freq, by_set, val in [
+                    (HOURLY, self._byhour, hour),
+                    (MINUTELY, self._byminute, minute),
+                    (SECONDLY, self._bysecond, second),
+                ]
             ):
                 timeset = ()
             else:
@@ -822,17 +836,7 @@ class Rrule(RruleBase):
                         and ii.mdaymask[i] not in bymonthday
                         and ii.nmdaymask[i] not in bynmonthday
                     )
-                    or (
-                        byyearday
-                        and (
-                            (i < ii.yearlen and i + 1 not in byyearday and -ii.yearlen + i not in byyearday)
-                            or (
-                                i >= ii.yearlen
-                                and i + 1 - ii.yearlen not in byyearday
-                                and -ii.nextyearlen + i - ii.yearlen not in byyearday
-                            )
-                        )
-                    )
+                    or _byyear_check(i)
                 ):
                     dayset[i] = None
                     filtered = True
@@ -1102,6 +1106,7 @@ class _IterInfo:
         "nextyearlen", "nmdaymask", "nwdaymask", "rrule", "wdaymask", "wnomask",
         "yearlen", "yearordinal", "yearweekday",
     ]
+
     # fmt: on
 
     def __init__(self, rrule):

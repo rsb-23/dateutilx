@@ -100,6 +100,7 @@ class RelativeDelta:
 
     """
 
+    # pylint: disable=r0913
     def __init__(
         self,
         dt1=None,
@@ -266,19 +267,16 @@ class RelativeDelta:
             div, mod = divmod(self.months * s, 12)
             self.months = mod * s
             self.years += div * s
-        if (
-            self.hours
-            or self.minutes
-            or self.seconds
-            or self.microseconds
-            or self.hour is not None
-            or self.minute is not None
-            or self.second is not None
-            or self.microsecond is not None
+        # fmt:off
+        if any(
+                [self.hours, self.minutes, self.seconds, self.microseconds,
+                 self.hour is not None, self.minute is not None,
+                 self.second is not None, self.microsecond is not None]
         ):
             self._has_time = 1
         else:
             self._has_time = 0
+        # fmt:on
 
     @property
     def weeks(self):

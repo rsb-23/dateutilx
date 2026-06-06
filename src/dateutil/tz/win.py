@@ -90,7 +90,7 @@ class TzRes:
         """
         resource = self.p_wchar()
         lp_buffer = ctypes.cast(ctypes.byref(resource), wintypes.LPWSTR)
-        nchar = self.LoadStringW(self._tzres._handle, offset, lp_buffer, 0)
+        nchar = self.load_string_w(self._tzres._handle, offset, lp_buffer, 0)
         return resource[:nchar]
 
     def name_from_string(self, tzname_str):
