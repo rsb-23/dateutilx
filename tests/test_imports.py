@@ -1,10 +1,10 @@
 import sys
+from types import ModuleType
 
 import pytest
 
 from dateutil.helper import is_windows_os
 
-MODULE_TYPE = type(sys)
 HOST_IS_WINDOWS = is_windows_os()
 
 # Tests live in datetutil/test which cause a RuntimeWarning for Python2 builds.
@@ -48,7 +48,7 @@ def test_lazy_import(clean_import, module):
     import dateutil
 
     mod_obj = getattr(dateutil, module, None)
-    assert isinstance(mod_obj, MODULE_TYPE)
+    assert isinstance(mod_obj, ModuleType)
 
     mod_imported = importlib.import_module(f"dateutil.{module}")
     assert mod_obj is mod_imported

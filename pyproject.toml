@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools_scm<8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dateutil"
+name = "python-dateutil"
 dynamic = ["version"]
 description = "Modern extension to the standard Python datetime module"
 readme = "README.rst"

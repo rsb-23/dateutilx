@@ -1,3 +1,4 @@
+# pylint: disable=c0103
 import itertools as it
 from datetime import date, datetime, time, timedelta
 

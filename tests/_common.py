@@ -27,7 +27,7 @@ class PicklableMixin:
 
         return nobj
 
-    def assertPicklable(self, obj, singleton=False, asfile=False, dump_kwargs=None, load_kwargs=None):
+    def assert_picklable(self, obj, singleton=False, asfile=False, dump_kwargs=None, load_kwargs=None):
         """
         Assert that an object can be pickled and unpickled. This assertion
         assumes that the desired behavior is that the unpickled object compares
@@ -119,10 +119,10 @@ class TZEnvContext(TZContextBase):
     _guard_allows_change = False
 
     def get_current_tz(self):
-        return os.environ.get("TZ", UnsetTz)
+        return os.environ.get("TZ", UNSET_TZ)
 
     def set_current_tz(self, tzname):
-        if tzname is UnsetTz and "TZ" in os.environ:
+        if tzname is UNSET_TZ and "TZ" in os.environ:
             del os.environ["TZ"]
         else:
             os.environ["TZ"] = tzname
@@ -184,9 +184,6 @@ class NotAValueClass:
     __ge__ = __rge__ = _op
 
 
-NotAValue = NotAValueClass()
-
-
 class ComparesEqualClass:
     """
     A class that is always equal to whatever you compare it to.
@@ -218,11 +215,10 @@ class ComparesEqualClass:
     __rgt__ = __gt__
 
 
-ComparesEqual = ComparesEqualClass()
-
-
 class UnsetTzClass:
     """Sentinel class for unset time zone variable"""
 
 
-UnsetTz = UnsetTzClass()
+COMPARES_EQUAL = ComparesEqualClass()
+NOT_A_VALUE = NotAValueClass()
+UNSET_TZ = UnsetTzClass()

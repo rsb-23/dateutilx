@@ -15,7 +15,7 @@ from dateutil.parser._parser import _ymd
 
 
 @pytest.mark.smoke
-def test_YMD_could_be_day():
+def test_ymd_could_be_day():
     ymd = _ymd("foo bar 124 baz")
 
     ymd.append(2, "M")

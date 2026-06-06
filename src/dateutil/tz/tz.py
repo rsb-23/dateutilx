@@ -29,8 +29,7 @@ try:
 except ImportError:
     TzWin = TzWinLocal = None
 
-
-rrule = None
+rrule = None  # pylint: disable=c0103
 ZERO = datetime.timedelta(0)
 EPOCH = datetime.datetime(1970, 1, 1, 0, 0)
 EPOCHORDINAL = EPOCH.toordinal()
@@ -913,7 +912,6 @@ class TzRange(TzRangeBase):
     """
 
     def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, start=None, end=None):
-
         global relativedelta
         from dateutil import relativedelta
 
@@ -1488,7 +1486,6 @@ def __get_gettz():
         """
 
         def __init__(self):
-
             self.__instances = weakref.WeakValueDictionary()
             self.__strong_cache_size = 8
             self.__strong_cache = OrderedDict()
@@ -1739,7 +1736,6 @@ def resolve_imaginary(dt):
     .. versionadded:: 2.7.0
     """
     if dt.tzinfo is not None and not datetime_exists(dt):
-
         curr_offset = (dt + datetime.timedelta(hours=24)).utcoffset()
         old_offset = (dt - datetime.timedelta(hours=24)).utcoffset()
 

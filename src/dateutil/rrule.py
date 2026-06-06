@@ -26,7 +26,10 @@ __all__ = [
     "MO", "TU", "WE", "TH", "FR", "SA", "SU",
 ]
 
+# Imported on demand.
+easter = parser = None
 
+YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 MO, TU, WE, TH, FR, SA, SU = weekdays
 
 # Every mask is 7 days longer to handle cross-year weekly periods.
@@ -50,13 +53,6 @@ WDAYMASK = [0, 1, 2, 3, 4, 5, 6] * 55
 del M29, M30, M31, M365MASK[59], MDAY365MASK[59], NMDAY365MASK[31]
 MDAY365MASK = tuple(MDAY365MASK)
 M365MASK = tuple(M365MASK)
-
-
-YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
-
-# Imported on demand.
-easter = None
-parser = None
 
 
 def _invalidates_cache(f):

@@ -39,11 +39,11 @@ def _settzkeyname():
     handle = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
     try:
         winreg.OpenKey(handle, TZKEYNAMENT).Close()
-        TZKEYNAME = TZKEYNAMENT
+        tzkeyname = TZKEYNAMENT
     except OSError:
-        TZKEYNAME = TZKEYNAME9X
+        tzkeyname = TZKEYNAME9X
     handle.Close()
-    return TZKEYNAME
+    return tzkeyname
 
 
 TZKEYNAME = _settzkeyname()
@@ -66,7 +66,7 @@ class TzRes:
         # Specify the LoadStringW function
         user32.LoadStringW.argtypes = (wintypes.HINSTANCE, wintypes.UINT, wintypes.LPWSTR, ctypes.c_int)
 
-        self.LoadStringW = user32.LoadStringW
+        self.load_string_w = user32.LoadStringW
         self._tzres = ctypes.WinDLL(tzres_loc)
         self.tzres_loc = tzres_loc
 

@@ -10,7 +10,7 @@ from dateutil.weekday import Day, Weekday, weekdays
 MO, TU, WE, TH, FR, SA, SU = weekdays
 
 __all__ = ["RelativeDelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
-num: TypeAlias = float | int
+Number: TypeAlias = float | int
 
 
 class RelativeDelta:
@@ -106,7 +106,7 @@ class RelativeDelta:
         dt2=None,
         years=0,
         months=0,
-        days: num = 0,
+        days: Number = 0,
         leapdays=0,
         weeks=0,
         hours=0,

@@ -6,7 +6,7 @@ import pytest
 from dateutil.helper import Day
 from dateutil.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
 
-from ._common import NotAValue
+from ._common import NOT_A_VALUE
 
 relativedelta = RelativeDelta
 
@@ -179,7 +179,7 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def testAdditionUnsupportedType(self):
         # For unsupported types that define their own comparators, etc.
-        self.assertIs(relativedelta(days=1) + NotAValue, NotAValue)
+        self.assertIs(relativedelta(days=1) + NOT_A_VALUE, NOT_A_VALUE)
 
     def testAdditionFloatValue(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=float(1)), datetime(2000, 1, 2))
@@ -217,20 +217,20 @@ class RelativeDeltaTest(unittest.TestCase):
             _ = relativedelta(hours=12) - 14
 
     def testSubtractionUnsupportedType(self):
-        self.assertIs(relativedelta(days=1) + NotAValue, NotAValue)
+        self.assertIs(relativedelta(days=1) + NOT_A_VALUE, NOT_A_VALUE)
 
     def testMultiplication(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=1) * 28, datetime(2000, 1, 29))
         self.assertEqual(datetime(2000, 1, 1) + 28 * relativedelta(days=1), datetime(2000, 1, 29))
 
     def testMultiplicationUnsupportedType(self):
-        self.assertIs(relativedelta(days=1) * NotAValue, NotAValue)
+        self.assertIs(relativedelta(days=1) * NOT_A_VALUE, NOT_A_VALUE)
 
     def testDivision(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=28) / 28, datetime(2000, 1, 2))
 
     def testDivisionUnsupportedType(self):
-        self.assertIs(relativedelta(days=1) / NotAValue, NotAValue)
+        self.assertIs(relativedelta(days=1) / NOT_A_VALUE, NOT_A_VALUE)
 
     def testBoolean(self):
         self.assertFalse(relativedelta(days=0))
@@ -260,7 +260,7 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertFalse(relativedelta(year=1) == 19)
 
     def testInequalityUnsupportedType(self):
-        self.assertIs(relativedelta(hours=3) == NotAValue, NotAValue)
+        self.assertIs(relativedelta(hours=3) == NOT_A_VALUE, NOT_A_VALUE)
 
     def testInequalityWeekdays(self):
         # Different weekdays

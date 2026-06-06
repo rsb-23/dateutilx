@@ -18,9 +18,10 @@ from dateutil.helper import is_windows_os
 from dateutil.parser import parse
 from dateutil.relativedelta import SU, TH, RelativeDelta
 
-from ._common import ComparesEqual, PicklableMixin, TZEnvContext, TZWinContext
+from ._common import COMPARES_EQUAL, PicklableMixin, TZEnvContext, TZWinContext
 
 relativedelta = RelativeDelta
+
 IS_WIN = is_windows_os()
 try:
     from dateutil import tzwin
@@ -595,7 +596,7 @@ class TzUTCTest(unittest.TestCase):
         self.assertNotEqual(tz.tzutc(), 7)
 
     def testInequalityUnsupported(self):
-        self.assertEqual(tz.tzutc(), ComparesEqual)
+        self.assertEqual(tz.tzutc(), COMPARES_EQUAL)
 
     def testRepr(self):
         UTC = tz.tzutc()
@@ -657,9 +658,9 @@ class TzOffsetTest(unittest.TestCase):
     def testInequalityUnsupported(self):
         tzo = tz.tzoffset("-5", -5 * 3600)
 
-        self.assertTrue(tzo == ComparesEqual)
-        self.assertFalse(tzo != ComparesEqual)
-        self.assertEqual(tzo, ComparesEqual)
+        self.assertTrue(tzo == COMPARES_EQUAL)
+        self.assertFalse(tzo != COMPARES_EQUAL)
+        self.assertEqual(tzo, COMPARES_EQUAL)
 
     def testAmbiguity(self):
         # Pick an arbitrary datetime, this should always return False.
@@ -763,8 +764,8 @@ class TzLocalTest(unittest.TestCase):
     def testInequalityUnsupported(self):
         tzl = tz.tzlocal()
 
-        self.assertTrue(tzl == ComparesEqual)
-        self.assertFalse(tzl != ComparesEqual)
+        self.assertTrue(tzl == COMPARES_EQUAL)
+        self.assertFalse(tzl != COMPARES_EQUAL)
 
     def testRepr(self):
         tzl = tz.tzlocal()
@@ -823,7 +824,7 @@ class TzLocalNixTest(unittest.TestCase, TzFoldMixin):
 
         return TZEnvContext(tzname_map.get(tzname, tzname))
 
-    def _testTzFunc(self, tzval, func, std_val, dst_val):
+    def _test_tz_func(self, tzval, func, std_val, dst_val):
         """
         This generates tests about how the behavior of a function ``func``
         changes between STD and DST (e.g. utcoffset, tzname, dst).
@@ -1339,8 +1340,8 @@ class TZRangeTest(unittest.TestCase, TzFoldMixin):
         TZR = tz.tzrange("EST", -18000, "EDT", -14400)
 
         self.assertFalse(TZR == 4)
-        self.assertTrue(TZR == ComparesEqual)
-        self.assertFalse(TZR != ComparesEqual)
+        self.assertTrue(TZR == COMPARES_EQUAL)
+        self.assertFalse(TZR != COMPARES_EQUAL)
 
 
 @pytest.mark.tzstr
@@ -1413,8 +1414,8 @@ class TZStrTest(unittest.TestCase, TzFoldMixin):
         TZS = tz.tzstr("EST5EDT")
 
         self.assertFalse(TZS == 4)
-        self.assertTrue(TZS == ComparesEqual)
-        self.assertFalse(TZS != ComparesEqual)
+        self.assertTrue(TZS == COMPARES_EQUAL)
+        self.assertFalse(TZS != COMPARES_EQUAL)
 
     def testTzStrRepr(self):
         TZS1 = tz.tzstr("EST5EDT4")
@@ -1565,7 +1566,7 @@ def test_tzstr_weakref():
         ),
     ],
 )
-def test_valid_GNU_tzstr(tz_str, expected):
+def test_valid_gnu_tzstr(tz_str, expected):
     tzi = tz.tzstr(tz_str)
 
     assert tzi == expected
@@ -1680,7 +1681,7 @@ def test_valid_dateutil_format(tz_str, expected):
         "IST-2IDT,M3,2000,1/26,M10,5,0",
     ],
 )
-def test_invalid_GNU_tzstr(tz_str):
+def test_invalid_gnu_tzstr(tz_str):
     with pytest.raises(ValueError):
         tz.tzstr(tz_str)
 
@@ -2236,8 +2237,8 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         # Compare it to an object that is promiscuous about equality, but for
         # which tzwin does not implement an equality operator.
         EST = tz.tzwin("Eastern Standard Time")
-        self.assertTrue(EST == ComparesEqual)
-        self.assertFalse(EST != ComparesEqual)
+        self.assertTrue(EST == COMPARES_EQUAL)
+        self.assertFalse(EST != COMPARES_EQUAL)
 
     def testTzwinTimeOnlyDST(self):
         # For zones with DST, .dst() should return None
@@ -2290,17 +2291,17 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
 
     def testTzwinLocalName(self):
         # https://github.com/dateutil/dateutil/issues/143
-        ESTs = "Eastern Standard Time"
-        EDTs = "Eastern Daylight Time"
+        est_ = "Eastern Standard Time"
+        edt_ = "Eastern Daylight Time"
         transition_dates = [
-            (datetime(2015, 3, 8, 0, 59), ESTs),
-            (datetime(2015, 3, 8, 3, 1), EDTs),
-            (datetime(2015, 11, 1, 0, 59), EDTs),
-            (datetime(2015, 11, 1, 3, 1), ESTs),
-            (datetime(2016, 3, 13, 0, 59), ESTs),
-            (datetime(2016, 3, 13, 3, 1), EDTs),
-            (datetime(2016, 11, 6, 0, 59), EDTs),
-            (datetime(2016, 11, 6, 3, 1), ESTs),
+            (datetime(2015, 3, 8, 0, 59), est_),
+            (datetime(2015, 3, 8, 3, 1), edt_),
+            (datetime(2015, 11, 1, 0, 59), edt_),
+            (datetime(2015, 11, 1, 3, 1), est_),
+            (datetime(2016, 3, 13, 0, 59), est_),
+            (datetime(2016, 3, 13, 3, 1), edt_),
+            (datetime(2016, 11, 6, 0, 59), edt_),
+            (datetime(2016, 11, 6, 3, 1), est_),
         ]
 
         with TZWinContext("Eastern Standard Time"):
@@ -2385,49 +2386,49 @@ class TzPickleTest(PicklableMixin, unittest.TestCase):
     _asfile = False
 
     def setUp(self):
-        self.assertPicklable = partial(self.assertPicklable, asfile=self._asfile)
+        self.assert_picklable = partial(self.assert_picklable, asfile=self._asfile)
 
     def testPickleTzUTC(self):
-        self.assertPicklable(tz.tzutc(), singleton=True)
+        self.assert_picklable(tz.tzutc(), singleton=True)
 
     def testPickleTzOffsetZero(self):
-        self.assertPicklable(tz.tzoffset("UTC", 0), singleton=True)
+        self.assert_picklable(tz.tzoffset("UTC", 0), singleton=True)
 
     def testPickleTzOffsetPos(self):
-        self.assertPicklable(tz.tzoffset("UTC+1", 3600), singleton=True)
+        self.assert_picklable(tz.tzoffset("UTC+1", 3600), singleton=True)
 
     def testPickleTzOffsetNeg(self):
-        self.assertPicklable(tz.tzoffset("UTC-1", -3600), singleton=True)
+        self.assert_picklable(tz.tzoffset("UTC-1", -3600), singleton=True)
 
     @pytest.mark.tzlocal
     def testPickleTzLocal(self):
-        self.assertPicklable(tz.tzlocal())
+        self.assert_picklable(tz.tzlocal())
 
     def testPickleTzFileEST5EDT(self):
         tzc = tz.tzfile(BytesIO(base64.b64decode(TZFILE_EST5EDT)))
-        self.assertPicklable(tzc)
+        self.assert_picklable(tzc)
 
     def testPickleTzFileEurope_Helsinki(self):
         tzc = tz.tzfile(BytesIO(base64.b64decode(EUROPE_HELSINKI)))
-        self.assertPicklable(tzc)
+        self.assert_picklable(tzc)
 
     def testPickleTzFileNew_York(self):
         tzc = tz.tzfile(BytesIO(base64.b64decode(NEW_YORK)))
-        self.assertPicklable(tzc)
+        self.assert_picklable(tzc)
 
     @unittest.skip("Known failure")
     def testPickleTzICal(self):
         tzc = tz.tzical(StringIO(TZICAL_EST5EDT)).get()
-        self.assertPicklable(tzc)
+        self.assert_picklable(tzc)
 
     def testPickleTzGettz(self):
-        self.assertPicklable(tz.gettz("America/New_York"))
+        self.assert_picklable(tz.gettz("America/New_York"))
 
     def testPickleZoneFileGettz(self):
         zoneinfo_file = zoneinfo.get_zonefile_instance()
         tzi = zoneinfo_file.get("America/New_York")
         self.assertIsNot(tzi, None)
-        self.assertPicklable(tzi)
+        self.assert_picklable(tzi)
 
 
 class TzPickleFileTest(TzPickleTest):
@@ -2649,12 +2650,12 @@ class DatetimeExistsTest(unittest.TestCase):
         self.assertTrue(tz.datetime_exists(dt))
 
     def testSpecifiedTzOverridesAttached(self):
-        EST = tz.gettz("US/Eastern")
-        AEST = tz.gettz("Australia/Sydney")
+        est = tz.gettz("US/Eastern")
+        aest = tz.gettz("Australia/Sydney")
 
-        dt = datetime(2012, 10, 7, 2, 30, tzinfo=EST)  # This time exists
+        dt = datetime(2012, 10, 7, 2, 30, tzinfo=est)  # This time exists
 
-        self.assertFalse(tz.datetime_exists(dt, tz=AEST))
+        self.assertFalse(tz.datetime_exists(dt, tz=aest))
 
 
 class TestEnfold:

@@ -37,7 +37,7 @@ disable=
 	wildcard-import, #2keep
 	# C
 	import-outside-toplevel, #34 keep
-	invalid-name, #1034
+	invalid-name, #1034 k
 	missing-docstring, #keep
 	superfluous-parens, #13 keep
 	wrong-import-position, #3keep
