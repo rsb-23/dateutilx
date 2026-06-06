@@ -74,7 +74,7 @@ def _invalidates_cache(f):
     return inner_func
 
 
-class rrulebase:
+class RruleBase:
     def __init__(self, cache=False):
         if cache:
             self._cache = []
@@ -286,7 +286,7 @@ class rrulebase:
         return _output
 
 
-class rrule(rrulebase):
+class Rrule(RruleBase):
     """
     That's the base of the rrule operation. It accepts all the keywords
     defined in the RFC as its constructor parameters (except byday,
@@ -1292,7 +1292,7 @@ class _IterInfo:
         return (datetime.time(hour, minute, second, tzinfo=self.rrule._tzinfo),)
 
 
-class rruleset(rrulebase):
+class RruleSet(RruleBase):
     """The rruleset type allows more complex recurrence setups, mixing
     multiple rules, dates, exclusion rules, and exclusion dates. The type
     constructor takes the following keyword arguments:
@@ -1655,7 +1655,7 @@ class _RRuleStr:
         if forceset or len(rrulevals) > 1 or rdatevals or exrulevals or exdatevals:
             if not parser and (rdatevals or exdatevals):
                 from dateutil import parser
-            rset = rruleset(cache=cache)
+            rset = RruleSet(cache=cache)
             for value in rrulevals:
                 rset.rrule(self._parse_rfc_rrule(value, dtstart=dtstart, ignoretz=ignoretz, tzinfos=tzinfos))
             for value in rdatevals:
@@ -1676,6 +1676,9 @@ class _RRuleStr:
 
 
 _iterinfo = _IterInfo
-rrulestr = _RRuleStr()
+rrule = Rrule
+rrulebase = RruleBase
+rruleset = RruleSet
 
+rrulestr = _RRuleStr()
 # vim:ts=4:sw=4:et

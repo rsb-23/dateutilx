@@ -50,9 +50,11 @@ def easter(year, method: EasterAlgo = EasterAlgo.WESTERN):
     `The Calendar FAQ: Easter <https://www.tondering.dk/claus/cal/easter.php>`_
 
     """
-
-    if method not in EasterAlgo:
-        raise ValueError("invalid method")
+    # todo: simplify for base 3.12
+    try:
+        EasterAlgo(method)
+    except ValueError as e:
+        raise ValueError("invalid Easter method") from e
 
     # g - Golden year - 1
     # c - Century

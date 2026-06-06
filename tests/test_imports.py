@@ -157,6 +157,8 @@ def test_import_tz_all():
     # fmt: off
     from dateutil.tz import (  # noqa: F401
         UTC,
+        TzWin,
+        TzWinLocal,
         datetime_ambiguous,
         datetime_exists,
         gettz,
@@ -168,8 +170,6 @@ def test_import_tz_all():
         tzrange,
         tzstr,
         tzutc,
-        tzwin,
-        tzwinlocal,
     )
 
     tz_all = ["tzutc", "tzoffset", "tzlocal", "tzfile", "tzrange",
@@ -177,7 +177,7 @@ def test_import_tz_all():
               "datetime_exists", "resolve_imaginary", "UTC"]
     # fmt: on
 
-    tz_all += ["tzwin", "tzwinlocal"] if HOST_IS_WINDOWS else []
+    tz_all += ["TzWin", "TzWinLocal"] if HOST_IS_WINDOWS else []
     lvars = locals()
 
     for var in tz_all:
@@ -197,9 +197,9 @@ def test_import_tz_windows_from():
 
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_star():
-    from dateutil.tzwin import tzwin, tzwinlocal
+    from dateutil.tzwin import TzWin, TzWinLocal
 
-    tzwin_all = [tzwin, tzwinlocal]
+    tzwin_all = [TzWin, TzWinLocal]
 
     for var in tzwin_all:
         assert var is not None

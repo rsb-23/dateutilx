@@ -3,8 +3,7 @@ from functools import wraps
 
 ZERO = timedelta(0)
 
-__all__ = ["enfold"]
-
+__all__ = ["enfold", "TzRangeBase"]
 
 # The following is adapted from Alexander Belopolsky's tz library
 # https://github.com/abalkin/tz
@@ -119,7 +118,7 @@ def _validate_fromutc_inputs(f):
     return fromutc
 
 
-class _tzinfo(tzinfo):
+class _TzInfo(tzinfo):
     """
     Base class for all ``dateutil`` ``tzinfo`` objects.
     """
@@ -235,7 +234,7 @@ class _tzinfo(tzinfo):
         return enfold(dt_wall, fold=_fold)
 
 
-class tzrangebase(_tzinfo):
+class TzRangeBase(_TzInfo):
     """
     This is an abstract base class for time zones represented by an annual
     transition into and out of DST. Child classes should implement the following

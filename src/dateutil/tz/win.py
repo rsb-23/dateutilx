@@ -12,7 +12,7 @@ import struct
 
 from dateutil.helper import is_windows_os
 
-from ._common import tzrangebase
+from ._common import TzRangeBase
 
 if is_windows_os():
     import winreg
@@ -26,8 +26,7 @@ except ValueError as e:
     # ValueError is raised on non-Windows systems for some horrible reason.
     raise ImportError("Running tzwin on non-Windows system") from e
 
-
-__all__ = ["tzwin", "tzwinlocal", "tzres"]
+__all__ = ["TzRes", "TzWin", "TzWinLocal"]
 
 ONEWEEK = datetime.timedelta(7)
 
@@ -50,7 +49,7 @@ def _settzkeyname():
 TZKEYNAME = _settzkeyname()
 
 
-class tzres:
+class TzRes:
     """
     Class for accessing ``tzres.dll``, which contains timezone name related
     resources.
@@ -75,8 +74,8 @@ class tzres:
         """
         Load a timezone name from a DLL offset (integer).
 
-        >>> from dateutil.tzwin import tzres
-        >>> tzr = tzres()
+        >>> from dateutil.tzwin import TzRes
+        >>> tzr = TzRes()
         >>> print(tzr.load_name(112))
         'Eastern Standard Time'
 
@@ -99,8 +98,8 @@ class tzres:
         Parse strings as returned from the Windows registry into the time zone
         name as defined in the registry.
 
-        >>> from dateutil.tzwin import tzres
-        >>> tzr = tzres()
+        >>> from dateutil.tzwin import TzRes
+        >>> tzr = TzRes()
         >>> print(tzr.name_from_string('@tzres.dll,-251'))
         'Dateline Daylight Time'
         >>> print(tzr.name_from_string('Eastern Standard Time'))
@@ -125,7 +124,7 @@ class tzres:
         return self.load_name(offset)
 
 
-class tzwinbase(tzrangebase):
+class TzWinBase(TzRangeBase):
     """tzinfo class based on win32's timezones available in the registry."""
 
     def __init__(self):
@@ -133,7 +132,7 @@ class tzwinbase(tzrangebase):
 
     def __eq__(self, other):
         # Compare on all relevant dimensions, including name.
-        if not isinstance(other, tzwinbase):
+        if not isinstance(other, TzWinBase):
             return NotImplemented
 
         return (
@@ -204,7 +203,7 @@ class tzwinbase(tzrangebase):
         return self._dst_base_offset_
 
 
-class tzwin(tzwinbase):
+class TzWin(TzWinBase):
     """
     Time zone object created from the zone info in the Windows registry
 
@@ -265,7 +264,7 @@ class tzwin(tzwinbase):
         return self.__class__, (self._name,)
 
 
-class tzwinlocal(tzwinbase):
+class TzWinLocal(TzWinBase):
     """
     Class representing the local time zone information in the Windows registry
 
@@ -363,7 +362,7 @@ def valuestodict(key):
         elif dtype == winreg.REG_SZ:
             # If it's a reference to the tzres DLL, load the actual string
             if value.startswith("@tzres"):
-                tz_res = tz_res or tzres()
+                tz_res = tz_res or TzRes()
                 value = tz_res.name_from_string(value)
 
             value = value.rstrip("\x00")  # Remove trailing nulls
