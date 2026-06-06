@@ -1,12 +1,14 @@
-import calendar
 import unittest
 from datetime import date, datetime, timedelta
 
 import pytest
 
-from dateutil.relativedelta import FR, MO, SU, TU, WE, relativedelta
+from dateutil.helper import Day
+from dateutil.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
 
 from ._common import NotAValue
+
+relativedelta = RelativeDelta
 
 
 class RelativeDeltaTest(unittest.TestCase):
@@ -15,10 +17,10 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def testInheritance(self):
         # Ensure that relativedelta is inheritance-friendly.
-        class rdChildClass(relativedelta):
+        class RDChildClass(relativedelta):
             pass
 
-        ccRD = rdChildClass(
+        cc_rd = RDChildClass(
             years=1, months=1, days=1, leapdays=1, weeks=1, hours=1, minutes=1, seconds=1, microseconds=1
         )
 
@@ -26,15 +28,15 @@ class RelativeDeltaTest(unittest.TestCase):
             years=1, months=1, days=1, leapdays=1, weeks=1, hours=1, minutes=1, seconds=1, microseconds=1
         )
 
-        self.assertEqual(type(ccRD + rd), type(ccRD), msg="Addition does not inherit type.")
+        self.assertEqual(type(cc_rd + rd), type(cc_rd), msg="Addition does not inherit type.")
 
-        self.assertEqual(type(ccRD - rd), type(ccRD), msg="Subtraction does not inherit type.")
+        self.assertEqual(type(cc_rd - rd), type(cc_rd), msg="Subtraction does not inherit type.")
 
-        self.assertEqual(type(-ccRD), type(ccRD), msg="Negation does not inherit type.")  # pylint: disable=e1130
+        self.assertEqual(type(-cc_rd), type(cc_rd), msg="Negation does not inherit type.")  # pylint: disable=e1130
 
-        self.assertEqual(type(ccRD * 5.0), type(ccRD), msg="Multiplication does not inherit type.")
+        self.assertEqual(type(cc_rd * 5.0), type(cc_rd), msg="Multiplication does not inherit type.")
 
-        self.assertEqual(type(ccRD / 5.0), type(ccRD), msg="Division does not inherit type.")
+        self.assertEqual(type(cc_rd / 5.0), type(cc_rd), msg="Division does not inherit type.")
 
     def testMonthEndMonthBeginning(self):
         self.assertEqual(
@@ -95,7 +97,7 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertEqual(self.today + relativedelta(weekday=FR), date(2003, 9, 19))
 
     def testNextFridayInt(self):
-        self.assertEqual(self.today + relativedelta(weekday=calendar.FRIDAY), date(2003, 9, 19))
+        self.assertEqual(self.today + relativedelta(weekday=Day.FRI), date(2003, 9, 19))
 
     def testLastFridayInThisMonth(self):
         self.assertEqual(self.today + relativedelta(day=31, weekday=FR(-1)), date(2003, 9, 26))
@@ -291,13 +293,13 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def testRelativeDeltaRepr(self):
         self.assertEqual(
-            repr(relativedelta(years=1, months=-1, days=15)), "relativedelta(years=+1, months=-1, days=+15)"
+            repr(relativedelta(years=1, months=-1, days=15)), "RelativeDelta(years=+1, months=-1, days=+15)"
         )
 
-        self.assertEqual(repr(relativedelta(months=14, seconds=-25)), "relativedelta(years=+1, months=+2, seconds=-25)")
+        self.assertEqual(repr(relativedelta(months=14, seconds=-25)), "RelativeDelta(years=+1, months=+2, seconds=-25)")
 
         self.assertEqual(
-            repr(relativedelta(month=3, hour=3, weekday=SU(3))), "relativedelta(month=3, weekday=SU(+3), hour=3)"
+            repr(relativedelta(month=3, hour=3, weekday=SU(3))), "RelativeDelta(month=3, weekday=SU(+3), hour=3)"
         )
 
     def testRelativeDeltaFractionalYear(self):
@@ -345,10 +347,10 @@ class RelativeDeltaTest(unittest.TestCase):
     def testRelativeDeltaFractionalRepr(self):
         rd = relativedelta(years=3, months=-2, days=1.25)
 
-        self.assertEqual(repr(rd), "relativedelta(years=+3, months=-2, days=+1.25)")
+        self.assertEqual(repr(rd), "RelativeDelta(years=+3, months=-2, days=+1.25)")
 
         rd = relativedelta(hours=0.5, seconds=9.22)
-        self.assertEqual(repr(rd), "relativedelta(hours=+0.5, seconds=+9.22)")
+        self.assertEqual(repr(rd), "RelativeDelta(hours=+0.5, seconds=+9.22)")
 
     def testRelativeDeltaFractionalWeeks(self):
         # Equivalent to days=8, hours=18
@@ -492,42 +494,16 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def testAddTimedeltaToPopulatedRelativeDelta(self):
         td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
-
+        # fmt: off
         rd = relativedelta(
-            year=1,
-            month=1,
-            day=1,
-            hour=1,
-            minute=1,
-            second=1,
-            microsecond=1,
-            years=1,
-            months=1,
-            days=1,
-            weeks=1,
-            hours=1,
-            minutes=1,
-            seconds=1,
-            microseconds=1,
+            year=1, month=1, day=1, hour=1, minute=1, second=1, microsecond=1,
+            years=1, months=1, days=1, weeks=1, hours=1, minutes=1, seconds=1, microseconds=1,
         )
-
         expected = relativedelta(
-            year=1,
-            month=1,
-            day=1,
-            hour=1,
-            minute=1,
-            second=1,
-            microsecond=1,
-            years=1,
-            months=1,
-            weeks=2,
-            days=2,
-            hours=2,
-            minutes=2,
-            seconds=2,
-            microseconds=1002,
+            year=1, month=1, day=1, hour=1, minute=1, second=1, microsecond=1,
+            years=1, months=1, weeks=2, days=2, hours=2, minutes=2, seconds=2, microseconds=1002,
         )
+        # fmt: on
 
         self.assertEqual(expected, rd + td)
 
@@ -535,7 +511,7 @@ class RelativeDeltaTest(unittest.TestCase):
         try:
             {relativedelta(minute=1): "test"}
         except TypeError:
-            self.fail("relativedelta() failed to hash!")
+            self.fail("RelativeDelta() failed to hash!")
 
     def testDayOfMonthPlus(self):
         assert [

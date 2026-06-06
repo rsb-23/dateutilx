@@ -41,12 +41,13 @@ from warnings import warn
 from dateutil import relativedelta, tz
 from dateutil.errors import ParserError, UnknownTimezoneWarning
 
-__all__ = ["parse", "parserinfo"]
+__all__ = ["parse", "parserinfo", "parser", "DEFAULTPARSER", "DEFAULTTZPARSER"]
 
 
 # TODO: pandas.core.tools.datetimes imports this explicitly.  Might be worth
-# making public and/or figuring out if there is something we can
-# take off their plate.
+# making public and/or figuring out if there is something we can take off their plate.
+
+
 class _TimeLex:
     # Fractional seconds are sometimes split by a comma
     _split_decimal = re.compile("([.,])")
@@ -1222,7 +1223,7 @@ class Parser:
         naive = default.replace(**repl)
 
         if res.weekday is not None and not res.day:
-            naive = naive + relativedelta.relativedelta(weekday=res.weekday)
+            naive = naive + relativedelta.RelativeDelta(weekday=res.weekday)
 
         return naive
 
@@ -1234,7 +1235,7 @@ class Parser:
 
         return dt
 
-    def _recombine_skipped(self, tokens, skipped_idxs):
+    def _recombine_skipped(self, tokens: list[str], skipped_idxs: list[int]):
         """
         >>> tokens = ["foo", " ", "bar", " ", "19June2000", "baz"]
         >>> skipped_idxs = [0, 1, 2, 5]
@@ -1254,7 +1255,7 @@ class Parser:
 DEFAULTPARSER = Parser()
 
 
-def parse(timestr, parserinfo=None, parser_info=None, **kwargs):
+def parse(timestr, parser_info=None, **kwargs):
     """
 
     Parse a string in one of the supported formats, using the
@@ -1349,8 +1350,6 @@ def parse(timestr, parserinfo=None, parser_info=None, **kwargs):
         Raised if the parsed date exceeds the largest valid C integer on
         your system.
     """
-    parser_info = parser_info or parserinfo  # TODO: parserinfo to be deprecated
-
     if parser_info:
         return parser(parser_info).parse(timestr, **kwargs)
 
@@ -1358,10 +1357,10 @@ def parse(timestr, parserinfo=None, parser_info=None, **kwargs):
 
 
 class _TzParser:
-    class _result(_ResultBase):
+    class _Result(_ResultBase):
         __slots__ = ["stdabbr", "stdoffset", "dstabbr", "dstoffset", "start", "end"]
 
-        class _attr(_ResultBase):
+        class _Attr(_ResultBase):
             __slots__ = ["month", "week", "weekday", "yday", "jyday", "day", "time"]
 
         def __repr__(self):
@@ -1369,11 +1368,11 @@ class _TzParser:
 
         def __init__(self):
             super().__init__()
-            self.start = self._attr()
-            self.end = self._attr()
+            self.start = self._Attr()
+            self.end = self._Attr()
 
     def parse(self, tzstr):
-        res = self._result()
+        res = self._Result()
         _tmp_list = [x for x in re.split(r"([,:.]|[a-zA-Z]+|[0-9]+)", tzstr) if x]
         used_idxs = []
         try:

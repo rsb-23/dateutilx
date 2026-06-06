@@ -311,7 +311,7 @@ def test_iso_raises(isostr, exception):
 @pytest.mark.parametrize("sep_act, valid_sep, exception", [("T", "C", ValueError), ("C", "T", ValueError)])
 def test_iso_with_sep_raises(sep_act, valid_sep, exception):
     parser = isoparser(sep=valid_sep)
-    isostr = "2012-04-25" + sep_act + "01:25:00"
+    isostr = f"2012-04-25{sep_act}01:25:00"
     with pytest.raises(exception):
         parser.isoparse(isostr)
 

@@ -2,14 +2,15 @@ import calendar
 import datetime
 import operator
 from math import copysign
+from typing import TypeAlias
 from warnings import warn
 
-from dateutil.weekday import Weekday, weekdays
+from dateutil.weekday import Day, Weekday, weekdays
 
-weekday = Weekday
 MO, TU, WE, TH, FR, SA, SU = weekdays
 
-__all__ = ["relativedelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+__all__ = ["RelativeDelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+num: TypeAlias = float | int
 
 
 class RelativeDelta:
@@ -86,9 +87,9 @@ class RelativeDelta:
     For example
 
     >>> from datetime import datetime
-    >>> from dateutil.relativedelta import relativedelta, MO
+    >>> from dateutil.relativedelta import RelativeDelta, MO
     >>> dt = datetime(2018, 4, 9, 13, 37, 0)
-    >>> delta = relativedelta(hours=25, day=1, weekday=MO(1))
+    >>> delta = RelativeDelta(hours=25, day=1, weekday=MO(1))
     >>> dt + delta
     datetime.datetime(2018, 4, 2, 14, 37)
 
@@ -105,7 +106,7 @@ class RelativeDelta:
         dt2=None,
         years=0,
         months=0,
-        days=0,
+        days: num = 0,
         leapdays=0,
         weeks=0,
         hours=0,
@@ -115,7 +116,7 @@ class RelativeDelta:
         year=None,
         month=None,
         day=None,
-        weekday=None,
+        weekday: Weekday | Day | None = None,
         yearday=None,
         nlyearday=None,
         hour=None,
@@ -302,11 +303,11 @@ class RelativeDelta:
         Return a version of this object represented entirely using integer
         values for the relative attributes.
 
-        >>> relativedelta(days=1.5, hours=2).normalized()
-        relativedelta(days=+1, hours=+14)
+        >>> RelativeDelta(days=1.5, hours=2).normalized()
+        RelativeDelta(days=+1, hours=+14)
 
         :return:
-            Returns a :class:`dateutil.relativedelta.relativedelta` object.
+            Returns a :class:`dateutil.relativedelta.RelativeDelta` object.
         """
         # Cascade remainders down (rounding each to roughly nearest microsecond)
         days = int(self.days)
@@ -343,7 +344,7 @@ class RelativeDelta:
         )
 
     def __add__(self, other):
-        if isinstance(other, relativedelta):
+        if isinstance(other, RelativeDelta):
             return self.__class__(
                 years=other.years + self.years,
                 months=other.months + self.months,
@@ -428,8 +429,9 @@ class RelativeDelta:
         return self.__neg__().__radd__(other)
 
     def __sub__(self, other):
-        if not isinstance(other, relativedelta):
+        if not isinstance(other, RelativeDelta):
             return NotImplemented  # In case the other object defines __rsub__
+
         return self.__class__(
             years=self.years - other.years,
             months=self.months - other.months,
@@ -509,9 +511,6 @@ class RelativeDelta:
             and self.microsecond is None
         )
 
-    # Compatibility with Python 2.x
-    __nonzero__ = __bool__
-
     def __mul__(self, other):
         try:
             f = float(other)
@@ -540,7 +539,7 @@ class RelativeDelta:
     __rmul__ = __mul__
 
     def __eq__(self, other):
-        if not isinstance(other, relativedelta):
+        if not isinstance(other, RelativeDelta):
             return NotImplemented
         if self.weekday or other.weekday:
             if not self.weekday or not other.weekday:
@@ -569,26 +568,16 @@ class RelativeDelta:
         )
 
     def __hash__(self):
+        # fmt: off
         return hash(
             (
                 self.weekday,
-                self.years,
-                self.months,
-                self.days,
-                self.hours,
-                self.minutes,
-                self.seconds,
-                self.microseconds,
+                self.years, self.months, self.days, self.hours, self.minutes, self.seconds, self.microseconds,
                 self.leapdays,
-                self.year,
-                self.month,
-                self.day,
-                self.hour,
-                self.minute,
-                self.second,
-                self.microsecond,
+                self.year, self.month, self.day, self.hour, self.minute, self.second, self.microsecond,
             )
         )
+        # fmt: on
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -620,6 +609,4 @@ def _sign(x):
     return int(copysign(1, x))
 
 
-relativedelta = RelativeDelta
-relativedelta.__name__ = "relativedelta"
 # vim:ts=4:sw=4:et

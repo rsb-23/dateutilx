@@ -2,11 +2,13 @@ from dateutil.helper import Day
 
 
 class NthWeekday:
-    def __init__(self, weekday: Day, n: int | None = None):
+    __slots__ = ["weekday", "n"]
+
+    def __init__(self, wkday: Day, n: int | None = None):
         if n == 0:
             raise ValueError("Can't create nth-weekday with n==0")
 
-        self.weekday = weekday
+        self.weekday = wkday
         self.n = n
 
     def __call__(self, n: int):
@@ -29,8 +31,11 @@ class NthWeekday:
 
 # pylint: disable=r0903
 class Weekday(NthWeekday):
-    def __init__(self, weekday_: int, n: int | None = None):
-        super().__init__(weekday=Day(weekday_), n=n)
+    def __init__(self, wkday: int, n: int | None = None):
+        super().__init__(wkday=Day(wkday), n=n)
+
+    def __hash__(self):
+        return hash((self.weekday, self.n))
 
 
 MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(Weekday(x) for x in range(7))

@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools_scm<8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dateutilx"
+name = "dateutil"
 dynamic = ["version"]
 description = "Modern extension to the standard Python datetime module"
 readme = "README.rst"
@@ -75,3 +75,12 @@ split_on_trailing_comma = false
 fail_under = 85.0
 [tool.coverage.run]
 source = ["src/"]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*_test.py", "*_solution.py", ]
+xfail_strict = true
+filterwarnings = ["error", "error::DeprecationWarning", "error::PendingDeprecationWarning", ]
+markers = [
+    "gettz", "import_star", "isoparser", "parserinfo", "rrule", "rruleset", "rrulestr",
+    "smoke", "tz_resolve_imaginary", "tzfile", "tzlocal", "tzoffset", "tzstr",
+]

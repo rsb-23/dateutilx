@@ -16,10 +16,11 @@ import pytest
 from dateutil import tz, zoneinfo
 from dateutil.helper import is_windows_os
 from dateutil.parser import parse
-from dateutil.relativedelta import SU, TH, relativedelta
+from dateutil.relativedelta import SU, TH, RelativeDelta
 
 from ._common import ComparesEqual, PicklableMixin, TZEnvContext, TZWinContext
 
+relativedelta = RelativeDelta
 IS_WIN = is_windows_os()
 try:
     from dateutil import tzwin

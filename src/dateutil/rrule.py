@@ -1300,7 +1300,7 @@ class RruleSet(RruleBase):
     :param cache: If True, caching of results will be enabled, improving
                   performance of multiple queries considerably."""
 
-    class _genitem:
+    class _GenItem:
         def __init__(self, genlist, gen):
             try:
                 self.dt = next(gen)
@@ -1371,14 +1371,14 @@ class RruleSet(RruleBase):
     def _iter(self):
         rlist = []
         self._rdate.sort()
-        self._genitem(rlist, iter(self._rdate))
+        self._GenItem(rlist, iter(self._rdate))
         for gen in [iter(x) for x in self._rrule]:
-            self._genitem(rlist, gen)
+            self._GenItem(rlist, gen)
         exlist = []
         self._exdate.sort()
-        self._genitem(exlist, iter(self._exdate))
+        self._GenItem(exlist, iter(self._exdate))
         for gen in [iter(x) for x in self._exrule]:
-            self._genitem(exlist, gen)
+            self._GenItem(exlist, gen)
         lastdt = None
         total = 0
         heapq.heapify(rlist)
@@ -1446,10 +1446,12 @@ class _RRuleStr:
         :class:`dateutil.rrule.rrule`
     """
 
-    def _handle_int(self, rrkwargs, name, value, **kwargs):
+    @staticmethod
+    def _handle_int(rrkwargs, name, value, **kwargs):
         rrkwargs[name.lower()] = int(value)
 
-    def _handle_int_list(self, rrkwargs, name, value, **kwargs):
+    @staticmethod
+    def _handle_int_list(rrkwargs, name, value, **kwargs):
         rrkwargs[name.lower()] = [int(x) for x in value.split(",")]
 
     _handle_INTERVAL = _handle_int
@@ -1464,10 +1466,12 @@ class _RRuleStr:
     _handle_BYMINUTE = _handle_int_list
     _handle_BYSECOND = _handle_int_list
 
-    def _handle_FREQ(self, rrkwargs, name, value, **kwargs):
+    @staticmethod
+    def _handle_freq(rrkwargs, name, value, **kwargs):
         rrkwargs["freq"] = Frequency[value]
 
-    def _handle_UNTIL(self, rrkwargs, name, value, **kwargs):
+    @staticmethod
+    def _handle_until(rrkwargs, name, value, **kwargs):
         global parser
         if not parser:
             from dateutil import parser
@@ -1476,10 +1480,12 @@ class _RRuleStr:
         except ValueError as e:
             raise ValueError("invalid until date") from e
 
-    def _handle_WKST(self, rrkwargs, name, value, **kwargs):
+    @staticmethod
+    def _handle_wkst(rrkwargs, name, value, **kwargs):
         rrkwargs["wkst"] = Day[value]
 
-    def _handle_BYWEEKDAY(self, rrkwargs, name, value, **kwargs):
+    @staticmethod
+    def _handle_byweekday(rrkwargs, name, value, **kwargs):
         """
         Two ways to specify this: +1MO or MO(+1)
         """
@@ -1500,7 +1506,12 @@ class _RRuleStr:
             _tmp_list.append(weekdays[Day[w]](n))
         rrkwargs["byweekday"] = _tmp_list
 
+    _handle_BYWEEKDAY = _handle_byweekday
+    _handle_FREQ = _handle_freq
+    _handle_UNTIL = _handle_until
+    _handle_WKST = _handle_wkst
     _handle_BYDAY = _handle_BYWEEKDAY
+    _handle_byday = _handle_byweekday
 
     def _parse_rfc_rrule(self, line, dtstart=None, cache=False, ignoretz=False, tzinfos=None):
         if line.find(":") != -1:
@@ -1529,7 +1540,7 @@ class _RRuleStr:
 
         datevals = []
         value_found = False
-        TZID = None
+        tzid_ = None
 
         for parm in parms:
             if parm.startswith("TZID="):
@@ -1549,7 +1560,7 @@ class _RRuleStr:
                         msg = f"tzids must be a callable, mapping, or None, not {tzids}"
                         raise ValueError(msg)
 
-                TZID = tzlookup(tzkey)
+                tzid_ = tzlookup(tzkey)
                 continue
 
             # RFC 5445 3.8.2.4: The VALUE parameter is optional, but may be found
@@ -1564,9 +1575,9 @@ class _RRuleStr:
 
         for datestr in date_value.split(","):
             date = parser.parse(datestr, ignoretz=ignoretz, tzinfos=tzinfos)
-            if TZID is not None:
+            if tzid_ is not None:
                 if date.tzinfo is None:
-                    date = date.replace(tzinfo=TZID)
+                    date = date.replace(tzinfo=tzid_)
                 else:
                     raise ValueError("DTSTART/EXDATE specifies multiple timezone")
             datevals.append(date)
@@ -1590,7 +1601,7 @@ class _RRuleStr:
             forceset = True
             unfold = True
 
-        TZID_NAMES = dict(map(lambda x: (x.upper(), x), re.findall("TZID=(?P<name>[^:]+):", s)))
+        tzid_names = dict(map(lambda x: (x.upper(), x), re.findall("TZID=(?P<name>[^:]+):", s)))
         s = s.upper()
         if not s.strip():
             raise ValueError("empty string")
@@ -1643,9 +1654,9 @@ class _RRuleStr:
                     raise ValueError("unsupported EXRULE parm: " + parm)
                 exrulevals.append(value)
             elif name == "EXDATE":
-                exdatevals.extend(self._parse_date_value(value, parms, TZID_NAMES, ignoretz, tzids, tzinfos))
+                exdatevals.extend(self._parse_date_value(value, parms, tzid_names, ignoretz, tzids, tzinfos))
             elif name == "DTSTART":
-                dtvals = self._parse_date_value(value, parms, TZID_NAMES, ignoretz, tzids, tzinfos)
+                dtvals = self._parse_date_value(value, parms, tzid_names, ignoretz, tzids, tzinfos)
                 if len(dtvals) != 1:
                     raise ValueError("Multiple DTSTART values specified:" + value)
                 dtstart = dtvals[0]

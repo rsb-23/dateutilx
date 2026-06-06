@@ -15,7 +15,7 @@ class EasterAlgo(IntEnum):
     WESTERN = 3
 
 
-def easter(year, method: EasterAlgo = EasterAlgo.WESTERN):
+def easter(year, method: EasterAlgo | int = EasterAlgo.WESTERN):
     """
     This method was ported from the work done by GM Arts,
     on top of the algorithm by Claus Tondering, which was

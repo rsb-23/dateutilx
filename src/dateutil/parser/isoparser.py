@@ -12,7 +12,7 @@ import re
 from datetime import date, datetime, time, timedelta
 from functools import wraps
 
-from dateutil import tz
+from dateutil.tz import UTC, TzOffset
 
 __all__ = ["isoparse", "isoparser"]
 
@@ -54,7 +54,7 @@ class IsoParser:
         self._sep = sep
 
     @_takes_ascii
-    def isoparse(self, dt_str):
+    def isoparse(self, dt_str: str):
         """
         Parse an ISO-8601 datetime string into a :class:`datetime.datetime`.
 
@@ -324,7 +324,7 @@ class IsoParser:
 
     def _parse_isotime(self, timestr):
         len_str = len(timestr)
-        components = [0, 0, 0, 0, None]
+        components: list = [0, 0, 0, 0, None]
         pos = 0
         comp = -1
 
@@ -375,9 +375,9 @@ class IsoParser:
 
         return components
 
-    def _parse_tzstr(self, tzstr, zero_as_utc=True):
+    def _parse_tzstr(self, tzstr: str | bytes, zero_as_utc=True):
         if tzstr in (b"Z", b"z"):
-            return tz.UTC
+            return UTC
 
         if len(tzstr) not in {3, 5, 6}:
             raise ValueError("Time zone offset must be 1, 3, 5 or 6 characters")
@@ -396,7 +396,7 @@ class IsoParser:
             minutes = int(tzstr[(4 if tzstr[3:4] == self._TIME_SEP else 3) :])
 
         if zero_as_utc and hours == 0 and minutes == 0:
-            return tz.UTC
+            return UTC
 
         if minutes > 59:
             raise ValueError("Invalid minutes in time zone offset")
@@ -404,7 +404,7 @@ class IsoParser:
         if hours > 23:
             raise ValueError("Invalid hours in time zone offset")
 
-        return tz.tzoffset(None, mult * (hours * 60 + minutes) * 60)
+        return TzOffset(None, mult * (hours * 60 + minutes) * 60)
 
 
 isoparser = IsoParser

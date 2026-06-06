@@ -9,7 +9,7 @@ from dateutil import tz
 from dateutil.errors import ParserError, UnknownTimezoneWarning
 from dateutil.helper import is_windows_os
 from dateutil.parser import parse, parser, parserinfo
-from dateutil.tz import tzoffset
+from dateutil.tz import TzOffset
 
 from ._common import TZEnvContext
 
@@ -197,7 +197,7 @@ def test_parse_ignoretz(dstr, expected):
     assert result == expected
 
 
-_brsttz = tzoffset("BRST", -10800)
+_brsttz = TzOffset("BRST", -10800)
 
 
 @pytest.mark.parametrize(
@@ -276,7 +276,7 @@ class TestFormat:
             ("%y %d %b", "03 25 Sep"),
         ],
     )
-    def test_strftime_formats_2003Sep25(self, fmt, dstr):
+    def test_strftime_formats_20030925(self, fmt, dstr):
         expected = datetime(2003, 9, 25)
 
         # First check that the format strings behave as expected
@@ -386,7 +386,7 @@ class TestTzinfoInputTypes:
     def test_valid_tzinfo_callable_input(self):
         dstr = "2014 January 19 09:00 UTC"
 
-        def tzinfos(*args, **kwargs):
+        def tzinfos(*args):  # noqa
             return "UTC+0"
 
         expected = datetime(2014, 1, 19, 9, tzinfo=tz.tzstr("UTC+0"))
@@ -406,7 +406,7 @@ class ParserTest(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         cls.tzinfos = {"BRST": -10800}
-        cls.brsttz = tzoffset("BRST", -10800)
+        cls.brsttz = TzOffset("BRST", -10800)
         cls.default = datetime(2003, 9, 25)
 
         # Parser should be able to handle bytestring and unicode
@@ -435,7 +435,7 @@ class ParserTest(unittest.TestCase):
             ]
 
         expected = datetime(2015, 9, 10, 10, 20)
-        res = parse("10 Сентябрь 2015 10:20", parserinfo=RusParserInfo())
+        res = parse("10 Сентябрь 2015 10:20", parser_info=RusParserInfo())
         assert res == expected
 
     def testParseWithNulls(self):
@@ -463,20 +463,20 @@ class ParserTest(unittest.TestCase):
 
     def testISOFormatStrip2(self):
         self.assertEqual(
-            parse("2003-09-25T10:49:41+03:00"), datetime(2003, 9, 25, 10, 49, 41, tzinfo=tzoffset(None, 10800))
+            parse("2003-09-25T10:49:41+03:00"), datetime(2003, 9, 25, 10, 49, 41, tzinfo=TzOffset(None, 10800))
         )
 
     def testISOStrippedFormatStrip2(self):
-        self.assertEqual(parse("20030925T104941+0300"), datetime(2003, 9, 25, 10, 49, 41, tzinfo=tzoffset(None, 10800)))
+        self.assertEqual(parse("20030925T104941+0300"), datetime(2003, 9, 25, 10, 49, 41, tzinfo=TzOffset(None, 10800)))
 
-    def testAMPMNoHour(self):
+    def test_ampm_no_hour(self):
         with pytest.raises(ParserError):
             parse("AM")
 
         with pytest.raises(ParserError):
             parse("Jan 20, 2015 PM")
 
-    def testAMPMRange(self):
+    def test_ampm_range(self):
         with pytest.raises(ParserError):
             parse("13:44 AM")
 
@@ -735,6 +735,8 @@ class TestOutOfBounds:
 
 
 class TestParseUnimplementedCases:
+    tzinfos = None
+
     @pytest.mark.xfail
     def test_somewhat_ambiguous_string(self):
         # Ref: github issue #487
@@ -745,7 +747,7 @@ class TestParseUnimplementedCases:
         assert res == datetime(2017, 10, 30, 12, 37, tzinfo=self.tzinfos)
 
     @pytest.mark.xfail
-    def test_YmdH_M_S(self):
+    def test_ymdh_m_s(self):
         # found in nasdaq's ftp data
         dstr = "1991041310:19:24"
         expected = datetime(1991, 4, 13, 10, 19, 24)
@@ -831,7 +833,7 @@ class TestParseUnimplementedCases:
         assert res == expected
 
     @pytest.mark.xfail
-    def test_unambiguous_YYYYMM(self):
+    def test_unambiguous_yyyymm(self):
         # 171206 can be parsed as YYMMDD. However, 201712 cannot be parsed
         # as instance of YYMMDD and parser could fallback to YYYYMM format.
         dstr = "201712"
@@ -888,10 +890,10 @@ class TestTZVar:
 
 
 def test_parse_tzinfos_fold():
-    NYC = tz.gettz("America/New_York")
-    tzinfos = {"EST": NYC, "EDT": NYC}
+    nyc = tz.gettz("America/New_York")
+    tzinfos = {"EST": nyc, "EDT": nyc}
 
-    dt_exp = tz.enfold(datetime(2011, 11, 6, 1, 30, tzinfo=NYC), fold=1)
+    dt_exp = tz.enfold(datetime(2011, 11, 6, 1, 30, tzinfo=nyc), fold=1)
     dt = parse("2011-11-06T01:30 EST", tzinfos=tzinfos)
 
     assert dt == dt_exp

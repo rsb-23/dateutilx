@@ -16,9 +16,8 @@ from .tz import (
 from .win import TzWin, TzWinLocal
 
 # fmt: off
-__all__ = ["tzutc", "tzoffset", "tzlocal", "tzfile", "tzrange",
-           "tzstr", "tzical", "tzwin", "tzwinlocal", "gettz",
-           "enfold", "datetime_ambiguous", "datetime_exists",
+__all__ = ["TzFile", "TzIcal", "TzLocal", "TzOffset", "TzRange", "TzStr", "TzUTC",
+           "tzutc", "gettz", "enfold", "datetime_ambiguous", "datetime_exists",
            "resolve_imaginary", "UTC", "DeprecatedTzFormatWarning",
            "TzWin", "TzWinLocal"]
 
