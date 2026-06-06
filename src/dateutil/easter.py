@@ -4,15 +4,18 @@ Western, Orthodox or Julian algorithms.
 """
 
 import datetime
+from enum import IntEnum
 
-__all__ = ["easter", "EASTER_JULIAN", "EASTER_ORTHODOX", "EASTER_WESTERN"]
-
-EASTER_JULIAN = 1
-EASTER_ORTHODOX = 2
-EASTER_WESTERN = 3
+__all__ = ["easter", "EasterAlgo"]
 
 
-def easter(year, method=EASTER_WESTERN):
+class EasterAlgo(IntEnum):
+    JULIAN = 1
+    ORTHODOX = 2
+    WESTERN = 3
+
+
+def easter(year, method: EasterAlgo = EasterAlgo.WESTERN):
     """
     This method was ported from the work done by GM Arts,
     on top of the algorithm by Claus Tondering, which was
@@ -40,7 +43,7 @@ def easter(year, method=EASTER_WESTERN):
 
     More about the algorithm may be found at:
 
-    `GM Arts: Easter Algorithms <http://www.gmarts.org/index.php?go=415>`_
+    `GM Arts: Easter Algorithms <https://www.gmarts.org/index.php?go=415>`_
 
     and
 
@@ -48,7 +51,7 @@ def easter(year, method=EASTER_WESTERN):
 
     """
 
-    if not (1 <= method <= 3):
+    if method not in EasterAlgo:
         raise ValueError("invalid method")
 
     # g - Golden year - 1

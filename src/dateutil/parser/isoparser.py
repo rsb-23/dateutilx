@@ -155,7 +155,7 @@ class IsoParser:
         """
         components, pos = self._parse_isodate(datestr)
         if pos < len(datestr):
-            raise ValueError("String contains unknown ISO " + f"components: {datestr.decode("ascii")!r}")
+            raise ValueError("String contains unknown ISO " + f"components: {datestr.decode('ascii')!r}")
         return date(*components)
 
     @_takes_ascii

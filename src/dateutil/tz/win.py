@@ -58,7 +58,7 @@ class tzres:
     .. versionadded:: 2.5.0
     """
 
-    p_wchar = ctypes.POINTER(wintypes.WCHAR)  # Pointer to a wide char
+    p_wchar = ctypes.POINTER(wintypes.WCHAR)  # Pointer to a wide char # noqa
 
     def __init__(self, tzres_loc="tzres.dll"):
         # Load the user32 DLL so we can load strings from tzres

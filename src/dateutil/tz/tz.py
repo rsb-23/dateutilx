@@ -833,7 +833,7 @@ class tzfile(_tzinfo):
         return self.__reduce_ex__(None)
 
     def __reduce_ex__(self, protocol):
-        return (self.__class__, (None, self._filename), self.__dict__)
+        return self.__class__, (None, self._filename), self.__dict__
 
 
 class tzrange(tzrangebase):
@@ -977,7 +977,7 @@ class tzrange(tzrangebase):
         start = base_year + self._start_delta
         end = base_year + self._end_delta
 
-        return (start, end)
+        return start, end
 
     def __eq__(self, other):
         if not isinstance(other, tzrange):

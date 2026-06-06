@@ -501,10 +501,10 @@ class ParserTest(unittest.TestCase):
             ),
         )
 
-        s2 = "http://biz.yahoo.com/ipo/p/600221.html"
+        s2 = "https://biz.yahoo.com/ipo/p/600221.html"
         self.assertEqual(
             parse(s2, fuzzy_with_tokens=True),
-            (datetime(2060, 2, 21, 0, 0, 0), ("http://biz.yahoo.com/ipo/p/", ".html")),
+            (datetime(2060, 2, 21, 0, 0, 0), ("https://biz.yahoo.com/ipo/p/", ".html")),
         )
 
     def testFuzzyAMPMProblem(self):

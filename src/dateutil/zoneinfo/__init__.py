@@ -14,7 +14,7 @@ METADATA_FN = "METADATA"
 
 class tzfile(_tzfile):
     def __reduce__(self):
-        return (gettz, (self._filename,))
+        return gettz, (self._filename,)
 
 
 def getzoneinfofile_stream():

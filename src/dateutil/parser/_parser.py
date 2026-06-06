@@ -292,14 +292,15 @@ class ParserInfo:
         self._year = time.localtime().tm_year
         self._century = self._year // 100 * 100
 
-    def _convert(self, lst):
+    @staticmethod
+    def _convert(lst):
         dct = {}
-        for i, v in enumerate(lst):
-            if isinstance(v, tuple):
-                for v in v:
+        for i, val in enumerate(lst):
+            if isinstance(val, tuple):
+                for v in val:
                     dct[v.lower()] = i
             else:
-                dct[v.lower()] = i
+                dct[val.lower()] = i
         return dct
 
     def jump(self, name):
@@ -1093,7 +1094,7 @@ class Parser:
         sec_remainder = value % 1
         if sec_remainder:
             second = int(60 * sec_remainder)
-        return (minute, second)
+        return minute, second
 
     def _parse_hms(self, idx, tokens, info, hms_idx):
         # TODO: Is this going to admit a lot of false-positives for when we
@@ -1111,7 +1112,7 @@ class Parser:
             hms = info.hms(tokens[hms_idx]) + 1
             new_idx = idx
 
-        return (new_idx, hms)
+        return new_idx, hms
 
     # ------------------------------------------------------------------
     # Handling for individual tokens.  These are kept as methods instead
