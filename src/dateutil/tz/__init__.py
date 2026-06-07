@@ -13,14 +13,13 @@ from .tz import (
     gettz,
     resolve_imaginary,
 )
-from .win import TzWin, TzWinLocal
+from .win import TzWin, TzWinLocal, tzwin, tzwinlocal
 
 # fmt: off
 __all__ = ["TzFile", "TzIcal", "TzLocal", "TzOffset", "TzRange", "TzStr", "TzUTC",
            "tzutc", "gettz", "enfold", "datetime_ambiguous", "datetime_exists",
            "resolve_imaginary", "UTC", "DeprecatedTzFormatWarning",
            "TzWin", "TzWinLocal"]
-
 # fmt: on
 
 
@@ -30,9 +29,6 @@ class DeprecatedTzFormatWarning(Warning):
 
 # Alias
 tzstr = TzStr
-tzwin = TzWin
-tzwinlocal = TzWinLocal
-
 tzfile = TzFile
 tzical = TzIcal
 tzlocal = TzLocal

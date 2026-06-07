@@ -17,7 +17,7 @@ from math import gcd
 from warnings import warn
 
 from .helper import Day, Frequency
-from .weekday import weekday, weekdays
+from .weekday import Weekday, weekdays
 
 # fmt: off
 __all__ = [
@@ -600,13 +600,13 @@ class Rrule(RruleBase):
 
             if self._byweekday is not None:
                 self._byweekday = tuple(sorted(self._byweekday))
-                orig_byweekday = [weekday(x) for x in self._byweekday]
+                orig_byweekday = [Weekday(x) for x in self._byweekday]
             else:
                 orig_byweekday = ()
 
             if self._bynweekday is not None:
                 self._bynweekday = tuple(sorted(self._bynweekday))
-                orig_bynweekday = [weekday(*x) for x in self._bynweekday]
+                orig_bynweekday = [Weekday(*x) for x in self._bynweekday]
             else:
                 orig_bynweekday = ()
 
@@ -698,7 +698,7 @@ class Rrule(RruleBase):
             parts.append("INTERVAL=" + str(self._interval))
 
         if self._wkst:
-            parts.append("WKST=" + repr(weekday(self._wkst))[0:2])
+            parts.append("WKST=" + repr(Weekday(self._wkst))[0:2])
 
         if self._count is not None:
             parts.append("COUNT=" + str(self._count))

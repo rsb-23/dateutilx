@@ -138,9 +138,9 @@ def test_import_rrule_all():
         assert var is not None
 
     # In the public interface but not in all
-    from dateutil.rrule import weekday
+    from dateutil.rrule import weekdays
 
-    assert weekday is not None
+    assert weekdays is not None
 
 
 # Test that dateutil.tz related imports work properly

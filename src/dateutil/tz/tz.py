@@ -23,11 +23,7 @@ from dateutil.helper import is_windows_os
 
 from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs, enfold
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
-
-try:
-    from .win import TzWin, TzWinLocal
-except ImportError:
-    TzWin = TzWinLocal = None
+from .win import TzWin, TzWinLocal
 
 rrule = None  # pylint: disable=c0103
 ZERO = datetime.timedelta(0)
