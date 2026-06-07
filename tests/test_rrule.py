@@ -2,12 +2,14 @@ import unittest
 from datetime import date, datetime
 
 import pytest
-from freezegun import freeze_time
 
 from dateutil import tz
 from dateutil.helper import Frequency
 from dateutil.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
 
+from .freezegun import freeze_time
+
+module = "dateutil.rrule"
 YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 
 
@@ -3658,7 +3660,7 @@ class RRuleTest(unittest.TestCase):
 
 
 @pytest.mark.rrule
-@freeze_time(datetime(2018, 3, 6, 5, 36, tzinfo=tz.UTC))
+@freeze_time(datetime(2018, 3, 6, 5, 36, tzinfo=tz.UTC), module)
 def test_generated_aware_dtstart():
     dtstart_exp = datetime(2018, 3, 6, 5, 36, tzinfo=tz.UTC)
     UNTIL = datetime(2018, 3, 6, 8, 0, tzinfo=tz.UTC)
@@ -3671,7 +3673,7 @@ def test_generated_aware_dtstart():
 @pytest.mark.rrule
 @pytest.mark.rrulestr
 @pytest.mark.xfail(reason="rrulestr loses time zone, gh issue #637")
-@freeze_time(datetime(2018, 3, 6, 5, 36, tzinfo=tz.UTC))
+@freeze_time(datetime(2018, 3, 6, 5, 36, tzinfo=tz.UTC), module)
 def test_generated_aware_dtstart_rrulestr():
     rrule_without_dtstart = rrule(freq=HOURLY, until=datetime(2018, 3, 6, 8, 0, tzinfo=tz.UTC))
     rrule_r = rrulestr(str(rrule_without_dtstart))

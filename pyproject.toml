@@ -13,7 +13,7 @@ dependencies = ["tzdata; sys_platform == 'win32'"]
 
 [project.optional-dependencies]
 lint = ["pre-commit", "pylint"]
-test = ["freezegun", "hypothesis", "pytest", "pytest-cov"]
+test = ["hypothesis", "pytest", "pytest-cov"]
 
 [tool.towncrier]
 package = "dateutil"
