@@ -4,11 +4,11 @@ from dateutil.weekday import FR, MO, SA, SU, TH, TU, WE, Weekday
 
 
 class WeekdayTest(unittest.TestCase):
-    def testInvalidNthWeekday(self):
+    def test_invalid_nth_weekday(self):
         with self.assertRaises(ValueError):
             FR(0)
 
-    def testWeekdayCallable(self):
+    def test_weekday_callable(self):
         # Calling a weekday instance generates a new weekday instance with the
         # value of n changed.
 
@@ -18,12 +18,12 @@ class WeekdayTest(unittest.TestCase):
         fr_3 = Weekday(4, 3)
         self.assertIs(fr_3(3), fr_3)
 
-    def testWeekdayEquality(self):
+    def test_weekday_equality(self):
         # Two weekday objects are not equal if they have different values for n
         self.assertNotEqual(TH, TH(-1))
         self.assertNotEqual(SA(3), SA(2))
 
-    def testWeekdayEqualitySubclass(self):
+    def test_weekday_equality_subclass(self):
         # Two weekday objects equal if their "weekday" and "n" attributes are available and the same
         class BasicWeekday:
             def __init__(self, weekday):
@@ -48,14 +48,14 @@ class WeekdayTest(unittest.TestCase):
         self.assertEqual(WE(3), we_basic3)
         self.assertNotEqual(WE(2), we_basic3)
 
-    def testWeekdayReprNoN(self):
+    def test_weekday_repr_no_n(self):
         no_n_reprs = ("MO", "TU", "WE", "TH", "FR", "SA", "SU")
         no_n_wdays = (MO, TU, WE, TH, FR, SA, SU)
 
         for repstr, wday in zip(no_n_reprs, no_n_wdays):
             self.assertEqual(repr(wday), repstr)
 
-    def testWeekdayReprWithN(self):
+    def test_weekday_repr_with_n(self):
         with_n_reprs = ("WE(+1)", "TH(-2)", "SU(+3)")
         with_n_wdays = (WE(1), TH(-2), SU(+3))
 

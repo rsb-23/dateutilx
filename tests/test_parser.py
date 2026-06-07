@@ -438,35 +438,35 @@ class ParserTest(unittest.TestCase):
         res = parse("10 Сентябрь 2015 10:20", parser_info=RusParserInfo())
         assert res == expected
 
-    def testParseWithNulls(self):
+    def test_parse_with_nulls(self):
         pstring = "\x00\x00August 29, 1924"
         assert parse(pstring) == datetime(1924, 8, 29)
 
-    def testDateCommandFormat(self):
+    def test_date_command_format(self):
         self.assertEqual(
             parse("Thu Sep 25 10:36:28 BRST 2003", tzinfos=self.tzinfos),
             datetime(2003, 9, 25, 10, 36, 28, tzinfo=self.brsttz),
         )
 
-    def testDateCommandFormatReversed(self):
+    def test_date_command_format_reversed(self):
         self.assertEqual(
             parse("2003 10:36:28 BRST 25 Sep Thu", tzinfos=self.tzinfos),
             datetime(2003, 9, 25, 10, 36, 28, tzinfo=self.brsttz),
         )
 
-    def testDateCommandFormatWithLong(self):
+    def test_date_command_format_with_long(self):
         # it was for py2
         self.assertEqual(
             parse("Thu Sep 25 10:36:28 BRST 2003", tzinfos={"BRST": -10800}),
             datetime(2003, 9, 25, 10, 36, 28, tzinfo=self.brsttz),
         )
 
-    def testISOFormatStrip2(self):
+    def test_iso_format_strip2(self):
         self.assertEqual(
             parse("2003-09-25T10:49:41+03:00"), datetime(2003, 9, 25, 10, 49, 41, tzinfo=TzOffset(None, 10800))
         )
 
-    def testISOStrippedFormatStrip2(self):
+    def test_iso_stripped_format_strip2(self):
         self.assertEqual(parse("20030925T104941+0300"), datetime(2003, 9, 25, 10, 49, 41, tzinfo=TzOffset(None, 10800)))
 
     def test_ampm_no_hour(self):
@@ -483,15 +483,15 @@ class ParserTest(unittest.TestCase):
         with pytest.raises(ParserError):
             parse("January 25, 1921 23:13 PM")
 
-    def testPertain(self):
+    def test_pertain(self):
         self.assertEqual(parse("Sep 03", default=self.default), datetime(2003, 9, 3))
         self.assertEqual(parse("Sep of 03", default=self.default), datetime(2003, 9, 25))
 
-    def testFuzzy(self):
+    def test_fuzzy(self):
         s = "Today is 25 of September of 2003, exactly at 10:49:41 with timezone -03:00."
         self.assertEqual(parse(s, fuzzy=True), datetime(2003, 9, 25, 10, 49, 41, tzinfo=self.brsttz))
 
-    def testFuzzyWithTokens(self):
+    def test_fuzzy_with_tokens(self):
         s1 = "Today is 25 of September of 2003, exactly at 10:49:41 with timezone -03:00."
         self.assertEqual(
             parse(s1, fuzzy_with_tokens=True),
@@ -507,7 +507,7 @@ class ParserTest(unittest.TestCase):
             (datetime(2060, 2, 21, 0, 0, 0), ("https://biz.yahoo.com/ipo/p/", ".html")),
         )
 
-    def testFuzzyAMPMProblem(self):
+    def test_fuzzy_a_m_p_m_problem(self):
         # Sometimes fuzzy parsing results in AM/PM flag being set without
         # hours - if it's fuzzy it should ignore that.
         s1 = "I have a meeting on March 1, 1974."
@@ -522,41 +522,41 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(parse(s3, fuzzy=True), datetime(2003, 12, 3, 3))
         self.assertEqual(parse(s4, fuzzy=True), datetime(2003, 12, 3, 3))
 
-    def testFuzzyIgnoreAMPM(self):
+    def test_fuzzy_ignore_a_m_p_m(self):
         s1 = "Jan 29, 1945 14:45 AM I going to see you there?"
         with pytest.warns(UnknownTimezoneWarning):
             res = parse(s1, fuzzy=True)
         self.assertEqual(res, datetime(1945, 1, 29, 14, 45))
 
-    def testRandomFormat24(self):
+    def test_random_format24(self):
         self.assertEqual(parse("0:00 PM, PST", default=self.default, ignoretz=True), datetime(2003, 9, 25, 12, 0))
 
-    def testRandomFormat26(self):
+    def test_random_format26(self):
         with pytest.warns(UnknownTimezoneWarning):
             res = parse("5:50 A.M. on June 13, 1990")
 
         self.assertEqual(res, datetime(1990, 6, 13, 5, 50))
 
-    def testUnspecifiedDayFallback(self):
+    def test_unspecified_day_fallback(self):
         # Test that for an unspecified day, the fallback behavior is correct.
         self.assertEqual(parse("April 2009", default=datetime(2010, 1, 31)), datetime(2009, 4, 30))
 
-    def testUnspecifiedDayFallbackFebNoLeapYear(self):
+    def test_unspecified_day_fallback_feb_no_leap_year(self):
         self.assertEqual(parse("Feb 2007", default=datetime(2010, 1, 31)), datetime(2007, 2, 28))
 
-    def testUnspecifiedDayFallbackFebLeapYear(self):
+    def test_unspecified_day_fallback_feb_leap_year(self):
         self.assertEqual(parse("Feb 2008", default=datetime(2010, 1, 31)), datetime(2008, 2, 29))
 
-    def testErrorType01(self):
+    def test_error_type01(self):
         with pytest.raises(ParserError):
             parse("shouldfail")
 
-    def testCorrectErrorOnFuzzyWithTokens(self):
+    def test_correct_error_on_fuzzy_with_tokens(self):
         self.assertRaisesRegex(ParserError, "Unknown string format", parse, "04/04/32/423", fuzzy_with_tokens=True)
         self.assertRaisesRegex(ParserError, "Unknown string format", parse, "04/04/04 +32423", fuzzy_with_tokens=True)
         self.assertRaisesRegex(ParserError, "Unknown string format", parse, "04/04/0d4", fuzzy_with_tokens=True)
 
-    def testIncreasingCTime(self):
+    def test_increasing_c_time(self):
         # This test will check 200 different years, every month, every day,
         # every hour, every minute, every second, and every weekday, using
         # a delta of more or less 1 year, 1 month, 1 day, 1 minute and
@@ -567,21 +567,21 @@ class ParserTest(unittest.TestCase):
             assert parse(dt.ctime()) == dt
             dt += delta
 
-    def testIncreasingISOFormat(self):
+    def test_increasing_iso_format(self):
         delta = timedelta(days=365 + 31 + 1, seconds=1 + 60 + 60 * 60)
         dt = datetime(1900, 1, 1, 0, 0, 0, 0)
         for _ in range(200):
             assert parse(dt.isoformat()) == dt
             dt += delta
 
-    def testMicrosecondsPrecisionError(self):
+    def test_microseconds_precision_error(self):
         # Skip found out that sad precision problem. :-(
         dt1 = parse("00:11:25.01")
         dt2 = parse("00:12:10.01")
         assert dt1.microsecond == 10000
         assert dt2.microsecond == 10000
 
-    def testMicrosecondPrecisionErrorReturns(self):
+    def test_microsecond_precision_error_returns(self):
         # One more precision issue, discovered by Eric Brown.  This should
         # be the last one, as we're no longer using floating points.
         for ms in [100001, 100000, 99999, 99998, 10001, 10000, 9999, 9998, 1001, 1000, 999, 998, 101, 100, 99, 98]:
@@ -598,7 +598,7 @@ class ParserTest(unittest.TestCase):
         dt = myparser.parse("01/Foo/2007")
         assert dt == datetime(2007, 1, 1)
 
-    def testCustomParserShortDaynames(self):
+    def test_custom_parser_short_daynames(self):
         # Horacio Hoyos discovered that day names shorter than 3 characters,
         # for example two letter German day name abbreviations, don't work:
         # https://github.com/dateutil/dateutil/issues/343
@@ -618,7 +618,7 @@ class ParserTest(unittest.TestCase):
         dt = myparser.parse("Sa 21. Jan 2017")
         self.assertEqual(dt, datetime(2017, 1, 21))
 
-    def testNoYearFirstNoDayFirst(self):
+    def test_no_year_first_no_day_first(self):
         dtstr = "090107"
 
         # Should be MMDDYY
@@ -626,7 +626,7 @@ class ParserTest(unittest.TestCase):
 
         self.assertEqual(parse(dtstr, yearfirst=False, dayfirst=False), datetime(2007, 9, 1))
 
-    def testYearFirst(self):
+    def test_year_first(self):
         dtstr = "090107"
 
         # Should be MMDDYY
@@ -634,7 +634,7 @@ class ParserTest(unittest.TestCase):
 
         self.assertEqual(parse(dtstr, yearfirst=True, dayfirst=False), datetime(2009, 1, 7))
 
-    def testDayFirst(self):
+    def test_day_first(self):
         dtstr = "090107"
 
         # Should be DDMMYY
@@ -642,20 +642,20 @@ class ParserTest(unittest.TestCase):
 
         self.assertEqual(parse(dtstr, yearfirst=False, dayfirst=True), datetime(2007, 1, 9))
 
-    def testDayFirstYearFirst(self):
+    def test_day_first_year_first(self):
         dtstr = "090107"
         # Should be YYDDMM
         self.assertEqual(parse(dtstr, yearfirst=True, dayfirst=True), datetime(2009, 7, 1))
 
-    def testUnambiguousYearFirst(self):
+    def test_unambiguous_year_first(self):
         dtstr = "2015 09 25"
         self.assertEqual(parse(dtstr, yearfirst=True), datetime(2015, 9, 25))
 
-    def testUnambiguousDayFirst(self):
+    def test_unambiguous_day_first(self):
         dtstr = "2015 09 25"
         self.assertEqual(parse(dtstr, dayfirst=True), datetime(2015, 9, 25))
 
-    def testUnambiguousDayFirstYearFirst(self):
+    def test_unambiguous_day_first_year_first(self):
         dtstr = "2015 09 25"
         self.assertEqual(parse(dtstr, dayfirst=True, yearfirst=True), datetime(2015, 9, 25))
 
@@ -671,7 +671,7 @@ class ParserTest(unittest.TestCase):
         res = parse(dtstr, fuzzy=True)
         assert res == datetime(2017, 7, 17, 6, 15)
 
-    def test_hmBY(self):
+    def test_hm_b_y(self):
         # See GH#483
         dtstr = "02:17NOV2017"
         res = parse(dtstr, default=self.default)

@@ -15,7 +15,7 @@ class RelativeDeltaTest(unittest.TestCase):
     now = datetime(2003, 9, 17, 20, 54, 47, 282310)
     today = date(2003, 9, 17)
 
-    def testInheritance(self):
+    def test_inheritance(self):
         # Ensure that relativedelta is inheritance-friendly.
         class RDChildClass(relativedelta):
             pass
@@ -38,7 +38,7 @@ class RelativeDeltaTest(unittest.TestCase):
 
         self.assertEqual(type(cc_rd / 5.0), type(cc_rd), msg="Division does not inherit type.")
 
-    def testMonthEndMonthBeginning(self):
+    def test_month_end_month_beginning(self):
         self.assertEqual(
             relativedelta(datetime(2003, 1, 31, 23, 59, 59), datetime(2003, 3, 1, 0, 0, 0)),
             relativedelta(months=-1, seconds=-1),
@@ -49,7 +49,7 @@ class RelativeDeltaTest(unittest.TestCase):
             relativedelta(months=1, seconds=1),
         )
 
-    def testMonthEndMonthBeginningLeapYear(self):
+    def test_month_end_month_beginning_leap_year(self):
         self.assertEqual(
             relativedelta(datetime(2012, 1, 31, 23, 59, 59), datetime(2012, 3, 1, 0, 0, 0)),
             relativedelta(months=-1, seconds=-1),
@@ -60,29 +60,29 @@ class RelativeDeltaTest(unittest.TestCase):
             relativedelta(months=1, seconds=1),
         )
 
-    def testNextMonth(self):
+    def test_next_month(self):
         self.assertEqual(self.now + relativedelta(months=+1), datetime(2003, 10, 17, 20, 54, 47, 282310))
 
-    def testNextMonthPlusOneWeek(self):
+    def test_next_month_plus_one_week(self):
         self.assertEqual(self.now + relativedelta(months=+1, weeks=+1), datetime(2003, 10, 24, 20, 54, 47, 282310))
 
-    def testNextMonthPlusOneWeek10am(self):
+    def test_next_month_plus_one_week10am(self):
         self.assertEqual(self.today + relativedelta(months=+1, weeks=+1, hour=10), datetime(2003, 10, 24, 10, 0))
 
-    def testNextMonthPlusOneWeek10amDiff(self):
+    def test_next_month_plus_one_week_10am_diff(self):
         self.assertEqual(
             relativedelta(datetime(2003, 10, 24, 10, 0), self.today), relativedelta(months=+1, days=+7, hours=+10)
         )
 
-    def testOneMonthBeforeOneYear(self):
+    def test_one_month_before_one_year(self):
         self.assertEqual(self.now + relativedelta(years=+1, months=-1), datetime(2004, 8, 17, 20, 54, 47, 282310))
 
-    def testMonthsOfDiffNumOfDays(self):
+    def test_months_of_diff_num_of_days(self):
         self.assertEqual(date(2003, 1, 27) + relativedelta(months=+1), date(2003, 2, 27))
         self.assertEqual(date(2003, 1, 31) + relativedelta(months=+1), date(2003, 2, 28))
         self.assertEqual(date(2003, 1, 31) + relativedelta(months=+2), date(2003, 3, 31))
 
-    def testMonthsOfDiffNumOfDaysWithYears(self):
+    def test_months_of_diff_num_of_days_with_years(self):
         self.assertEqual(date(2000, 2, 28) + relativedelta(years=+1), date(2001, 2, 28))
         self.assertEqual(date(2000, 2, 29) + relativedelta(years=+1), date(2001, 2, 28))
 
@@ -93,86 +93,86 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertEqual(date(2001, 2, 28) + relativedelta(years=-1), date(2000, 2, 28))
         self.assertEqual(date(2001, 3, 1) + relativedelta(years=-1), date(2000, 3, 1))
 
-    def testNextFriday(self):
+    def test_next_friday(self):
         self.assertEqual(self.today + relativedelta(weekday=FR), date(2003, 9, 19))
 
-    def testNextFridayInt(self):
+    def test_next_friday_int(self):
         self.assertEqual(self.today + relativedelta(weekday=Day.FRI), date(2003, 9, 19))
 
-    def testLastFridayInThisMonth(self):
+    def test_last_friday_in_this_month(self):
         self.assertEqual(self.today + relativedelta(day=31, weekday=FR(-1)), date(2003, 9, 26))
 
-    def testLastDayOfFebruary(self):
+    def test_last_day_of_february(self):
         self.assertEqual(date(2021, 2, 1) + relativedelta(day=31), date(2021, 2, 28))
 
-    def testLastDayOfFebruaryLeapYear(self):
+    def test_last_day_of_february_leap_year(self):
         self.assertEqual(date(2020, 2, 1) + relativedelta(day=31), date(2020, 2, 29))
 
-    def testNextWednesdayIsToday(self):
+    def test_next_wednesday_is_today(self):
         self.assertEqual(self.today + relativedelta(weekday=WE), date(2003, 9, 17))
 
-    def testNextWednesdayNotToday(self):
+    def test_next_wednesday_not_today(self):
         self.assertEqual(self.today + relativedelta(days=+1, weekday=WE), date(2003, 9, 24))
 
-    def testAddMoreThan12Months(self):
+    def test_add_more_than_12months(self):
         self.assertEqual(date(2003, 12, 1) + relativedelta(months=+13), date(2005, 1, 1))
 
-    def testAddNegativeMonths(self):
+    def test_add_negative_months(self):
         self.assertEqual(date(2003, 1, 1) + relativedelta(months=-2), date(2002, 11, 1))
 
-    def test15thISOYearWeek(self):
+    def test_15th_iso_year_week(self):
         self.assertEqual(date(2003, 1, 1) + relativedelta(day=4, weeks=+14, weekday=MO(-1)), date(2003, 4, 7))
 
-    def testMillenniumAge(self):
+    def test_millennium_age(self):
         self.assertEqual(
             relativedelta(self.now, date(2001, 1, 1)),
             relativedelta(years=+2, months=+8, days=+16, hours=+20, minutes=+54, seconds=+47, microseconds=+282310),
         )
 
-    def testJohnAge(self):
+    def test_john_age(self):
         self.assertEqual(
             relativedelta(self.now, datetime(1978, 4, 5, 12, 0)),
             relativedelta(years=+25, months=+5, days=+12, hours=+8, minutes=+54, seconds=+47, microseconds=+282310),
         )
 
-    def testJohnAgeWithDate(self):
+    def test_john_age_with_date(self):
         self.assertEqual(
             relativedelta(self.today, datetime(1978, 4, 5, 12, 0)),
             relativedelta(years=+25, months=+5, days=+11, hours=+12),
         )
 
-    def testYearDay(self):
+    def test_year_day(self):
         self.assertEqual(date(2003, 1, 1) + relativedelta(yearday=260), date(2003, 9, 17))
         self.assertEqual(date(2002, 1, 1) + relativedelta(yearday=260), date(2002, 9, 17))
         self.assertEqual(date(2000, 1, 1) + relativedelta(yearday=260), date(2000, 9, 16))
         self.assertEqual(self.today + relativedelta(yearday=261), date(2003, 9, 18))
 
-    def testYearDayBug(self):
+    def test_year_day_bug(self):
         # Tests a problem reported by Adam Ryan.
         self.assertEqual(date(2010, 1, 1) + relativedelta(yearday=15), date(2010, 1, 15))
 
-    def testNonLeapYearDay(self):
+    def test_non_leap_year_day(self):
         self.assertEqual(date(2003, 1, 1) + relativedelta(nlyearday=260), date(2003, 9, 17))
         self.assertEqual(date(2002, 1, 1) + relativedelta(nlyearday=260), date(2002, 9, 17))
         self.assertEqual(date(2000, 1, 1) + relativedelta(nlyearday=260), date(2000, 9, 17))
         self.assertEqual(self.today + relativedelta(yearday=261), date(2003, 9, 18))
 
-    def testBoolean(self):
+    def test_boolean(self):
         self.assertFalse(relativedelta(days=0))
         self.assertTrue(relativedelta(days=1))
 
-    def testAbsoluteValueNegative(self):
+    def test_absolute_value_negative(self):
         rd_base = relativedelta(years=-1, months=-5, days=-2, hours=-3, minutes=-5, seconds=-2, microseconds=-12)
         rd_expected = relativedelta(years=1, months=5, days=2, hours=3, minutes=5, seconds=2, microseconds=12)
         self.assertEqual(abs(rd_base), rd_expected)
 
-    def testAbsoluteValuePositive(self):
+    def test_absolute_value_positive(self):
         rd_base = relativedelta(years=1, months=5, days=2, hours=3, minutes=5, seconds=2, microseconds=12)
         rd_expected = rd_base
 
         self.assertEqual(abs(rd_base), rd_expected)
 
-    def testComparison(self):
+    def test_comparison(self):
         d1 = relativedelta(years=1, months=1, days=1, leapdays=0, hours=1, minutes=1, seconds=1, microseconds=1)
         d2 = relativedelta(years=1, months=1, days=1, leapdays=0, hours=1, minutes=1, seconds=1, microseconds=1)
         d3 = relativedelta(years=1, months=1, days=1, leapdays=0, hours=1, minutes=1, seconds=1, microseconds=2)
@@ -180,14 +180,14 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertEqual(d1, d2)
         self.assertNotEqual(d1, d3)
 
-    def testInequalityTypeMismatch(self):
+    def test_inequality_type_mismatch(self):
         # Different type
         self.assertFalse(relativedelta(year=1) == 19)
 
-    def testInequalityUnsupportedType(self):
+    def test_inequality_unsupported_type(self):
         self.assertIs(relativedelta(hours=3) == NOT_A_VALUE, NOT_A_VALUE)
 
-    def testInequalityWeekdays(self):
+    def test_inequality_weekdays(self):
         # Different weekdays
         no_wday = relativedelta(year=1997, month=4)
         wday_mo_1 = relativedelta(year=1997, month=4, weekday=MO(+1))
@@ -205,10 +205,10 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertFalse(wday_mo_1 == wday_tu)
         self.assertFalse(wday_tu == wday_mo_1)
 
-    def testMonthOverflow(self):
+    def test_month_overflow(self):
         self.assertEqual(relativedelta(months=273), relativedelta(years=22, months=9))
 
-    def testWeeks(self):
+    def test_weeks(self):
         # Test that the weeks property is working properly.
         rd = relativedelta(years=4, months=2, weeks=8, days=6)
         self.assertEqual((rd.weeks, rd.days), (8, 8 * 7 + 6))
@@ -216,7 +216,7 @@ class RelativeDeltaTest(unittest.TestCase):
         rd.weeks = 3
         self.assertEqual((rd.weeks, rd.days), (3, 3 * 7 + 6))
 
-    def testRelativeDeltaRepr(self):
+    def test_relative_delta_repr(self):
         self.assertEqual(
             repr(relativedelta(years=1, months=-1, days=15)), "RelativeDelta(years=+1, months=-1, days=+15)"
         )
@@ -227,7 +227,7 @@ class RelativeDeltaTest(unittest.TestCase):
             repr(relativedelta(month=3, hour=3, weekday=SU(3))), "RelativeDelta(month=3, weekday=SU(+3), hour=3)"
         )
 
-    def testRelativeDeltaInvalidDatetimeObject(self):
+    def test_relative_delta_invalid_datetime_object(self):
         with self.assertRaises(TypeError):
             relativedelta(dt1="2018-01-01", dt2="2018-01-02")
 
@@ -237,18 +237,18 @@ class RelativeDeltaTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             relativedelta(dt1="2018-01-01", dt2=datetime(2018, 1, 2))
 
-    def testInvalidYearDay(self):
+    def test_invalid_year_day(self):
         with self.assertRaises(ValueError):
             relativedelta(yearday=367)
 
-    def testAddTimedeltaToUnpopulatedRelativedelta(self):
+    def test_add_timedelta_to_unpopulated_relativedelta(self):
         td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
 
         expected = relativedelta(weeks=1, days=1, hours=1, minutes=1, seconds=1, microseconds=1001)
 
         self.assertEqual(expected, relativedelta() + td)
 
-    def testAddTimedeltaToPopulatedRelativeDelta(self):
+    def test_add_timedelta_to_populated_relative_delta(self):
         td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
         # fmt: off
         rd = relativedelta(
@@ -263,13 +263,13 @@ class RelativeDeltaTest(unittest.TestCase):
 
         self.assertEqual(expected, rd + td)
 
-    def testHashable(self):
+    def test_hashable(self):
         try:
             {relativedelta(minute=1): "test"}
         except TypeError:
             self.fail("RelativeDelta() failed to hash!")
 
-    def testDayOfMonthPlus(self):
+    def test_day_of_month_plus(self):
         assert [
             date(2021, 1, 28) + relativedelta(months=1),
             date(2021, 2, 27) + relativedelta(months=1),
@@ -277,7 +277,7 @@ class RelativeDeltaTest(unittest.TestCase):
             date(2021, 5, 30) + relativedelta(months=1),
         ] == [date(2021, 2, 28), date(2021, 3, 27), date(2021, 5, 29), date(2021, 6, 30)]
 
-    def testLastDayOfMonthPlus(self):
+    def test_last_day_of_month_plus(self):
         assert [
             date(2021, 1, 31) + relativedelta(months=1),
             date(2021, 1, 30) + relativedelta(months=1),
@@ -296,7 +296,7 @@ class RelativeDeltaTest(unittest.TestCase):
             date(2021, 6, 30),
         ]
 
-    def testDayOfMonthMinus(self):
+    def test_day_of_month_minus(self):
         assert [
             date(2021, 2, 27) - relativedelta(months=1),
             date(2021, 3, 30) - relativedelta(months=1),
@@ -313,7 +313,7 @@ class RelativeDeltaTest(unittest.TestCase):
             date(2021, 5, 29),
         ]
 
-    def testLastDayOfMonthMinus(self):
+    def test_last_day_of_month_minus(self):
         assert [
             date(2021, 2, 28) - relativedelta(months=1),
             date(2021, 3, 31) - relativedelta(months=1),
@@ -323,36 +323,36 @@ class RelativeDeltaTest(unittest.TestCase):
 
 
 class RelativeDeltaOperationTest(unittest.TestCase):
-    def testAddition(self):
+    def test_addition(self):
         self.assertEqual(
             relativedelta(days=10) + relativedelta(years=1, months=2, days=3, hours=4, minutes=5, microseconds=6),
             relativedelta(years=1, months=2, days=13, hours=4, minutes=5, microseconds=6),
         )
 
-    def testAbsoluteAddition(self):
+    def test_absolute_addition(self):
         self.assertEqual(relativedelta() + relativedelta(day=0, hour=0), relativedelta(day=0, hour=0))
         self.assertEqual(relativedelta(day=0, hour=0) + relativedelta(), relativedelta(day=0, hour=0))
 
-    def testAdditionToDatetime(self):
+    def test_addition_to_datetime(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=1), datetime(2000, 1, 2))
 
-    def testRightAdditionToDatetime(self):
+    def test_right_addition_to_datetime(self):
         self.assertEqual(relativedelta(days=1) + datetime(2000, 1, 1), datetime(2000, 1, 2))
 
-    def testAdditionInvalidType(self):
+    def test_addition_invalid_type(self):
         with self.assertRaises(TypeError):
             _ = relativedelta(days=3) + 9
 
-    def testAdditionUnsupportedType(self):
+    def test_addition_unsupported_type(self):
         # For unsupported types that define their own comparators, etc.
         self.assertIs(relativedelta(days=1) + NOT_A_VALUE, NOT_A_VALUE)
 
-    def testAdditionFloatValue(self):
+    def test_addition_float_value(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=float(1)), datetime(2000, 1, 2))
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(months=float(1)), datetime(2000, 2, 1))
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(years=float(1)), datetime(2001, 1, 1))
 
-    def testAdditionFloatFractionals(self):
+    def test_addition_float_fractionals(self):
         self.assertEqual(datetime(2000, 1, 1, 0) + relativedelta(days=float(0.5)), datetime(2000, 1, 1, 12))
         self.assertEqual(datetime(2000, 1, 1, 0, 0) + relativedelta(hours=float(0.5)), datetime(2000, 1, 1, 0, 30))
         self.assertEqual(
@@ -366,49 +366,49 @@ class RelativeDeltaOperationTest(unittest.TestCase):
             datetime(2000, 1, 1, 0, 0, 0, 500000),
         )
 
-    def testSubtraction(self):
+    def test_subtraction(self):
         self.assertEqual(
             relativedelta(days=10) - relativedelta(years=1, months=2, days=3, hours=4, minutes=5, microseconds=6),
             relativedelta(years=-1, months=-2, days=7, hours=-4, minutes=-5, microseconds=-6),
         )
 
-    def testRightSubtractionFromDatetime(self):
+    def test_right_subtraction_from_datetime(self):
         self.assertEqual(datetime(2000, 1, 2) - relativedelta(days=1), datetime(2000, 1, 1))
 
-    def testSubractionWithDatetime(self):
+    def test_subraction_with_datetime(self):
         self.assertRaises(TypeError, lambda x, y: x - y, (relativedelta(days=1), datetime(2000, 1, 1)))
 
-    def testSubtractionInvalidType(self):
+    def test_subtraction_invalid_type(self):
         with self.assertRaises(TypeError):
             _ = relativedelta(hours=12) - 14
 
-    def testSubtractionUnsupportedType(self):
+    def test_subtraction_unsupported_type(self):
         self.assertIs(relativedelta(days=1) + NOT_A_VALUE, NOT_A_VALUE)
 
-    def testMultiplication(self):
+    def test_multiplication(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=1) * 28, datetime(2000, 1, 29))
         self.assertEqual(datetime(2000, 1, 1) + 28 * relativedelta(days=1), datetime(2000, 1, 29))
 
-    def testMultiplicationUnsupportedType(self):
+    def test_multiplication_unsupported_type(self):
         self.assertIs(relativedelta(days=1) * NOT_A_VALUE, NOT_A_VALUE)
 
-    def testDivision(self):
+    def test_division(self):
         self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=28) / 28, datetime(2000, 1, 2))
 
-    def testDivisionUnsupportedType(self):
+    def test_division_unsupported_type(self):
         self.assertIs(relativedelta(days=1) / NOT_A_VALUE, NOT_A_VALUE)
 
 
 class RelativeDeltaFractionTest(unittest.TestCase):
-    def testRelativeDeltaFractionalYear(self):
+    def test_relative_delta_fractional_year(self):
         with self.assertRaises(ValueError):
             relativedelta(years=1.5)
 
-    def testRelativeDeltaFractionalMonth(self):
+    def test_relative_delta_fractional_month(self):
         with self.assertRaises(ValueError):
             relativedelta(months=1.5)
 
-    def testRelativeDeltaFractionalAbsolutes(self):
+    def test_relative_delta_fractional_absolutes(self):
         # Fractional absolute values will soon be unsupported,
         # check for the deprecation warning.
         with pytest.warns(DeprecationWarning):
@@ -432,7 +432,7 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         with pytest.warns(DeprecationWarning):
             relativedelta(microsecond=157221.93)
 
-    def testRelativeDeltaFractionalRepr(self):
+    def test_relative_delta_fractional_repr(self):
         rd = relativedelta(years=3, months=-2, days=1.25)
 
         self.assertEqual(repr(rd), "RelativeDelta(years=+3, months=-2, days=+1.25)")
@@ -440,13 +440,13 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         rd = relativedelta(hours=0.5, seconds=9.22)
         self.assertEqual(repr(rd), "RelativeDelta(hours=+0.5, seconds=+9.22)")
 
-    def testRelativeDeltaFractionalWeeks(self):
+    def test_relative_delta_fractional_weeks(self):
         # Equivalent to days=8, hours=18
         rd = relativedelta(weeks=1.25)
         d1 = datetime(2009, 9, 3, 0, 0)
         self.assertEqual(d1 + rd, datetime(2009, 9, 11, 18))
 
-    def testRelativeDeltaFractionalDays(self):
+    def test_relative_delta_fractional_days(self):
         rd1 = relativedelta(days=1.48)
 
         d1 = datetime(2009, 9, 3, 0, 0)
@@ -455,22 +455,22 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         rd2 = relativedelta(days=1.5)
         self.assertEqual(d1 + rd2, datetime(2009, 9, 4, 12, 0, 0))
 
-    def testRelativeDeltaFractionalHours(self):
+    def test_relative_delta_fractional_hours(self):
         rd = relativedelta(days=1, hours=12.5)
         d1 = datetime(2009, 9, 3, 0, 0)
         self.assertEqual(d1 + rd, datetime(2009, 9, 4, 12, 30, 0))
 
-    def testRelativeDeltaFractionalMinutes(self):
+    def test_relative_delta_fractional_minutes(self):
         rd = relativedelta(hours=1, minutes=30.5)
         d1 = datetime(2009, 9, 3, 0, 0)
         self.assertEqual(d1 + rd, datetime(2009, 9, 3, 1, 30, 30))
 
-    def testRelativeDeltaFractionalSeconds(self):
+    def test_relative_delta_fractional_seconds(self):
         rd = relativedelta(hours=5, minutes=30, seconds=30.5)
         d1 = datetime(2009, 9, 3, 0, 0)
         self.assertEqual(d1 + rd, datetime(2009, 9, 3, 5, 30, 30, 500000))
 
-    def testRelativeDeltaFractionalPositiveOverflow(self):
+    def test_relative_delta_fractional_positive_overflow(self):
         # Equivalent to (days=1, hours=14)
         rd1 = relativedelta(days=1.5, hours=2)
         d1 = datetime(2009, 9, 3, 0, 0)
@@ -485,7 +485,7 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         rd3 = relativedelta(days=1.5, hours=13, minutes=59.5, seconds=31)
         self.assertEqual(d1 + rd3, datetime(2009, 9, 5, 2, 0, 1))
 
-    def testRelativeDeltaFractionalNegativeDays(self):
+    def test_relative_delta_fractional_negative_days(self):
         # Equivalent to (days=-1, hours=-1)
         rd1 = relativedelta(days=-1.5, hours=11)
         d1 = datetime(2009, 9, 3, 12, 0)
@@ -495,7 +495,7 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         rd2 = relativedelta(days=-1.25, hours=-3)
         self.assertEqual(d1 + rd2, datetime(2009, 9, 2, 3))
 
-    def testRelativeDeltaNormalizeFractionalDays(self):
+    def test_relative_delta_normalize_fractional_days(self):
         # Equivalent to (days=2, hours=18)
         rd1 = relativedelta(days=2.75)
 
@@ -506,7 +506,7 @@ class RelativeDeltaFractionTest(unittest.TestCase):
 
         self.assertEqual(rd2.normalized(), relativedelta(days=1, hours=11, minutes=31, seconds=12))
 
-    def testRelativeDeltaNormalizeFractionalDays2(self):
+    def test_relative_delta_normalize_fractional_days2(self):
         # Equivalent to (hours=1, minutes=30)
         rd1 = relativedelta(hours=1.5)
 
@@ -517,7 +517,7 @@ class RelativeDeltaFractionTest(unittest.TestCase):
 
         self.assertEqual(rd2.normalized(), relativedelta(hours=3, minutes=17, seconds=5, microseconds=100))
 
-    def testRelativeDeltaNormalizeFractionalMinutes(self):
+    def test_relative_delta_normalize_fractional_minutes(self):
         # Equivalent to (minutes=15, seconds=36)
         rd1 = relativedelta(minutes=15.6)
 
@@ -528,12 +528,12 @@ class RelativeDeltaFractionTest(unittest.TestCase):
 
         self.assertEqual(rd2.normalized(), relativedelta(minutes=25, seconds=20, microseconds=25000))
 
-    def testRelativeDeltaNormalizeFractionalSeconds(self):
+    def test_relative_delta_normalize_fractional_seconds(self):
         # Equivalent to (seconds=45, microseconds=25000)
         rd1 = relativedelta(seconds=45.025)
         self.assertEqual(rd1.normalized(), relativedelta(seconds=45, microseconds=25000))
 
-    def testRelativeDeltaFractionalPositiveOverflow2(self):
+    def test_relative_delta_fractional_positive_overflow2(self):
         # Equivalent to (days=1, hours=14)
         rd1 = relativedelta(days=1.5, hours=2)
         self.assertEqual(rd1.normalized(), relativedelta(days=1, hours=14))
@@ -547,7 +547,7 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         rd3 = relativedelta(days=1.5, hours=13, minutes=59.50045, seconds=31.473, microseconds=500003)
         self.assertEqual(rd3.normalized(), relativedelta(days=2, hours=2, minutes=0, seconds=2, microseconds=3))
 
-    def testRelativeDeltaFractionalNegativeOverflow(self):
+    def test_relative_delta_fractional_negative_overflow(self):
         # Equivalent to (days=-1)
         rd1 = relativedelta(days=-0.5, hours=-12)
         self.assertEqual(rd1.normalized(), relativedelta(days=-1))

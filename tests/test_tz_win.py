@@ -24,7 +24,8 @@ class TzWinFoldMixin:
     def get_args(self, tzname):
         return (tzname,)
 
-    def get_utc_transitions(self, tzi, year, gap):
+    @staticmethod
+    def get_utc_transitions(tzi, year, gap):
         dston, dstoff = tzi.transitions(year)
         if gap:
             t_n = dston - timedelta(minutes=30)
@@ -188,12 +189,12 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
     def setUp(self):
         self.tzclass = tzwin.TzWin
 
-    def testTzResLoadName(self):
+    def test_tz_res_load_name(self):
         # This may not work right on non-US locales.
         tzr = tzwin.TzRes()
         self.assertEqual(tzr.load_name(112), "Eastern Standard Time")
 
-    def testTzResNameFromString(self):
+    def test_tz_res_name_from_string(self):
         tzr = tzwin.TzRes()
         self.assertEqual(tzr.name_from_string("@tzres.dll,-221"), "Alaskan Daylight Time")
 
@@ -202,16 +203,16 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         with self.assertRaises(ValueError):
             tzr.name_from_string("@tzres.dll,100")
 
-    def testIsdstZoneWithNoDaylightSaving(self):
-        tz = self.tzclass("UTC")
-        dt = parse("2013-03-06 19:08:15")
-        self.assertFalse(tz._isdst(dt))
+    def test_isdst_zone_with_no_daylight_saving(self):
+        tz_ = self.tzclass("UTC")
+        dt_ = parse("2013-03-06 19:08:15")
+        self.assertFalse(tz_._isdst(dt_))
 
-    def testOffset(self):
-        tz = self.tzclass("Cape Verde Standard Time")
-        self.assertEqual(tz.utcoffset(datetime(1995, 5, 21, 12, 9, 13)), timedelta(-1, 82800))
+    def test_offset(self):
+        tz_ = self.tzclass("Cape Verde Standard Time")
+        self.assertEqual(tz_.utcoffset(datetime(1995, 5, 21, 12, 9, 13)), timedelta(-1, 82800))
 
-    def testTzwinName(self):
+    def test_tzwin_name(self):
         # https://github.com/dateutil/dateutil/issues/143
         tw = tz.tzwin("Eastern Standard Time")
 
@@ -232,11 +233,11 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         for t_date, expected in transition_dates:
             self.assertEqual(t_date.replace(tzinfo=tw).tzname(), expected)
 
-    def testTzwinRepr(self):
+    def test_tzwin_repr(self):
         tw = tz.tzwin("Yakutsk Standard Time")
         self.assertEqual(repr(tw), "tzwin(" + repr("Yakutsk Standard Time") + ")")
 
-    def testTzWinEquality(self):
+    def test_tz_win_equality(self):
         # https://github.com/dateutil/dateutil/issues/151
         tzwin_names = (
             "Eastern Standard Time",
@@ -253,7 +254,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
 
             self.assertEqual(tw1, tw2)
 
-    def testTzWinInequality(self):
+    def test_tz_win_inequality(self):
         # https://github.com/dateutil/dateutil/issues/151
         # Note these last two currently differ only in their name.
         tzwin_names = (
@@ -270,7 +271,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
 
             self.assertNotEqual(tw1, tw2)
 
-    def testTzWinEqualityInvalid(self):
+    def test_tz_win_equality_invalid(self):
         # Compare to objects that do not implement comparison with this
         # (should default to False)
         UTC = tz.UTC
@@ -283,14 +284,14 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         self.assertTrue(EST != UTC)
         self.assertTrue(EST != 1)
 
-    def testTzWinInequalityUnsupported(self):
+    def test_tz_win_inequality_unsupported(self):
         # Compare it to an object that is promiscuous about equality, but for
         # which tzwin does not implement an equality operator.
         EST = tz.tzwin("Eastern Standard Time")
         self.assertTrue(EST == COMPARES_EQUAL)
         self.assertFalse(EST != COMPARES_EQUAL)
 
-    def testTzwinTimeOnlyDST(self):
+    def test_tzwin_time_only_dst(self):
         # For zones with DST, .dst() should return None
         tw_est = tz.tzwin("Eastern Standard Time")
         self.assertIs(dt.time(14, 10, tzinfo=tw_est).dst(), None)
@@ -299,7 +300,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         tw_sast = tz.tzwin("South Africa Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).dst(), timedelta(0))
 
-    def testTzwinTimeOnlyUTCOffset(self):
+    def test_tzwin_time_only_utc_offset(self):
         # For zones with DST, .utcoffset() should return None
         tw_est = tz.tzwin("Eastern Standard Time")
         self.assertIs(dt.time(14, 10, tzinfo=tw_est).utcoffset(), None)
@@ -308,7 +309,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         tw_sast = tz.tzwin("South Africa Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).utcoffset(), timedelta(hours=2))
 
-    def testTzwinTimeOnlyTZName(self):
+    def test_tzwin_time_only_t_z_name(self):
         # For zones with DST, the name defaults to standard time
         tw_est = tz.tzwin("Eastern Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_est).tzname(), "Eastern Standard Time")
@@ -328,18 +329,18 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
     def get_args(self, tzname):
         return ()
 
-    def testLocal(self):
+    def test_local(self):
         # Not sure how to pin a local time zone, so for now we're just going
         # to run this and make sure it doesn't raise an error
         # See GitHub Issue #135: https://github.com/dateutil/dateutil/issues/135
         datetime.now(self.tzclass())
 
-    def testTzwinLocalUTCOffset(self):
+    def test_tzwin_local_utc_offset(self):
         with TZWinContext("Eastern Standard Time"):
             tzwl = self.tzclass()
             self.assertEqual(datetime(2014, 3, 11, tzinfo=tzwl).utcoffset(), timedelta(hours=-4))
 
-    def testTzwinLocalName(self):
+    def test_tzwin_local_name(self):
         # https://github.com/dateutil/dateutil/issues/143
         est_ = "Eastern Standard Time"
         edt_ = "Eastern Daylight Time"
@@ -360,11 +361,11 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
             for t_date, expected in transition_dates:
                 self.assertEqual(t_date.replace(tzinfo=tw).tzname(), expected)
 
-    def testTzWinLocalRepr(self):
+    def test_tz_win_local_repr(self):
         tw = self.tzclass()
         self.assertEqual(repr(tw), "tzwinlocal()")
 
-    def testTzwinLocalRepr(self):
+    def test_tzwin_local_repr(self):
         # https://github.com/dateutil/dateutil/issues/143
         with TZWinContext("Eastern Standard Time"):
             tw = self.tzclass()
@@ -376,7 +377,7 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
 
             self.assertEqual(str(tw), "tzwinlocal(" + repr("Pacific Standard Time") + ")")
 
-    def testTzwinLocalEquality(self):
+    def test_tzwin_local_equality(self):
         tw_est = tz.tzwin("Eastern Standard Time")
         tw_pst = tz.tzwin("Pacific Standard Time")
 
@@ -398,7 +399,7 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
             self.assertEqual(twl1, tw_pst)
             self.assertNotEqual(twl1, tw_est)
 
-    def testTzwinLocalTimeOnlyDST(self):
+    def test_tzwin_local_time_only_dst(self):
         # For zones with DST, .dst() should return None
         with TZWinContext("Eastern Standard Time"):
             twl = self.tzclass()
@@ -409,7 +410,7 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
             twl = self.tzclass()
             self.assertEqual(dt.time(14, 10, tzinfo=twl).dst(), timedelta(0))
 
-    def testTzwinLocalTimeOnlyUTCOffset(self):
+    def test_tzwin_local_time_only_utc_offset(self):
         # For zones with DST, .utcoffset() should return None
         with TZWinContext("Eastern Standard Time"):
             twl = self.tzclass()
@@ -420,7 +421,7 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
             twl = self.tzclass()
             self.assertEqual(dt.time(14, 10, tzinfo=twl).utcoffset(), timedelta(hours=2))
 
-    def testTzwinLocalTimeOnlyTZName(self):
+    def test_tzwin_local_time_only_tz_name(self):
         # For zones with DST, the name defaults to standard time
         with TZWinContext("Eastern Standard Time"):
             twl = self.tzclass()
