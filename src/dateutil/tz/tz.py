@@ -888,7 +888,7 @@ class TzRange(TzRangeBase):
 
     .. testsetup:: tzrange
 
-        from dateutil.tz import tzrange, tzstr
+        >>> from dateutil.tz import tzrange, tzstr
 
     .. doctest:: tzrange
 
@@ -898,9 +898,9 @@ class TzRange(TzRangeBase):
         >>> from dateutil.relativedelta import *
         >>> range1 = tzrange("EST", -18000, "EDT")
         >>> range2 = tzrange("EST", -18000, "EDT", -14400,
-        ...                  relativedelta(hours=+2, month=4, day=1,
+        ...                  RelativeDelta(hours=+2, month=4, day=1,
         ...                                weekday=SU(+1)),
-        ...                  relativedelta(hours=+1, month=10, day=31,
+        ...                  RelativeDelta(hours=+1, month=10, day=31,
         ...                                weekday=SU(-1)))
         >>> tzstr('EST5EDT') == range1 == range2
         True
@@ -908,8 +908,8 @@ class TzRange(TzRangeBase):
     """
 
     def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, start=None, end=None):
-        global relativedelta
-        from dateutil import relativedelta
+        # global relativedelta
+        from dateutil.relativedelta import SU, RelativeDelta
 
         self._std_abbr = stdabbr
         self._dst_abbr = dstabbr
@@ -937,12 +937,12 @@ class TzRange(TzRangeBase):
             self._dst_offset = ZERO
 
         if dstabbr and start is None:
-            self._start_delta = relativedelta.RelativeDelta(hours=+2, month=4, day=1, weekday=relativedelta.SU(+1))
+            self._start_delta = RelativeDelta(hours=+2, month=4, day=1, weekday=SU(+1))
         else:
             self._start_delta = start
 
         if dstabbr and end is None:
-            self._end_delta = relativedelta.RelativeDelta(hours=+1, month=10, day=31, weekday=relativedelta.SU(-1))
+            self._end_delta = RelativeDelta(hours=+1, month=10, day=31, weekday=SU(-1))
         else:
             self._end_delta = end
 

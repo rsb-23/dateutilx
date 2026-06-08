@@ -101,13 +101,13 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 8, 9, 0)],
         )
 
-    def test_yearly_by_month_and_n_week_day(self):
+    def test_yearly_by_month_and_nweekday(self):
         self.assertEqual(
             list(rrule(YEARLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))),
             [datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 29, 9, 0), datetime(1998, 3, 3, 9, 0)],
         )
 
-    def test_yearly_by_month_and_n_week_day_large(self):
+    def test_yearly_by_month_and_nweekday_large(self):
         # This is interesting because the TH(-3) ends up before
         # the TU(3).
         self.assertEqual(
@@ -371,7 +371,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 8, 9, 0)],
         )
 
-    def test_monthly_by_month_and_n_week_day(self):
+    def test_monthly_by_month_and_nweekday(self):
         self.assertEqual(
             list(
                 rrule(MONTHLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
@@ -379,7 +379,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 29, 9, 0), datetime(1998, 3, 3, 9, 0)],
         )
 
-    def test_monthly_by_month_and_n_week_day_large(self):
+    def test_monthly_by_month_and_nweekday_large(self):
         self.assertEqual(
             list(
                 rrule(MONTHLY, count=3, bymonth=(1, 3), byweekday=(TU(3), TH(-3)), dtstart=datetime(1997, 9, 2, 9, 0))
@@ -639,7 +639,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 8, 9, 0)],
         )
 
-    def test_weekly_by_month_and_n_week_day(self):
+    def test_weekly_by_month_and_nweekday(self):
         self.assertEqual(
             list(rrule(WEEKLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))),
             [datetime(1998, 1, 1, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 8, 9, 0)],
@@ -892,7 +892,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 8, 9, 0)],
         )
 
-    def test_daily_by_month_and_n_week_day(self):
+    def test_daily_by_month_and_nweekday(self):
         self.assertEqual(
             list(rrule(DAILY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))),
             [datetime(1998, 1, 1, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 1, 8, 9, 0)],
@@ -1141,7 +1141,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 0, 0), datetime(1998, 1, 1, 1, 0), datetime(1998, 1, 1, 2, 0)],
         )
 
-    def test_hourly_by_month_and_n_week_day(self):
+    def test_hourly_by_month_and_nweekday(self):
         self.assertEqual(
             list(rrule(HOURLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))),
             [datetime(1998, 1, 1, 0, 0), datetime(1998, 1, 1, 1, 0), datetime(1998, 1, 1, 2, 0)],
@@ -1390,7 +1390,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 0, 0), datetime(1998, 1, 1, 0, 1), datetime(1998, 1, 1, 0, 2)],
         )
 
-    def test_minutely_by_month_and_n_week_day(self):
+    def test_minutely_by_month_and_nweekday(self):
         self.assertEqual(
             list(
                 rrule(MINUTELY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
@@ -1634,7 +1634,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(1998, 1, 1, 0, 0, 0), datetime(1998, 1, 1, 0, 0, 1), datetime(1998, 1, 1, 0, 0, 2)],
         )
 
-    def test_secondly_by_month_and_n_week_day(self):
+    def test_secondly_by_month_and_nweekday(self):
         self.assertEqual(
             list(
                 rrule(SECONDLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
@@ -1825,7 +1825,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(2010, 3, 22, 12, 1), datetime(2010, 3, 22, 13, 1), datetime(2010, 3, 22, 14, 1)],
         )
 
-    def test_hourly_bad_r_rule(self):
+    def test_hourly_bad_rrule(self):
         """
         When `byhour` is specified with `freq=HOURLY`, there are certain
         combinations of `dtstart` and `byhour` which result in an rrule with no
@@ -1838,7 +1838,7 @@ class RRuleTest(unittest.TestCase):
             ValueError, rrule, HOURLY, interval=4, byhour=(7, 11, 15, 19), dtstart=datetime(1997, 9, 2, 9, 0)
         )
 
-    def test_minutely_bad_r_rule(self):
+    def test_minutely_bad_rrule(self):
         """
         See :func:`testHourlyBadRRule` for details.
         """
@@ -1847,7 +1847,7 @@ class RRuleTest(unittest.TestCase):
             ValueError, rrule, MINUTELY, interval=12, byminute=(10, 11, 25, 39, 50), dtstart=datetime(1997, 9, 2, 9, 0)
         )
 
-    def test_secondly_bad_r_rule(self):
+    def test_secondly_bad_rrule(self):
         """
         See :func:`testHourlyBadRRule` for details.
         """
@@ -1856,7 +1856,7 @@ class RRuleTest(unittest.TestCase):
             ValueError, rrule, SECONDLY, interval=10, bysecond=(2, 15, 37, 42, 59), dtstart=datetime(1997, 9, 2, 9, 0)
         )
 
-    def test_minutely_bad_combo_r_rule(self):
+    def test_minutely_bad_combo_rrule(self):
         """
         Certain values of :param:`interval` in :class:`rrule`, when combined
         with certain values of :param:`byhour` create rules which apply to no
@@ -1870,7 +1870,7 @@ class RRuleTest(unittest.TestCase):
 
         self.assertRaises(ValueError, make_bad_rrule)
 
-    def test_secondly_bad_combo_r_rule(self):
+    def test_secondly_bad_combo_rrule(self):
         """
         See :func:`testMinutelyBadComboRRule' for details.
         """
@@ -1885,7 +1885,7 @@ class RRuleTest(unittest.TestCase):
         self.assertRaises(ValueError, make_bad_minute_rrule)
         self.assertRaises(ValueError, make_bad_hour_rrule)
 
-    def test_bad_until_count_r_rule(self):
+    def test_bad_until_count_rrule(self):
         """
         See rfc-5545 3.3.10 - This checks for the deprecation warning, and will
         eventually check for an error.
@@ -1920,13 +1920,13 @@ class RRuleTest(unittest.TestCase):
             [datetime(1997, 9, 2, 9, 0), datetime(1997, 9, 3, 9, 0), datetime(1997, 9, 4, 9, 0)],
         )
 
-    def test_wk_st_interval_m_o(self):
+    def test_wkst_interval_mo(self):
         self.assertEqual(
             list(rrule(WEEKLY, count=3, interval=2, byweekday=(TU, SU), wkst=MO, dtstart=datetime(1997, 9, 2, 9, 0))),
             [datetime(1997, 9, 2, 9, 0), datetime(1997, 9, 7, 9, 0), datetime(1997, 9, 16, 9, 0)],
         )
 
-    def test_wk_st_interval_s_u(self):
+    def test_wkst_interval_su(self):
         self.assertEqual(
             list(rrule(WEEKLY, count=3, interval=2, byweekday=(TU, SU), wkst=SU, dtstart=datetime(1997, 9, 2, 9, 0))),
             [datetime(1997, 9, 2, 9, 0), datetime(1997, 9, 14, 9, 0), datetime(1997, 9, 16, 9, 0)],
@@ -2027,7 +2027,7 @@ class RRuleTest(unittest.TestCase):
             datetime(1997, 9, 4, 9, 0),
         )
 
-    def test_x_after(self):
+    def test_xafter(self):
         self.assertEqual(
             list(rrule(DAILY, dtstart=datetime(1997, 9, 2, 9, 0)).xafter(datetime(1997, 9, 8, 9, 0), count=12)),
             [
@@ -2046,7 +2046,7 @@ class RRuleTest(unittest.TestCase):
             ],
         )
 
-    def test_x_after_inc(self):
+    def test_xafter_inc(self):
         self.assertEqual(
             list(
                 rrule(DAILY, dtstart=datetime(1997, 9, 2, 9, 0)).xafter(datetime(1997, 9, 8, 9, 0), count=12, inc=True)
@@ -2479,7 +2479,7 @@ class RRuleTest(unittest.TestCase):
             [datetime(2033, 3, 3, 3, 3, 3), datetime(2039, 3, 3, 3, 3, 3), datetime(2072, 3, 3, 3, 3, 3)],
         )
 
-    def test_str_n_week_day(self):
+    def test_str_nweekday(self):
         self.assertEqual(
             list(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=3;BYDAY=1TU,-1TH\n")),
             [datetime(1997, 12, 25, 9, 0), datetime(1998, 1, 6, 9, 0), datetime(1998, 12, 31, 9, 0)],
@@ -2591,12 +2591,12 @@ class RRuleTest(unittest.TestCase):
             rrule(YEARLY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_yearly_by_month_and_n_week_day(self):
+    def test_to_str_yearly_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(YEARLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_yearly_by_month_and_n_week_day_large(self):
+    def test_to_str_yearly_by_month_and_nweekday_large(self):
         # This is interesting because the TH(-3) ends up before
         # the TU(3).
         self._rrulestr_reverse_test(
@@ -2758,12 +2758,12 @@ class RRuleTest(unittest.TestCase):
             rrule(MONTHLY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_monthly_by_month_and_n_week_day(self):
+    def test_to_str_monthly_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(MONTHLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_monthly_by_month_and_n_week_day_large(self):
+    def test_to_str_monthly_by_month_and_nweekday_large(self):
         self._rrulestr_reverse_test(
             rrule(MONTHLY, count=3, bymonth=(1, 3), byweekday=(TU(3), TH(-3)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
@@ -2922,7 +2922,7 @@ class RRuleTest(unittest.TestCase):
             rrule(WEEKLY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_weekly_by_month_and_n_week_day(self):
+    def test_to_str_weekly_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(WEEKLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
@@ -3076,7 +3076,7 @@ class RRuleTest(unittest.TestCase):
             rrule(DAILY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_daily_by_month_and_n_week_day(self):
+    def test_to_str_daily_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(DAILY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
@@ -3223,7 +3223,7 @@ class RRuleTest(unittest.TestCase):
             rrule(HOURLY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_hourly_by_month_and_n_week_day(self):
+    def test_to_str_hourly_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(HOURLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
@@ -3373,7 +3373,7 @@ class RRuleTest(unittest.TestCase):
             rrule(MINUTELY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_minutely_by_month_and_n_week_day(self):
+    def test_to_str_minutely_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(MINUTELY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
@@ -3523,7 +3523,7 @@ class RRuleTest(unittest.TestCase):
             rrule(SECONDLY, count=3, bymonth=(1, 3), byweekday=(TU, TH), dtstart=datetime(1997, 9, 2, 9, 0))
         )
 
-    def test_to_str_secondly_by_month_and_n_week_day(self):
+    def test_to_str_secondly_by_month_and_nweekday(self):
         self._rrulestr_reverse_test(
             rrule(SECONDLY, count=3, bymonth=(1, 3), byweekday=(TU(1), TH(-1)), dtstart=datetime(1997, 9, 2, 9, 0))
         )
@@ -3641,7 +3641,7 @@ class RRuleTest(unittest.TestCase):
             rrule(SECONDLY, count=3, bysecond=(0,), byminute=(1,), dtstart=datetime(2010, 3, 22, 12, 1))
         )
 
-    def test_to_str_with_wk_st(self):
+    def test_to_str_with_wkst(self):
         self._rrulestr_reverse_test(rrule(WEEKLY, count=3, wkst=SU, dtstart=datetime(1997, 9, 2, 9, 0)))
 
     def test_replace_if_set(self):

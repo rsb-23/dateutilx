@@ -21,13 +21,13 @@ class _DatetimeMeta(type):
 
 
 class _FakeDatetime(datetime, metaclass=_DatetimeMeta):
-    _frozen: datetime = datetime(1900, 1, 1)
+    frozen_: datetime = datetime(1900, 1, 1)
 
     @classmethod
     def now(cls, tz=None):
         if tz is not None:
-            return cls._frozen.astimezone(tz)
-        return cls._frozen
+            return cls.frozen_.astimezone(tz)
+        return cls.frozen_
 
     def __hash__(self):
         return dt.datetime.__hash__(self)
@@ -54,9 +54,9 @@ def freeze_time(frozen_dt: datetime, module, *, tz_offset=0):
 
             @functools.wraps(fn)
             def wrapper(*args, **kwargs):
-                _FakeDatetime._frozen = frozen_dt
+                _FakeDatetime.frozen_ = frozen_dt
                 fake_module = _FakeDatetimeModule()
-                fake_module.datetime._frozen = frozen_dt
+                fake_module.datetime.frozen_ = frozen_dt
                 with patch(to_patch, fake_module):
                     return fn(*args, **kwargs)
 
@@ -64,7 +64,7 @@ def freeze_time(frozen_dt: datetime, module, *, tz_offset=0):
 
             @functools.wraps(fn)
             def wrapper(*args, **kwargs):
-                _FakeDatetime._frozen = frozen_dt
+                _FakeDatetime.frozen_ = frozen_dt
                 with patch(to_patch, _FakeDatetime):
                     return fn(*args, **kwargs)
 

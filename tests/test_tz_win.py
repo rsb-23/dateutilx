@@ -17,6 +17,11 @@ except ImportError as e:
         raise e
     tzwin = None
 
+UTC = tz.UTC
+
+ESTs = "Eastern Standard Time"
+EDTs = "Eastern Daylight Time"
+
 
 class TzWinFoldMixin:
     context = contextlib.nullcontext
@@ -135,7 +140,6 @@ class TzWinFoldMixin:
 
         with self.context(tzname):
             NYC = self.tzclass(*args)
-            UTC = tz.UTC
             hour = timedelta(hours=1)
 
             # Firmly 2015-11-01 0:30 EDT-4
@@ -170,7 +174,6 @@ class TzWinFoldMixin:
 
         with self.context(tzname):
             NYC = self.tzclass(*args)
-            UTC = tz.UTC
 
             t_n = self.get_utc_transitions(NYC, 2011, False)[0]
 
@@ -217,8 +220,6 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         tw = tz.tzwin("Eastern Standard Time")
 
         # Cover the transitions for at least two years.
-        ESTs = "Eastern Standard Time"
-        EDTs = "Eastern Daylight Time"
         transition_dates = [
             (datetime(2015, 3, 8, 0, 59), ESTs),
             (datetime(2015, 3, 8, 3, 1), EDTs),
@@ -274,9 +275,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
     def test_tz_win_equality_invalid(self):
         # Compare to objects that do not implement comparison with this
         # (should default to False)
-        UTC = tz.UTC
         EST = tz.tzwin("Eastern Standard Time")
-
         self.assertFalse(EST == UTC)
         self.assertFalse(EST == 1)
         self.assertFalse(UTC == EST)
@@ -309,7 +308,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         tw_sast = tz.tzwin("South Africa Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).utcoffset(), timedelta(hours=2))
 
-    def test_tzwin_time_only_t_z_name(self):
+    def test_tzwin_time_only_tzname(self):
         # For zones with DST, the name defaults to standard time
         tw_est = tz.tzwin("Eastern Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_est).tzname(), "Eastern Standard Time")
@@ -342,17 +341,16 @@ class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
 
     def test_tzwin_local_name(self):
         # https://github.com/dateutil/dateutil/issues/143
-        est_ = "Eastern Standard Time"
-        edt_ = "Eastern Daylight Time"
+
         transition_dates = [
-            (datetime(2015, 3, 8, 0, 59), est_),
-            (datetime(2015, 3, 8, 3, 1), edt_),
-            (datetime(2015, 11, 1, 0, 59), edt_),
-            (datetime(2015, 11, 1, 3, 1), est_),
-            (datetime(2016, 3, 13, 0, 59), est_),
-            (datetime(2016, 3, 13, 3, 1), edt_),
-            (datetime(2016, 11, 6, 0, 59), edt_),
-            (datetime(2016, 11, 6, 3, 1), est_),
+            (datetime(2015, 3, 8, 0, 59), ESTs),
+            (datetime(2015, 3, 8, 3, 1), EDTs),
+            (datetime(2015, 11, 1, 0, 59), EDTs),
+            (datetime(2015, 11, 1, 3, 1), ESTs),
+            (datetime(2016, 3, 13, 0, 59), ESTs),
+            (datetime(2016, 3, 13, 3, 1), EDTs),
+            (datetime(2016, 11, 6, 0, 59), EDTs),
+            (datetime(2016, 11, 6, 3, 1), ESTs),
         ]
 
         with TZWinContext("Eastern Standard Time"):

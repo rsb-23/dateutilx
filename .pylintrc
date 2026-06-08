@@ -28,10 +28,10 @@ disable=
 	# W
 	abstract-method, #4keep
 	attribute-defined-outside-init, #79 k
-	fixme, #24
+	fixme, #keep
 	global-statement, #7 k
-	protected-access, #39
-	redefined-outer-name, #20
+	protected-access, #39 k
+	redefined-outer-name, #20 k
 	unused-argument, #keep
 	unused-wildcard-import, #2keep
 	wildcard-import, #2keep

@@ -507,7 +507,7 @@ class ParserTest(unittest.TestCase):
             (datetime(2060, 2, 21, 0, 0, 0), ("https://biz.yahoo.com/ipo/p/", ".html")),
         )
 
-    def test_fuzzy_a_m_p_m_problem(self):
+    def test_fuzzy_am_pm_problem(self):
         # Sometimes fuzzy parsing results in AM/PM flag being set without
         # hours - if it's fuzzy it should ignore that.
         s1 = "I have a meeting on March 1, 1974."
@@ -522,7 +522,7 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(parse(s3, fuzzy=True), datetime(2003, 12, 3, 3))
         self.assertEqual(parse(s4, fuzzy=True), datetime(2003, 12, 3, 3))
 
-    def test_fuzzy_ignore_a_m_p_m(self):
+    def test_fuzzy_ignore_am_pm(self):
         s1 = "Jan 29, 1945 14:45 AM I going to see you there?"
         with pytest.warns(UnknownTimezoneWarning):
             res = parse(s1, fuzzy=True)
@@ -556,7 +556,7 @@ class ParserTest(unittest.TestCase):
         self.assertRaisesRegex(ParserError, "Unknown string format", parse, "04/04/04 +32423", fuzzy_with_tokens=True)
         self.assertRaisesRegex(ParserError, "Unknown string format", parse, "04/04/0d4", fuzzy_with_tokens=True)
 
-    def test_increasing_c_time(self):
+    def test_increasing_ctime(self):
         # This test will check 200 different years, every month, every day,
         # every hour, every minute, every second, and every weekday, using
         # a delta of more or less 1 year, 1 month, 1 day, 1 minute and
@@ -671,7 +671,7 @@ class ParserTest(unittest.TestCase):
         res = parse(dtstr, fuzzy=True)
         assert res == datetime(2017, 7, 17, 6, 15)
 
-    def test_hm_b_y(self):
+    def test_h_mby(self):
         # See GH#483
         dtstr = "02:17NOV2017"
         res = parse(dtstr, default=self.default)
@@ -740,8 +740,7 @@ class TestParseUnimplementedCases:
     @pytest.mark.xfail
     def test_somewhat_ambiguous_string(self):
         # Ref: github issue #487
-        # The parser is choosing the wrong part for hour
-        # causing datetime to raise an exception.
+        # The parser is choosing the wrong part for hour causing datetime to raise an exception.
         dtstr = "1237 PM BRST Mon Oct 30 2017"
         res = parse(dtstr, tzinfo=self.tzinfos)
         assert res == datetime(2017, 10, 30, 12, 37, tzinfo=self.tzinfos)

@@ -325,18 +325,6 @@ def test_isoparser_invalid_sep(sep):
         isoparser(sep=sep)
 
 
-# This only fails on Python 3
-@pytest.mark.xfail(True, reason="Fails on Python 3 only")
-def test_isoparser_byte_sep():
-    dt = datetime(2017, 12, 6, 12, 30, 45)
-    dt_str = dt.isoformat(sep="T")
-
-    dt_rt = isoparser(sep=b"T").isoparse(dt_str)
-
-    assert dt == dt_rt
-
-
-###
 # Test parse_tzstr
 @pytest.mark.parametrize("tzoffset", FULL_TZOFFSETS)
 def test_parse_tzstr(tzoffset):
