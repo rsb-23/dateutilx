@@ -14,7 +14,7 @@ jobs:
       - uses: rsb-23/actions/checkout@main
       - uses: rsb-23/actions/setup-python@main
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Install dependencies
         run: |
@@ -24,5 +24,5 @@ jobs:
 
       - name: Run pre-commit
         env:
-          SKIP: mypy, pylint, no-commit-to-branch
+          SKIP: mypy, pylint, no-commit-to-branch, pyupgrade
         run: pre-commit run --all-files

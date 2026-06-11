@@ -12,8 +12,8 @@ def __getattr__(name):
     import importlib
 
     if name in __all__:
-        return importlib.import_module("." + name, __name__)
-    raise AttributeError("module {!r} has not attribute {!r}".format(__name__, name))
+        return importlib.import_module(f".{name}", __name__)
+    raise AttributeError(f"module {__name__!r} has not attribute {name!r}")
 
 
 def __dir__():

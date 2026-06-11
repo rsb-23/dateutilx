@@ -31,7 +31,7 @@ def main(metadata_file):
 
     if not os.path.isfile(metadata["tzdata_file"]):
         for ii, releases_url in enumerate(releases_urls):
-            print("Downloading tz file from mirror {ii}".format(ii=ii))
+            print(f"Downloading tz file from mirror {ii}")
             try:
                 request.urlretrieve(os.path.join(releases_url, metadata["tzdata_file"]), metadata["tzdata_file"])
             except urllib_error.URLError as e:

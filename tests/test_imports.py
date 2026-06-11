@@ -1,9 +1,11 @@
 import sys
+from types import ModuleType
 
 import pytest
 
-MODULE_TYPE = type(sys)
+from dateutil.helper import is_windows_os
 
+HOST_IS_WINDOWS = is_windows_os()
 
 # Tests live in datetutil/test which cause a RuntimeWarning for Python2 builds.
 # But since we expect lazy imports tests to fail for Python < 3.7  we'll ignore those
@@ -45,17 +47,11 @@ def test_lazy_import(clean_import, module):
 
     import dateutil
 
-    if sys.version_info < (3, 7):
-        pytest.xfail("Lazy loading does not work for Python < 3.7")
-
     mod_obj = getattr(dateutil, module, None)
-    assert isinstance(mod_obj, MODULE_TYPE)
+    assert isinstance(mod_obj, ModuleType)
 
-    mod_imported = importlib.import_module("dateutil.%s" % module)
+    mod_imported = importlib.import_module(f"dateutil.{module}")
     assert mod_obj is mod_imported
-
-
-HOST_IS_WINDOWS = sys.platform.startswith("win")
 
 
 def test_import_version_str():
@@ -109,15 +105,15 @@ def test_import_relative_delta_from():
 
 
 def test_import_relative_delta_all():
-    from dateutil.relativedelta import FR, MO, SA, SU, TH, TU, WE, relativedelta
+    from dateutil.relativedelta import FR, MO, SA, SU, TH, TU, WE, RelativeDelta
 
-    for var in (relativedelta, MO, TU, WE, TH, FR, SA, SU):
+    for var in (RelativeDelta, MO, TU, WE, TH, FR, SA, SU):
         assert var is not None
 
     # In the public interface but not in all
-    from dateutil.relativedelta import weekday
+    from dateutil.relativedelta import weekdays
 
-    assert weekday is not None
+    assert weekdays is not None
 
 
 # Test that dateutil.rrule related imports work properly
@@ -131,28 +127,10 @@ def test_import_rrule_from():
 
 def test_import_rrule_all():
     # fmt: off
-    from dateutil.rrule import (
-        DAILY,
-        FR,
-        HOURLY,
-        MINUTELY,
-        MO,
-        MONTHLY,
-        SA,
-        SECONDLY,
-        SU,
-        TH,
-        TU,
-        WE,
-        WEEKLY,
-        YEARLY,
-        rrule,
-        rruleset,
-        rrulestr,
-    )
+    from dateutil.helper import Frequency
+    from dateutil.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
 
-    rr_all = (rrule, rruleset, rrulestr,
-              YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY,
+    rr_all = (rrule, rruleset, rrulestr, Frequency,
               MO, TU, WE, TH, FR, SA, SU)
     # fmt: on
 
@@ -160,9 +138,9 @@ def test_import_rrule_all():
         assert var is not None
 
     # In the public interface but not in all
-    from dateutil.rrule import weekday
+    from dateutil.rrule import weekdays
 
-    assert weekday is not None
+    assert weekdays is not None
 
 
 # Test that dateutil.tz related imports work properly
@@ -175,9 +153,12 @@ def test_import_tz_from():
 
 
 def test_import_tz_all():
+    # pylint: disable=w0641
     # fmt: off
     from dateutil.tz import (  # noqa: F401
         UTC,
+        TzWin,
+        TzWinLocal,
         datetime_ambiguous,
         datetime_exists,
         gettz,
@@ -189,8 +170,6 @@ def test_import_tz_all():
         tzrange,
         tzstr,
         tzutc,
-        tzwin,
-        tzwinlocal,
     )
 
     tz_all = ["tzutc", "tzoffset", "tzlocal", "tzfile", "tzrange",
@@ -198,7 +177,7 @@ def test_import_tz_all():
               "datetime_exists", "resolve_imaginary", "UTC"]
     # fmt: on
 
-    tz_all += ["tzwin", "tzwinlocal"] if sys.platform.startswith("win") else []
+    tz_all += ["TzWin", "TzWinLocal"] if HOST_IS_WINDOWS else []
     lvars = locals()
 
     for var in tz_all:
@@ -218,9 +197,9 @@ def test_import_tz_windows_from():
 
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_star():
-    from dateutil.tzwin import tzwin, tzwinlocal
+    from dateutil.tzwin import TzWin, TzWinLocal
 
-    tzwin_all = [tzwin, tzwinlocal]
+    tzwin_all = [TzWin, TzWinLocal]
 
     for var in tzwin_all:
         assert var is not None

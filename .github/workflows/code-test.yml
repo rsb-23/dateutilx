@@ -1,0 +1,43 @@
+name: Unit Tests
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    types: [ reopened ]
+  push:
+
+env:
+  PY_BASE_VERSION: "3.10"
+
+jobs:
+  coverage-test: # Tests code for base version and coverage
+    runs-on: windows-latest
+    steps:
+      - &checkout
+        uses: rsb-23/actions/checkout@main
+      - uses: &test-runner ./.github/test-runner
+        with:
+          python-version: ${{ env.PY_BASE_VERSION }}
+          coverage: true
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+
+  all-tests: # Tests code for higher version in ubuntu
+    needs: coverage-test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - *checkout
+      - uses: *test-runner
+        with:
+          python-version: ${{ matrix.python-version }}

@@ -20,9 +20,11 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [ flake8-pyproject ]
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.2
+  - repo: local
     hooks:
-      - id: pyupgrade
-        args: [--py3-plus]
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [ python ]
+        args: [ "-rn", "-sn" ]

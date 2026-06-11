@@ -27,7 +27,7 @@ class PicklableMixin:
 
         return nobj
 
-    def assertPicklable(self, obj, singleton=False, asfile=False, dump_kwargs=None, load_kwargs=None):
+    def assert_picklable(self, obj, singleton=False, asfile=False, dump_kwargs=None, load_kwargs=None):
         """
         Assert that an object can be pickled and unpickled. This assertion
         assumes that the desired behavior is that the unpickled object compares
@@ -77,7 +77,7 @@ class TZContextBase:
     @classmethod
     def tz_change_disallowed_message(cls):
         """Generate instructions on how to allow tz changes"""
-        msg = "Changing time zone not allowed. Set {envar} to {gval} " "if you would like to allow this behavior"
+        msg = "Changing time zone not allowed. Set {envar} to {gval} if you would like to allow this behavior"
 
         return msg.format(envar=cls._guard_var_name, gval=cls._guard_allows_change)
 
@@ -92,7 +92,7 @@ class TZContextBase:
         self._old_tz = self.get_current_tz()
         self.set_current_tz(self.tzval)
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         if self._old_tz is not None:
             self.set_current_tz(self._old_tz)
 
@@ -119,13 +119,13 @@ class TZEnvContext(TZContextBase):
     _guard_allows_change = False
 
     def get_current_tz(self):
-        return os.environ.get("TZ", UnsetTz)
+        return os.environ.get("TZ", UNSET_TZ)
 
-    def set_current_tz(self, tzval):
-        if tzval is UnsetTz and "TZ" in os.environ:
+    def set_current_tz(self, tzname):
+        if tzname is UNSET_TZ and "TZ" in os.environ:
             del os.environ["TZ"]
         else:
-            os.environ["TZ"] = tzval
+            os.environ["TZ"] = tzname
 
         time.tzset()
 
@@ -140,20 +140,18 @@ class TZWinContext(TZContextBase):
     """
 
     def get_current_tz(self):
-        p = subprocess.Popen(["tzutil", "/g"], stdout=subprocess.PIPE)
-
-        ctzname, err = p.communicate()
-        ctzname = ctzname.decode()  # Popen returns
+        with subprocess.Popen(["tzutil", "/g"], stdout=subprocess.PIPE) as p:
+            ctzname, err = p.communicate()
+            ctzname = ctzname.decode()  # Popen returns
 
         if p.returncode:
-            raise OSError("Failed to get current time zone: " + err)
+            raise OSError(f"Failed to get current time zone: {err}")
 
         return ctzname
 
     def set_current_tz(self, tzname):
-        p = subprocess.Popen('tzutil /s "' + tzname + '"')
-
-        out, err = p.communicate()
+        with subprocess.Popen(["tzutil", "/s", tzname], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+            _, err = p.communicate()
 
         if p.returncode:
             raise OSError("Failed to set current time zone: " + (err or "Unknown error."))
@@ -184,9 +182,6 @@ class NotAValueClass:
     __eq__ = __req__ = _op
     __le__ = __rle__ = _op
     __ge__ = __rge__ = _op
-
-
-NotAValue = NotAValueClass()
 
 
 class ComparesEqualClass:
@@ -220,13 +215,10 @@ class ComparesEqualClass:
     __rgt__ = __gt__
 
 
-ComparesEqual = ComparesEqualClass()
-
-
 class UnsetTzClass:
     """Sentinel class for unset time zone variable"""
 
-    pass
 
-
-UnsetTz = UnsetTzClass()
+COMPARES_EQUAL = ComparesEqualClass()
+NOT_A_VALUE = NotAValueClass()
+UNSET_TZ = UnsetTzClass()

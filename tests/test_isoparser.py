@@ -1,3 +1,4 @@
+# pylint: disable=c0103
 import itertools as it
 from datetime import date, datetime, time, timedelta
 
@@ -77,7 +78,7 @@ def test_year_month_day(dt, fmt):
 
 def _isoparse_date_and_time(dt, date_fmt, time_fmt, tzoffset, microsecond_precision=None):
     tzi, offset_str = tzoffset
-    fmt = date_fmt + "T" + time_fmt
+    fmt = f"{date_fmt}T{time_fmt}"
     dt = dt.replace(tzinfo=tzi)
     dtstr = dt.strftime(fmt)
 
@@ -311,7 +312,7 @@ def test_iso_raises(isostr, exception):
 @pytest.mark.parametrize("sep_act, valid_sep, exception", [("T", "C", ValueError), ("C", "T", ValueError)])
 def test_iso_with_sep_raises(sep_act, valid_sep, exception):
     parser = isoparser(sep=valid_sep)
-    isostr = "2012-04-25" + sep_act + "01:25:00"
+    isostr = f"2012-04-25{sep_act}01:25:00"
     with pytest.raises(exception):
         parser.isoparse(isostr)
 
@@ -324,18 +325,6 @@ def test_isoparser_invalid_sep(sep):
         isoparser(sep=sep)
 
 
-# This only fails on Python 3
-@pytest.mark.xfail(True, reason="Fails on Python 3 only")
-def test_isoparser_byte_sep():
-    dt = datetime(2017, 12, 6, 12, 30, 45)
-    dt_str = dt.isoformat(sep="T")
-
-    dt_rt = isoparser(sep=b"T").isoparse(dt_str)
-
-    assert dt == dt_rt
-
-
-###
 # Test parse_tzstr
 @pytest.mark.parametrize("tzoffset", FULL_TZOFFSETS)
 def test_parse_tzstr(tzoffset):
@@ -351,7 +340,7 @@ def test_parse_tzstr(tzoffset):
 def test_parse_tzstr_zero_as_utc(tzstr, zero_as_utc):
     tzi = isoparser().parse_tzstr(tzstr, zero_as_utc=zero_as_utc)
     assert tzi == UTC
-    assert (type(tzi) is tz.tzutc) == zero_as_utc
+    assert isinstance(tzi, tz.tzutc) == zero_as_utc
 
 
 @pytest.mark.parametrize(
@@ -427,14 +416,11 @@ def test_parse_isodate_error_text():
 ###
 # Test parse_isotime
 def __make_time_examples():
-    outputs = []
-
     # HH
     time_h = [time(0), time(8), time(22)]
     time_h_fmts = ["%H"]
 
-    outputs.append(it.product(time_h, time_h_fmts))
-
+    outputs = [it.product(time_h, time_h_fmts)]
     # HHMM / HH:MM
     time_hm = [time(0, 0), time(0, 30), time(8, 47), time(16, 1)]
     time_hm_fmts = ["%H%M", "%H:%M"]
@@ -458,7 +444,7 @@ def __make_time_examples():
     outputs = list(map(list, outputs))
 
     # Time zones
-    ex_naive = list(it.chain.from_iterable(x[0:2] for x in outputs))
+    ex_naive = list(it.chain.from_iterable(x[:2] for x in outputs))
     o = it.product(ex_naive, TZOFFSETS)  # ((time, fmt), (tzinfo, offsetstr))
     o = ((t.replace(tzinfo=tzi), fmt + off_str) for (t, fmt), (tzi, off_str) in o)
 

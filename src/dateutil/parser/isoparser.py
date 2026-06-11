@@ -12,7 +12,7 @@ import re
 from datetime import date, datetime, time, timedelta
 from functools import wraps
 
-from dateutil import tz
+from dateutil.tz import UTC, TzOffset
 
 __all__ = ["isoparse", "isoparser"]
 
@@ -54,7 +54,7 @@ class IsoParser:
         self._sep = sep
 
     @_takes_ascii
-    def isoparse(self, dt_str):
+    def isoparse(self, dt_str: str):
         """
         Parse an ISO-8601 datetime string into a :class:`datetime.datetime`.
 
@@ -155,7 +155,7 @@ class IsoParser:
         """
         components, pos = self._parse_isodate(datestr)
         if pos < len(datestr):
-            raise ValueError("String contains unknown ISO " + "components: {!r}".format(datestr.decode("ascii")))
+            raise ValueError(f"String contains unknown ISO components: {datestr.decode('ascii')!r}")
         return date(*components)
 
     @_takes_ascii
@@ -213,7 +213,7 @@ class IsoParser:
             raise ValueError("ISO string too short")
 
         # Year
-        components[0] = int(dt_str[0:4])
+        components[0] = int(dt_str[:4])
         pos = 4
         if pos >= len_str:
             return components, pos
@@ -232,8 +232,7 @@ class IsoParser:
         if pos >= len_str:
             if has_sep:
                 return components, pos
-            else:
-                raise ValueError("Invalid ISO format")
+            raise ValueError("Invalid ISO format")
 
         if has_sep:
             if dt_str[pos : pos + 1] != self._DATE_SEP:
@@ -251,7 +250,7 @@ class IsoParser:
             raise ValueError("ISO string too short")
 
         # All ISO formats start with the year
-        year = int(dt_str[0:4])
+        year = int(dt_str[:4])
 
         has_sep = dt_str[4:5] == self._DATE_SEP
 
@@ -282,7 +281,7 @@ class IsoParser:
             pos += 3
 
             if ordinal_day < 1 or ordinal_day > (365 + calendar.isleap(year)):
-                raise ValueError("Invalid ordinal day" + " {} for year {}".format(ordinal_day, year))
+                raise ValueError(f"Invalid ordinal day {ordinal_day} for year {year}")
 
             base_date = date(year, 1, 1) + timedelta(days=ordinal_day - 1)
 
@@ -310,10 +309,10 @@ class IsoParser:
             Returns a :class:`datetime.date`
         """
         if not 0 < week < 54:
-            raise ValueError("Invalid week: {}".format(week))
+            raise ValueError(f"Invalid week: {week}")
 
         if not 0 < day < 8:  # Range is 1-7
-            raise ValueError("Invalid weekday: {}".format(day))
+            raise ValueError(f"Invalid weekday: {day}")
 
         # Get week 1 for the specific year:
         jan_4 = date(year, 1, 4)  # Week 1 always has January 4th in it
@@ -325,7 +324,7 @@ class IsoParser:
 
     def _parse_isotime(self, timestr):
         len_str = len(timestr)
-        components = [0, 0, 0, 0, None]
+        components: list = [0, 0, 0, 0, None]
         pos = 0
         comp = -1
 
@@ -369,23 +368,22 @@ class IsoParser:
         if pos < len_str:
             raise ValueError("Unused components in ISO string")
 
-        if components[0] == 24:
-            # Standard supports 00:00 and 24:00 as representations of midnight
-            if any(component != 0 for component in components[1:4]):
-                raise ValueError("Hour may only be 24 at 24:00:00.000")
+        # Standard supports 00:00 and 24:00 as representations of midnight
+        if components[0] == 24 and any(component != 0 for component in components[1:4]):
+            raise ValueError("Hour may only be 24 at 24:00:00.000")
 
         return components
 
-    def _parse_tzstr(self, tzstr, zero_as_utc=True):
-        if tzstr == b"Z" or tzstr == b"z":
-            return tz.UTC
+    def _parse_tzstr(self, tzstr: str | bytes, zero_as_utc=True):
+        if tzstr in (b"Z", b"z"):
+            return UTC
 
         if len(tzstr) not in {3, 5, 6}:
             raise ValueError("Time zone offset must be 1, 3, 5 or 6 characters")
 
-        if tzstr[0:1] == b"-":
+        if tzstr[:1] == b"-":
             mult = -1
-        elif tzstr[0:1] == b"+":
+        elif tzstr[:1] == b"+":
             mult = 1
         else:
             raise ValueError("Time zone offset requires sign")
@@ -397,15 +395,15 @@ class IsoParser:
             minutes = int(tzstr[(4 if tzstr[3:4] == self._TIME_SEP else 3) :])
 
         if zero_as_utc and hours == 0 and minutes == 0:
-            return tz.UTC
-        else:
-            if minutes > 59:
-                raise ValueError("Invalid minutes in time zone offset")
+            return UTC
 
-            if hours > 23:
-                raise ValueError("Invalid hours in time zone offset")
+        if minutes > 59:
+            raise ValueError("Invalid minutes in time zone offset")
 
-            return tz.tzoffset(None, mult * (hours * 60 + minutes) * 60)
+        if hours > 23:
+            raise ValueError("Invalid hours in time zone offset")
+
+        return TzOffset(None, mult * (hours * 60 + minutes) * 60)
 
 
 isoparser = IsoParser
