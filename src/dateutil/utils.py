@@ -53,9 +53,7 @@ def default_tzinfo(dt, tzinfo):
     :return:
         Returns an aware :py:class:`datetime.datetime`.
     """
-    if dt.tzinfo is not None:
-        return dt
-    return dt.replace(tzinfo=tzinfo)
+    return dt if dt.tzinfo is not None else dt.replace(tzinfo=tzinfo)
 
 
 def within_delta(dt1, dt2, delta):

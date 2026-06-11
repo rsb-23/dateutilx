@@ -249,16 +249,16 @@ class ParserInfo:
 
     WEEKDAYS = [
         ("Mon", "Monday"),
-        ("Tue", "Tuesday"),  # TODO: "Tues"
+        ("Tue", "Tues", "Tuesday"),
         ("Wed", "Wednesday"),
-        ("Thu", "Thursday"),  # TODO: "Thurs"
+        ("Thu", "Thurs", "Thursday"),
         ("Fri", "Friday"),
         ("Sat", "Saturday"),
         ("Sun", "Sunday"),
     ]
     MONTHS = [
         ("Jan", "January"),
-        ("Feb", "February"),  # TODO: "Febr"
+        ("Feb", "Febr", "February"),
         ("Mar", "March"),
         ("Apr", "April"),
         ("May", "May"),
@@ -294,7 +294,7 @@ class ParserInfo:
         self._century = self._year // 100 * 100
 
     @staticmethod
-    def _convert(lst):
+    def _convert(lst) -> dict[str, int]:
         dct = {}
         for i, val in enumerate(lst):
             if isinstance(val, tuple):
@@ -308,24 +308,14 @@ class ParserInfo:
         return name.lower() in self._jump
 
     def weekday(self, name):
-        try:
-            return self._weekdays[name.lower()]
-        except KeyError:
-            pass
-        return None
+        return self._weekdays.get(name.lower())
 
     def month(self, name):
-        try:
-            return self._months[name.lower()] + 1
-        except KeyError:
-            pass
-        return None
+        idx = self._months.get(name.lower())
+        return None if idx is None else idx + 1
 
     def hms(self, name):
-        try:
-            return self._hms[name.lower()]
-        except KeyError:
-            return None
+        return self._hms.get(name.lower())
 
     def ampm(self, name):
         try:
@@ -340,10 +330,7 @@ class ParserInfo:
         return name.lower() in self._utczone
 
     def tzoffset(self, name):
-        if name in self._utczone:
-            return 0
-
-        return self.TZOFFSET.get(name)
+        return 0 if name in self._utczone else self.TZOFFSET.get(name)
 
     def convertyear(self, year, century_specified=False):
         """
@@ -634,15 +621,12 @@ class Parser:
         try:
             ret = self._build_naive(res, default)
         except ValueError as e:
-            raise ParserError(str(e) + ": %s", timestr) from e
+            raise ParserError(f"{str(e)}: %s", timestr) from e
 
         if not ignoretz:
             ret = self._build_tzaware(ret, res, tzinfos)
 
-        if kwargs.get("fuzzy_with_tokens", False):
-            return ret, skipped_tokens
-
-        return ret
+        return (ret, skipped_tokens) if kwargs.get("fuzzy_with_tokens", False) else ret
 
     class _Result(_ResultBase):
         # fmt: off
@@ -1086,15 +1070,12 @@ class Parser:
         return hour
 
     def _parse_min_sec(self, value):
-        # TODO: Every usage of this function sets res.second to the return
-        # value. Are there any cases where second will be returned as None and
+        # TODO: Every usage of this function sets res.second to the return value.
+        # Are there any cases where second will be returned as None and
         # we *don't* want to set res.second = None?
         minute = int(value)
-        second = None
-
         sec_remainder = value % 1
-        if sec_remainder:
-            second = int(60 * sec_remainder)
+        second = int(60 * sec_remainder) if sec_remainder else None
         return minute, second
 
     def _parse_hms(self, idx, tokens, info, hms_idx):
@@ -1186,13 +1167,12 @@ class Parser:
         elif res.tzoffset:
             aware = naive.replace(tzinfo=tz.tzoffset(res.tzname, res.tzoffset))
 
-        elif not res.tzname and not res.tzoffset:
+        elif not res.tzname:
             # i.e. no timezone information was found.
             aware = naive
 
-        elif res.tzname:
-            # tz-like string was parsed but we don't know what to do
-            # with it
+        else:
+            # tz-like string was parsed but we don't know what to do with it
             warnings.warn(
                 f"tzname {res.tzname} identified but not understood.  "
                 "Pass `tzinfos` argument in order to correctly return a timezone-aware datetime.  "
@@ -1376,9 +1356,8 @@ class _TzParser:
         _tmp_list = [x for x in re.split(r"([,:.]|[a-zA-Z]+|[0-9]+)", tzstr) if x]
         used_idxs = []
         try:
-            len_l = len(_tmp_list)
+            i, len_l = 0, len(_tmp_list)
 
-            i = 0
             while i < len_l:
                 # BRST+3[BRDT[+2]]
                 j = i
@@ -1576,5 +1555,3 @@ parserinfo = ParserInfo
 _resultbase = _ResultBase
 _timelex = _TimeLex
 _tzparser = _TzParser
-
-# vim:ts=4:sw=4:et

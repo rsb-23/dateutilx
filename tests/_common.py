@@ -145,7 +145,7 @@ class TZWinContext(TZContextBase):
             ctzname = ctzname.decode()  # Popen returns
 
         if p.returncode:
-            raise OSError("Failed to get current time zone: " + err)
+            raise OSError(f"Failed to get current time zone: {err}")
 
         return ctzname
 

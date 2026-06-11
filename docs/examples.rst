@@ -1478,5 +1478,3 @@ tzwinlocal examples
 .. doctest:: tzwinlocal
 
     >>> tz = tzwinlocal()
-
-# vim:ts=4:sw=4:et

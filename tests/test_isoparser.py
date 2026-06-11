@@ -78,7 +78,7 @@ def test_year_month_day(dt, fmt):
 
 def _isoparse_date_and_time(dt, date_fmt, time_fmt, tzoffset, microsecond_precision=None):
     tzi, offset_str = tzoffset
-    fmt = date_fmt + "T" + time_fmt
+    fmt = f"{date_fmt}T{time_fmt}"
     dt = dt.replace(tzinfo=tzi)
     dtstr = dt.strftime(fmt)
 
@@ -416,14 +416,11 @@ def test_parse_isodate_error_text():
 ###
 # Test parse_isotime
 def __make_time_examples():
-    outputs = []
-
     # HH
     time_h = [time(0), time(8), time(22)]
     time_h_fmts = ["%H"]
 
-    outputs.append(it.product(time_h, time_h_fmts))
-
+    outputs = [it.product(time_h, time_h_fmts)]
     # HHMM / HH:MM
     time_hm = [time(0, 0), time(0, 30), time(8, 47), time(16, 1)]
     time_hm_fmts = ["%H%M", "%H:%M"]
@@ -447,7 +444,7 @@ def __make_time_examples():
     outputs = list(map(list, outputs))
 
     # Time zones
-    ex_naive = list(it.chain.from_iterable(x[0:2] for x in outputs))
+    ex_naive = list(it.chain.from_iterable(x[:2] for x in outputs))
     o = it.product(ex_naive, TZOFFSETS)  # ((time, fmt), (tzinfo, offsetstr))
     o = ((t.replace(tzinfo=tzi), fmt + off_str) for (t, fmt), (tzi, off_str) in o)
 

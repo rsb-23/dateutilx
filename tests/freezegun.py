@@ -25,9 +25,7 @@ class _FakeDatetime(datetime, metaclass=_DatetimeMeta):
 
     @classmethod
     def now(cls, tz=None):
-        if tz is not None:
-            return cls.frozen_.astimezone(tz)
-        return cls.frozen_
+        return cls.frozen_ if tz is None else cls.frozen_.astimezone(tz)
 
     def __hash__(self):
         return dt.datetime.__hash__(self)

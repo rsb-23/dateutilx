@@ -36,7 +36,6 @@ class TzWinFoldMixin:
             t_n = dston - timedelta(minutes=30)
 
             t0_u = t_n.replace(tzinfo=tzi).astimezone(tz.UTC)
-            t1_u = t0_u + timedelta(hours=1)
         else:
             # Get 1 hour before the first ambiguous date
             t_n = dstoff - timedelta(minutes=30)
@@ -44,8 +43,8 @@ class TzWinFoldMixin:
             t0_u = t_n.replace(tzinfo=tzi).astimezone(tz.UTC)
             t_n += timedelta(hours=1)  # Naive ambiguous date
             t0_u = t0_u + timedelta(hours=1)  # First ambiguous date
-            t1_u = t0_u + timedelta(hours=1)  # Second ambiguous date
 
+        t1_u = t0_u + timedelta(hours=1)
         return t_n, t0_u, t1_u
 
     def test_fold_positive_utc_offset(self):

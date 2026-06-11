@@ -168,9 +168,7 @@ class RelativeDeltaTest(unittest.TestCase):
 
     def test_absolute_value_positive(self):
         rd_base = relativedelta(years=1, months=5, days=2, hours=3, minutes=5, seconds=2, microseconds=12)
-        rd_expected = rd_base
-
-        self.assertEqual(abs(rd_base), rd_expected)
+        self.assertEqual(abs(rd_base), rd_base)
 
     def test_comparison(self):
         d1 = relativedelta(years=1, months=1, days=1, leapdays=0, hours=1, minutes=1, seconds=1, microseconds=1)
@@ -348,21 +346,19 @@ class RelativeDeltaOperationTest(unittest.TestCase):
         self.assertIs(relativedelta(days=1) + NOT_A_VALUE, NOT_A_VALUE)
 
     def test_addition_float_value(self):
-        self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=float(1)), datetime(2000, 1, 2))
-        self.assertEqual(datetime(2000, 1, 1) + relativedelta(months=float(1)), datetime(2000, 2, 1))
-        self.assertEqual(datetime(2000, 1, 1) + relativedelta(years=float(1)), datetime(2001, 1, 1))
+        self.assertEqual(datetime(2000, 1, 1) + relativedelta(days=1.0), datetime(2000, 1, 2))
+        self.assertEqual(datetime(2000, 1, 1) + relativedelta(months=1.0), datetime(2000, 2, 1))
+        self.assertEqual(datetime(2000, 1, 1) + relativedelta(years=1.0), datetime(2001, 1, 1))
 
     def test_addition_float_fractionals(self):
-        self.assertEqual(datetime(2000, 1, 1, 0) + relativedelta(days=float(0.5)), datetime(2000, 1, 1, 12))
-        self.assertEqual(datetime(2000, 1, 1, 0, 0) + relativedelta(hours=float(0.5)), datetime(2000, 1, 1, 0, 30))
+        self.assertEqual(datetime(2000, 1, 1, 0) + relativedelta(days=0.5), datetime(2000, 1, 1, 12))
+        self.assertEqual(datetime(2000, 1, 1, 0, 0) + relativedelta(hours=0.5), datetime(2000, 1, 1, 0, 30))
+        self.assertEqual(datetime(2000, 1, 1, 0, 0, 0) + relativedelta(minutes=0.5), datetime(2000, 1, 1, 0, 0, 30))
         self.assertEqual(
-            datetime(2000, 1, 1, 0, 0, 0) + relativedelta(minutes=float(0.5)), datetime(2000, 1, 1, 0, 0, 30)
+            datetime(2000, 1, 1, 0, 0, 0, 0) + relativedelta(seconds=0.5), datetime(2000, 1, 1, 0, 0, 0, 500000)
         )
         self.assertEqual(
-            datetime(2000, 1, 1, 0, 0, 0, 0) + relativedelta(seconds=float(0.5)), datetime(2000, 1, 1, 0, 0, 0, 500000)
-        )
-        self.assertEqual(
-            datetime(2000, 1, 1, 0, 0, 0, 0) + relativedelta(microseconds=float(500000.25)),
+            datetime(2000, 1, 1, 0, 0, 0, 0) + relativedelta(microseconds=500000.25),
             datetime(2000, 1, 1, 0, 0, 0, 500000),
         )
 
@@ -570,56 +566,35 @@ class RelativeDeltaFractionTest(unittest.TestCase):
         self.assertEqual(rd3.normalized(), relativedelta(days=-2, hours=-2, minutes=0, seconds=-2, microseconds=-3))
 
 
-class RelativeDeltaWeeksPropertyGetterTest(unittest.TestCase):
-    """Test the weeks property getter"""
+class TestRelativeDeltaWeeksProperty:
+    # fmt: off
+    @pytest.mark.parametrize(
+        "days,expected_days,expected_weeks",
+        [
+            (1, 1, 0), (-1, -1, 0),
+            (8, 8, 1), (-8, -8, -1)
+        ],
+    )
+    # fmt: on
+    def test_weeks_property_getter(self, days, expected_days, expected_weeks):
+        rd = relativedelta(days=days)
 
-    def test_one_day(self):
-        rd = relativedelta(days=1)
-        self.assertEqual(rd.days, 1)
-        self.assertEqual(rd.weeks, 0)
+        assert rd.days == expected_days
+        assert rd.weeks == expected_weeks
 
-    def test_minus_one_day(self):
-        rd = relativedelta(days=-1)
-        self.assertEqual(rd.days, -1)
-        self.assertEqual(rd.weeks, 0)
+    @pytest.mark.parametrize(
+        "initial_days,set_weeks,expected_days,expected_weeks",
+        [
+            (1, 1, 8, 1),  # add 7 days
+            (-1, 1, 6, 0),  # add 7 days
+            (8, -1, -6, 0),  # change from 1 week, 1 day to -1 week, 1 day
+            (-8, -1, -8, -1),  # does not change anything
+        ],
+    )
+    def test_weeks_property_setter(self, initial_days, set_weeks, expected_days, expected_weeks):
+        """Test the weeks setter which makes a "smart" update of the days attribute"""
+        rd = relativedelta(days=initial_days)
+        rd.weeks = set_weeks
 
-    def test_height_days(self):
-        rd = relativedelta(days=8)
-        self.assertEqual(rd.days, 8)
-        self.assertEqual(rd.weeks, 1)
-
-    def test_minus_height_days(self):
-        rd = relativedelta(days=-8)
-        self.assertEqual(rd.days, -8)
-        self.assertEqual(rd.weeks, -1)
-
-
-class RelativeDeltaWeeksPropertySetterTest(unittest.TestCase):
-    """Test the weeks setter which makes a "smart" update of the days attribute"""
-
-    def test_one_day_set_one_week(self):
-        rd = relativedelta(days=1)
-        rd.weeks = 1  # add 7 days
-        self.assertEqual(rd.days, 8)
-        self.assertEqual(rd.weeks, 1)
-
-    def test_minus_one_day_set_one_week(self):
-        rd = relativedelta(days=-1)
-        rd.weeks = 1  # add 7 days
-        self.assertEqual(rd.days, 6)
-        self.assertEqual(rd.weeks, 0)
-
-    def test_height_days_set_minus_one_week(self):
-        rd = relativedelta(days=8)
-        rd.weeks = -1  # change from 1 week, 1 day to -1 week, 1 day
-        self.assertEqual(rd.days, -6)
-        self.assertEqual(rd.weeks, 0)
-
-    def test_minus_height_days_set_minus_one_week(self):
-        rd = relativedelta(days=-8)
-        rd.weeks = -1  # does not change anything
-        self.assertEqual(rd.days, -8)
-        self.assertEqual(rd.weeks, -1)
-
-
-# vim:ts=4:sw=4:et
+        assert rd.days == expected_days
+        assert rd.weeks == expected_weeks

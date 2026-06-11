@@ -155,7 +155,7 @@ class IsoParser:
         """
         components, pos = self._parse_isodate(datestr)
         if pos < len(datestr):
-            raise ValueError("String contains unknown ISO " + f"components: {datestr.decode('ascii')!r}")
+            raise ValueError(f"String contains unknown ISO components: {datestr.decode('ascii')!r}")
         return date(*components)
 
     @_takes_ascii
@@ -213,7 +213,7 @@ class IsoParser:
             raise ValueError("ISO string too short")
 
         # Year
-        components[0] = int(dt_str[0:4])
+        components[0] = int(dt_str[:4])
         pos = 4
         if pos >= len_str:
             return components, pos
@@ -250,7 +250,7 @@ class IsoParser:
             raise ValueError("ISO string too short")
 
         # All ISO formats start with the year
-        year = int(dt_str[0:4])
+        year = int(dt_str[:4])
 
         has_sep = dt_str[4:5] == self._DATE_SEP
 
@@ -281,7 +281,7 @@ class IsoParser:
             pos += 3
 
             if ordinal_day < 1 or ordinal_day > (365 + calendar.isleap(year)):
-                raise ValueError("Invalid ordinal day" + f" {ordinal_day} for year {year}")
+                raise ValueError(f"Invalid ordinal day {ordinal_day} for year {year}")
 
             base_date = date(year, 1, 1) + timedelta(days=ordinal_day - 1)
 
@@ -368,10 +368,9 @@ class IsoParser:
         if pos < len_str:
             raise ValueError("Unused components in ISO string")
 
-        if components[0] == 24:
-            # Standard supports 00:00 and 24:00 as representations of midnight
-            if any(component != 0 for component in components[1:4]):
-                raise ValueError("Hour may only be 24 at 24:00:00.000")
+        # Standard supports 00:00 and 24:00 as representations of midnight
+        if components[0] == 24 and any(component != 0 for component in components[1:4]):
+            raise ValueError("Hour may only be 24 at 24:00:00.000")
 
         return components
 
@@ -382,9 +381,9 @@ class IsoParser:
         if len(tzstr) not in {3, 5, 6}:
             raise ValueError("Time zone offset must be 1, 3, 5 or 6 characters")
 
-        if tzstr[0:1] == b"-":
+        if tzstr[:1] == b"-":
             mult = -1
-        elif tzstr[0:1] == b"+":
+        elif tzstr[:1] == b"+":
             mult = 1
         else:
             raise ValueError("Time zone offset requires sign")

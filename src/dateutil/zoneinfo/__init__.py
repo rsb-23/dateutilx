@@ -4,7 +4,7 @@ from io import BytesIO
 from pkgutil import get_data
 from tarfile import TarFile
 
-from dateutil.tz import tzfile as _tzfile
+from dateutil.tz import TzFile as _TzFile
 
 __all__ = ["get_zonefile_instance", "gettz", "gettz_db_metadata"]
 
@@ -12,7 +12,7 @@ ZONEFILENAME = "dateutil-zoneinfo.tar.gz"
 METADATA_FN = "METADATA"
 
 
-class tzfile(_tzfile):
+class TzFile(_TzFile):
     def __reduce__(self):
         return gettz, (self._filename,)
 
@@ -20,7 +20,7 @@ class tzfile(_tzfile):
 def getzoneinfofile_stream():
     try:
         return BytesIO(get_data(__name__, ZONEFILENAME))
-    except OSError as e:  # TODO  switch to FileNotFoundError?
+    except FileNotFoundError as e:  # TODO  switch to FileNotFoundError?
         warnings.warn(f"I/O error({e.errno}): {e.strerror}")
         return None
 
@@ -30,14 +30,14 @@ class ZoneInfoFile:
         if zonefile_stream is not None:
             with TarFile.open(fileobj=zonefile_stream) as tf:
                 self.zones = {
-                    zf.name: tzfile(tf.extractfile(zf), filename=zf.name)
+                    zf.name: TzFile(tf.extractfile(zf), filename=zf.name)
                     for zf in tf.getmembers()
                     if zf.isfile() and zf.name != METADATA_FN
                 }
                 # deal with links: They'll point to their parent object. Less
                 # waste of memory
                 links = {zl.name: self.zones[zl.linkname] for zl in tf.getmembers() if zl.islnk() or zl.issym()}
-                self.zones.update(links)
+                self.zones |= links
                 try:
                     metadata_json = tf.extractfile(tf.getmember(METADATA_FN))
                     metadata_str = metadata_json.read().decode("UTF-8")

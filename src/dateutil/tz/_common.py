@@ -167,11 +167,9 @@ class _TzInfo(tzinfo):
         """
         if self.is_ambiguous(dt_wall):
             delta_wall = dt_wall - dt_utc
-            _fold = int(delta_wall == (dt_utc.utcoffset() - dt_utc.dst()))
-        else:
-            _fold = 0
+            return int(delta_wall == (dt_utc.utcoffset() - dt_utc.dst()))
 
-        return _fold
+        return 0
 
     def _fold(self, dt):
         return getattr(dt, "fold", 0)
@@ -303,11 +301,7 @@ class TzRangeBase(_TzInfo):
 
         isdst = self._naive_isdst(dt_utc, utc_transitions)
 
-        if isdst:
-            dt_wall = dt + self._dst_offset
-        else:
-            dt_wall = dt + self._std_offset
-
+        dt_wall = dt + (self._dst_offset if isdst else self._std_offset)
         _fold = int(not isdst and self.is_ambiguous(dt_wall))
 
         return enfold(dt_wall, fold=_fold)
@@ -350,13 +344,10 @@ class TzRangeBase(_TzInfo):
         isdst = self._naive_isdst(dt, transitions)
 
         # Handle ambiguous dates
-        if not isdst and self.is_ambiguous(dt):
-            return not self._fold(dt)
-        return isdst
+        return not self._fold(dt) if not isdst and self.is_ambiguous(dt) else isdst
 
     def _naive_isdst(self, dt, transitions):
         dston, dstoff = transitions
-
         dt = dt.replace(tzinfo=None)
 
         if dston < dstoff:

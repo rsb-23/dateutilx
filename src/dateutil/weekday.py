@@ -12,9 +12,7 @@ class NthWeekday:
         self.n = n
 
     def __call__(self, n: int):
-        if n == self.n:
-            return self
-        return NthWeekday(self.weekday, n)
+        return self if n == self.n else NthWeekday(self.weekday, n)
 
     def __eq__(self, other) -> bool:
         try:

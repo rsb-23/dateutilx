@@ -214,27 +214,20 @@ class RelativeDelta:
                     DeprecationWarning,
                 )
 
-            if isinstance(weekday, int):
-                self.weekday = weekdays[weekday]
-            else:
-                self.weekday = weekday
-
+            self.weekday = weekdays[weekday] if isinstance(weekday, int) else weekday
             yday = 0
             if nlyearday:
                 yday = nlyearday
             elif yearday:
                 yday = yearday
-                if yearday > 59:
+                if yday > 59:
                     self.leapdays = -1
             if yday:
                 ydayidx = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 366]
                 for idx, ydays in enumerate(ydayidx):
                     if yday <= ydays:
                         self.month = idx + 1
-                        if idx == 0:
-                            self.day = yday
-                        else:
-                            self.day = yday - ydayidx[idx - 1]
+                        self.day = yday if idx == 0 else yday - ydayidx[idx - 1]
                         break
                 else:
                     raise ValueError(f"invalid year day ({yday})")
@@ -539,14 +532,18 @@ class RelativeDelta:
     def __eq__(self, other):
         if not isinstance(other, RelativeDelta):
             return NotImplemented
-        if self.weekday or other.weekday:
-            if not self.weekday or not other.weekday:
-                return False
+
+        if bool(self.weekday) != bool(other.weekday):
+            # if only 1 exists
+            return False
+
+        if self.weekday:
             if self.weekday.weekday != other.weekday.weekday:
                 return False
             n1, n2 = self.weekday.n, other.weekday.n
             if n1 != n2 and not ((not n1 or n1 == 1) and (not n2 or n2 == 1)):
                 return False
+
         return (
             self.years == other.years
             and self.months == other.months
@@ -605,6 +602,3 @@ class RelativeDelta:
 
 def _sign(x):
     return int(copysign(1, x))
-
-
-# vim:ts=4:sw=4:et
