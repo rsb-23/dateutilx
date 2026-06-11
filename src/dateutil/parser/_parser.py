@@ -41,6 +41,8 @@ from warnings import warn
 from dateutil import relativedelta, tz
 from dateutil.errors import ParserError, UnknownTimezoneWarning
 
+from .utils import standard_dt_parser
+
 __all__ = ["parse", "parserinfo", "parser", "DEFAULTPARSER", "DEFAULTTZPARSER"]
 
 
@@ -109,9 +111,9 @@ class _TimeLex:
                 token = nextchar
                 if self.isword(nextchar):
                     state = "a"
-                elif self.isnum(nextchar):
+                elif nextchar.isdigit():
                     state = "0"
-                elif self.isspace(nextchar):
+                elif nextchar.isspace():
                     token = " "
                     break  # emit token
                 else:
@@ -131,7 +133,7 @@ class _TimeLex:
             elif state == "0":
                 # If we've already started reading a number, we keep reading
                 # numbers until we find something that doesn't fit.
-                if self.isnum(nextchar):
+                if nextchar.isdigit():
                     token += nextchar
                 elif nextchar == "." or (nextchar == "," and len(token) >= 2):
                     token += nextchar
@@ -145,7 +147,7 @@ class _TimeLex:
                 seenletters = True
                 if nextchar == "." or self.isword(nextchar):
                     token += nextchar
-                elif self.isnum(nextchar) and token[-1] == ".":
+                elif nextchar.isdigit() and token[-1] == ".":
                     token += nextchar
                     state = "0."
                 else:
@@ -154,7 +156,7 @@ class _TimeLex:
             elif state == "0.":
                 # If we've seen at least one dot separator, keep going, we'll
                 # break up the tokens later.
-                if nextchar == "." or self.isnum(nextchar):
+                if nextchar == "." or nextchar.isdigit():
                     token += nextchar
                 elif self.isword(nextchar) and token[-1] == ".":
                     token += nextchar
@@ -193,16 +195,6 @@ class _TimeLex:
     def isword(cls, nextchar):
         """Whether or not the next character is part of a word"""
         return nextchar.isalpha()
-
-    @classmethod
-    def isnum(cls, nextchar):
-        """Whether the next character is part of a number"""
-        return nextchar.isdigit()
-
-    @classmethod
-    def isspace(cls, nextchar):
-        """Whether the next character is whitespace"""
-        return nextchar.isspace()
 
 
 class _ResultBase:
@@ -608,7 +600,14 @@ class Parser:
         if default is None:
             default = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        res, skipped_tokens = self._parse(timestr, **kwargs)
+        try:
+            dt_ = standard_dt_parser(timestr)
+            res = self._Result()
+            res.year, res.month, res.day = dt_.year, dt_.month, dt_.day
+            res.hour, res.minute, res.second, res.microsecond = dt_.hour, dt_.minute, dt_.second, dt_.microsecond
+            skipped_tokens = []
+        except ValueError:
+            res, skipped_tokens = self._parse(timestr, **kwargs)
 
         if res is None:
             raise ParserError(f"Unknown string format: {timestr}")
