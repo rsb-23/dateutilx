@@ -1209,7 +1209,7 @@ class Parser:
 
     def _assign_tzname(self, dt, tzname):
         if dt.tzname() != tzname:
-            new_dt = tz.enfold(dt, fold=1)
+            new_dt = dt.replace(fold=1)
             if new_dt.tzname() == tzname:
                 return new_dt
 

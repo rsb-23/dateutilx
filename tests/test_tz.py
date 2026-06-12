@@ -1,6 +1,5 @@
 import base64
 import contextlib
-import copy
 import gc
 import os
 import unittest
@@ -8,10 +7,11 @@ import weakref
 from datetime import datetime, time, timedelta, tzinfo
 from functools import partial
 from io import BytesIO, StringIO
+from zoneinfo import ZoneInfo
 
 import pytest
 
-from dateutilx import tz, zoneinfo
+from dateutilx import tz
 from dateutilx.helper import is_windows_os
 from dateutilx.parser import parse
 from dateutilx.relativedelta import SU, TH, RelativeDelta
@@ -33,15 +33,16 @@ relativedelta = RelativeDelta
 
 IS_WIN = is_windows_os()
 
-MISSING_TARBALL = "This test fails if you don't have the dateutil timezone file installed. Please read the README"
-
 UTC = tz.UTC
 EST_TUPLE = ("EST", timedelta(hours=-5), timedelta(hours=0))
 EDT_TUPLE = ("EDT", timedelta(hours=-4), timedelta(hours=1))
 
-
 # Helper functions
 mark_tzlocal_nix = pytest.mark.skipif(IS_WIN, reason="requires Unix")(pytest.mark.tzlocal)
+
+
+def enfold(dt_time, fold=1):
+    return dt_time.replace(fold=fold)
 
 
 def get_timezone_tuple(dt):
@@ -200,7 +201,7 @@ class TzFoldMixin:
             NYC = self.gettz(tzname)
 
             dt0 = datetime(2011, 11, 6, 1, 30, tzinfo=NYC)
-            dt1 = tz.enfold(dt0, fold=1)
+            dt1 = dt0.replace(fold=1)
 
             # Make sure these actually represent different times
             self.assertNotEqual(dt0.astimezone(UTC), dt1.astimezone(UTC))
@@ -825,72 +826,6 @@ def test_gettz_weakref():
     assert tz.gettz("America/New_York") is not NYC_ref()
 
 
-class ZoneInfoGettzTest(GettzTest):
-    def gettz(self, tzname):
-        zoneinfo_file = zoneinfo.get_zonefile_instance()
-        return zoneinfo_file.get(tzname)
-
-    def test_zone_info_file_start1(self):
-        tz_ = self.gettz("EST5EDT")
-        self.assertEqual(datetime(2003, 4, 6, 1, 59, tzinfo=tz_).tzname(), "EST", MISSING_TARBALL)
-        self.assertEqual(datetime(2003, 4, 6, 2, 00, tzinfo=tz_).tzname(), "EDT")
-
-    def test_zone_info_file_end1(self):
-        tzc = self.gettz("EST5EDT")
-        self.assertEqual(datetime(2003, 10, 26, 0, 59, tzinfo=tzc).tzname(), "EDT", MISSING_TARBALL)
-
-        end_est = tz.enfold(datetime(2003, 10, 26, 1, 00, tzinfo=tzc), fold=1)
-        self.assertEqual(end_est.tzname(), "EST")
-
-    def test_zone_info_offset_signal(self):
-        utc = self.gettz("UTC")
-        nyc = self.gettz("America/New_York")
-        self.assertNotEqual(utc, None, MISSING_TARBALL)
-        self.assertNotEqual(nyc, None)
-        t0 = datetime(2007, 11, 4, 0, 30, tzinfo=nyc)
-        t1 = t0.astimezone(utc)
-        t2 = t1.astimezone(nyc)
-        self.assertEqual(t0, t2)
-        self.assertEqual(nyc.dst(t0), timedelta(hours=1))
-
-    def test_zone_info_copy(self):
-        # copy.copy() called on a ZoneInfo file was returning the same instance
-        CHI = self.gettz("America/Chicago")
-        CHI_COPY = copy.copy(CHI)
-
-        self.assertIsNot(CHI, CHI_COPY)
-        self.assertEqual(CHI, CHI_COPY)
-
-    def test_zone_info_deep_copy(self):
-        CHI = self.gettz("America/Chicago")
-        CHI_COPY = copy.deepcopy(CHI)
-
-        self.assertIsNot(CHI, CHI_COPY)
-        self.assertEqual(CHI, CHI_COPY)
-
-    def test_zone_info_instance_caching(self):
-        zif_0 = zoneinfo.get_zonefile_instance()
-        zif_1 = zoneinfo.get_zonefile_instance()
-
-        self.assertIs(zif_0, zif_1)
-
-    def test_zone_info_new_instance(self):
-        zif_0 = zoneinfo.get_zonefile_instance()
-        zif_1 = zoneinfo.get_zonefile_instance(new_instance=True)
-        zif_2 = zoneinfo.get_zonefile_instance()
-
-        self.assertIsNot(zif_0, zif_1)
-        self.assertIs(zif_1, zif_2)
-
-    def test_zone_info_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            zoneinfo.gettz("US/Eastern")
-
-    def test_zone_info_metadata_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            zoneinfo.gettz_db_metadata()
-
-
 class TZRangeTest(unittest.TestCase, TzFoldMixin):
     TZ_EST = tz.tzrange(
         "EST",
@@ -1406,7 +1341,7 @@ def test_tzstr_default_end(tz_str):
     tzi = tz.tzstr(tz_str)
     dt_dst = datetime(2003, 10, 26, 0, 59, tzinfo=tzi)
     dt_dst_ambig = datetime(2003, 10, 26, 1, 00, tzinfo=tzi)
-    dt_std_ambig = tz.enfold(dt_dst_ambig, fold=1)
+    dt_std_ambig = dt_dst_ambig.replace(fold=1)
     dt_std = datetime(2003, 10, 26, 2, 00, tzinfo=tzi)
 
     assert get_timezone_tuple(dt_dst) == EDT_TUPLE
@@ -1427,7 +1362,6 @@ def test_tzstr_default_cmp(tzstr_1, tzstr_2):
 
 class TZICalTest(unittest.TestCase, TzFoldMixin):
     def _gettz_str_tuple(self, tzname):
-
         tzname_map = {
             "Australia/Sydney": TZ_AEST,
             "America/Toronto": TZ_EST,
@@ -1480,7 +1414,7 @@ class TZICalTest(unittest.TestCase, TzFoldMixin):
             dt2 = datetime(2003, 11, 2, 1, 00)
             fold = [0, 1]
 
-        dts = (tz.enfold(dt.replace(tzinfo=tzc), fold=f) for dt, f in zip((dt1, dt2), fold))
+        dts = (dt.replace(tzinfo=tzc, fold=f) for dt, f in zip((dt1, dt2), fold))
 
         for value, dt_ in zip(values, dts):
             self.assertEqual(func(dt_), value)
@@ -1634,7 +1568,7 @@ class TZTest(unittest.TestCase):
     def test_file_end1(self):
         tzc = tz.tzfile(BytesIO(base64.b64decode(TZFILE_EST5EDT)))
         self.assertEqual(datetime(2003, 10, 26, 0, 59, tzinfo=tzc).tzname(), "EDT")
-        end_est = tz.enfold(datetime(2003, 10, 26, 1, 00, tzinfo=tzc))
+        end_est = enfold(datetime(2003, 10, 26, 1, 00, tzinfo=tzc))
         self.assertEqual(end_est.tzname(), "EST")
 
     def test_file_last_transition(self):
@@ -1642,7 +1576,7 @@ class TZTest(unittest.TestCase):
         tzc = tz.tzfile(BytesIO(base64.b64decode(TZFILE_EST5EDT)))
         self.assertEqual(datetime(2037, 10, 25, 0, 59, tzinfo=tzc).tzname(), "EDT")
 
-        last_date = tz.enfold(datetime(2037, 10, 25, 1, 00, tzinfo=tzc), fold=1)
+        last_date = datetime(2037, 10, 25, 1, 00, tzinfo=tzc, fold=1)
         self.assertEqual(last_date.tzname(), "EST")
 
         self.assertEqual(datetime(2038, 5, 25, 12, 0, tzinfo=tzc).tzname(), "EST")
@@ -1739,7 +1673,7 @@ class TzPickleTest(PicklableMixin, unittest.TestCase):
     _asfile = False
 
     def setUp(self):
-        self.assert_picklable = partial(self.assert_picklable, asfile=self._asfile)
+        self.assert_picklable = partial(self.assert_picklable, asfile=self._asfile, singleton=True)
 
     def test_pickle_tz_utc(self):
         self.assert_picklable(tz.tzutc(), singleton=True)
@@ -1778,8 +1712,7 @@ class TzPickleTest(PicklableMixin, unittest.TestCase):
         self.assert_picklable(tz.gettz("America/New_York"))
 
     def test_pickle_zone_file_gettz(self):
-        zoneinfo_file = zoneinfo.get_zonefile_instance()
-        tzi = zoneinfo_file.get("America/New_York")
+        tzi = ZoneInfo("America/New_York")
         self.assertIsNot(tzi, None)
         self.assert_picklable(tzi)
 
@@ -2013,39 +1946,39 @@ class DatetimeExistsTest(unittest.TestCase):
 
 class TestEnfold:
     def test_enter_fold_default(self):
-        dt = tz.enfold(datetime(2020, 1, 19, 3, 32))
+        dt = enfold(datetime(2020, 1, 19, 3, 32))
 
         assert dt.fold == 1
 
     def test_enter_fold(self):
-        dt = tz.enfold(datetime(2020, 1, 19, 3, 32), fold=1)
+        dt = enfold(datetime(2020, 1, 19, 3, 32), fold=1)
 
         assert dt.fold == 1
 
     def test_exit_fold(self):
-        dt = tz.enfold(datetime(2020, 1, 19, 3, 32), fold=0)
+        dt = enfold(datetime(2020, 1, 19, 3, 32), fold=0)
 
         # Before Python 3.6, dt.fold won't exist if fold is 0.
         assert getattr(dt, "fold", 0) == 0
 
     def test_defold(self):
-        dt = tz.enfold(datetime(2020, 1, 19, 3, 32), fold=1)
+        dt = enfold(datetime(2020, 1, 19, 3, 32), fold=1)
 
-        dt2 = tz.enfold(dt, fold=0)
+        dt2 = dt.replace(fold=0)
 
         assert getattr(dt2, "fold", 0) == 0
 
     def test_fold_replace_args(self):
         # This test can be dropped when Python < 3.6 is dropped, since it
         # is mainly to cover the `replace` method on _DatetimeWithFold
-        dt = tz.enfold(datetime(1950, 1, 2, 12, 30, 15, 8), fold=1)
+        dt = enfold(datetime(1950, 1, 2, 12, 30, 15, 8), fold=1)
 
         dt2 = dt.replace(1952, 2, 3, 13, 31, 16, 9)
-        assert dt2 == tz.enfold(datetime(1952, 2, 3, 13, 31, 16, 9), fold=1)
+        assert dt2 == enfold(datetime(1952, 2, 3, 13, 31, 16, 9), fold=1)
         assert dt2.fold == 1
 
     def test_fold_replace_exception_duplicate_args(self):
-        dt = tz.enfold(datetime(1999, 1, 3), fold=1)
+        dt = enfold(datetime(1999, 1, 3), fold=1)
 
         with pytest.raises(TypeError):
             dt.replace(1950, year=2000)  # pylint: disable=e1124
@@ -2087,7 +2020,7 @@ class ImaginaryDateTest(unittest.TestCase):
 def test_resolve_imaginary_ambiguous(dt):
     assert tz.resolve_imaginary(dt) is dt
 
-    dt_f = tz.enfold(dt)
+    dt_f = enfold(dt)
     assert dt is not dt_f
     assert tz.resolve_imaginary(dt_f) is dt_f
 
@@ -2111,36 +2044,11 @@ def test_resolve_imaginary_existing(dt):
     assert tz.resolve_imaginary(dt) is dt
 
 
-def __get_kiritimati_resolve_imaginary_test():
-    # In the 2018d release of the IANA database, the Kiritimati "imaginary day"
-    # data was corrected, so if the system zoneinfo is older than 2018d, the
-    # Kiritimati test will fail.
-
-    tzi = tz.gettz("Pacific/Kiritimati")
-    new_version = False
-    if not tz.datetime_exists(datetime(1995, 1, 1, 12, 30), tzi):
-        zif = zoneinfo.get_zonefile_instance()
-        if zif.metadata is not None:
-            new_version = zif.metadata["tzversion"] >= "2018d"
-
-        if new_version:
-            tzi = zif.get("Pacific/Kiritimati")
-    else:
-        new_version = True
-
-    if new_version:
-        dates = (datetime(1994, 12, 31, 12, 30), datetime(1995, 1, 1, 12, 30))
-    else:
-        dates = (datetime(1995, 1, 1, 12, 30), datetime(1995, 1, 2, 12, 30))
-
-    return (tzi,) + dates
-
-
 resolve_imaginary_tests = [
     (tz.gettz("Europe/London"), datetime(2018, 3, 25, 1, 30), datetime(2018, 3, 25, 2, 30)),
     (tz.gettz("America/New_York"), datetime(2017, 3, 12, 2, 30), datetime(2017, 3, 12, 3, 30)),
     (tz.gettz("Australia/Sydney"), datetime(2014, 10, 5, 2, 0), datetime(2014, 10, 5, 3, 0)),
-    __get_kiritimati_resolve_imaginary_test(),
+    (tz.gettz("Pacific/Kiritimati"), datetime(1994, 12, 31, 12, 30), datetime(1995, 1, 1, 12, 30)),
     (tz.gettz("Africa/Monrovia"), datetime(1972, 1, 7, 0, 30), datetime(1972, 1, 7, 1, 14, 30)),
 ]
 

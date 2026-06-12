@@ -876,7 +876,7 @@ class TestTZVar:
         # One manifestion of GH #318
         with TZEnvContext("EST+5EDT,M3.2.0/2,M11.1.0/2"):
             dt_exp = datetime(2011, 11, 6, 1, 30, tzinfo=tz.tzlocal())
-            dt_exp = tz.enfold(dt_exp, fold=1)
+            dt_exp = dt_exp.replace(fold=1)
             dt = parse("2011-11-06T01:30 EST")
 
             # Because this is ambiguous, until `tz.tzlocal() is tz.tzlocal()`
@@ -892,12 +892,12 @@ def test_parse_tzinfos_fold():
     nyc = tz.gettz("America/New_York")
     tzinfos = {"EST": nyc, "EDT": nyc}
 
-    dt_exp = tz.enfold(datetime(2011, 11, 6, 1, 30, tzinfo=nyc), fold=1)
+    dt_exp = datetime(2011, 11, 6, 1, 30, tzinfo=nyc, fold=1)
     dt = parse("2011-11-06T01:30 EST", tzinfos=tzinfos)
 
     assert dt == dt_exp
     assert dt.tzinfo is dt_exp.tzinfo
-    assert getattr(dt, "fold") == getattr(dt_exp, "fold")
+    assert dt.fold == dt_exp.fold
     assert dt.astimezone(tz.UTC) == dt_exp.astimezone(tz.UTC)
 
 

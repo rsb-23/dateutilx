@@ -177,7 +177,7 @@ class TzWinFoldMixin:
             t_n = self.get_utc_transitions(NYC, 2011, False)[0]
 
             dt0 = t_n.replace(tzinfo=NYC)
-            dt1 = tz.enfold(dt0, fold=1)
+            dt1 = dt0.replace(fold=1)
 
             # Make sure these actually represent different times
             self.assertNotEqual(dt0.astimezone(UTC), dt1.astimezone(UTC))

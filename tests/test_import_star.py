@@ -30,4 +30,3 @@ def test_imported_modules():
     assert dateutilx.rrule == new_locals.pop("rrule")
     assert dateutilx.tz == new_locals.pop("tz")
     assert dateutilx.utils == new_locals.pop("utils")
-    assert dateutilx.zoneinfo == new_locals.pop("zoneinfo")
