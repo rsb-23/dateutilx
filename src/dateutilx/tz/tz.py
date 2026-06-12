@@ -19,7 +19,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any
 
-from dateutil.helper import is_windows_os
+from dateutilx.helper import is_windows_os
 
 from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs, enfold
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
@@ -40,7 +40,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
     .. doctest::
 
         >>> import datetime as dt
-        >>> from dateutil.tz import *
+        >>> from dateutilx.tz import *
 
         >>> dt.datetime.now()
         datetime.datetime(2003, 9, 27, 9, 40, 1, 521290)
@@ -57,7 +57,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
 
         .. doctest::
 
-            >>> from dateutil.tz import tzutc, UTC
+            >>> from dateutilx.tz import tzutc, UTC
             >>> tzutc() is tzutc()
             True
             >>> tzutc() is UTC
@@ -384,7 +384,7 @@ class TzFile(_TzInfo):
 
     .. testsetup:: tzfile
 
-        from dateutil.tz import gettz
+        from dateutilx.tz import gettz
         from datetime import datetime
 
     .. doctest:: tzfile
@@ -867,14 +867,14 @@ class TzRange(TzRangeBase):
 
     .. testsetup:: tzrange
 
-        >>> from dateutil.tz import tzrange, tzstr
+        >>> from dateutilx.tz import tzrange, tzstr
 
     .. doctest:: tzrange
 
         >>> tzstr('EST5EDT') == tzrange("EST", -18000, "EDT")
         True
 
-        >>> from dateutil.relativedelta import *
+        >>> from dateutilx.relativedelta import *
         >>> range1 = tzrange("EST", -18000, "EDT")
         >>> range2 = tzrange("EST", -18000, "EDT", -14400,
         ...                  RelativeDelta(hours=+2, month=4, day=1,
@@ -888,7 +888,7 @@ class TzRange(TzRangeBase):
 
     def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, start=None, end=None):
         # global relativedelta
-        from dateutil.relativedelta import SU, RelativeDelta
+        from dateutilx.relativedelta import SU, RelativeDelta
 
         self._std_abbr = stdabbr
         self._dst_abbr = dstabbr
@@ -1009,7 +1009,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
 
     def __init__(self, s, posix_offset=False):
         global parser
-        from dateutil.parser import _parser as parser
+        from dateutilx.parser import _parser as parser
 
         self._s = s
 
@@ -1038,7 +1038,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
         self.hasdst = bool(self._start_delta)
 
     def _delta(self, x, isend=0):
-        from dateutil import relativedelta
+        from dateutilx import relativedelta
 
         kwargs = {}
         if x.month is not None:
@@ -1176,7 +1176,7 @@ class TzIcal:
     def __init__(self, fileobj):
         global rrule
         if not rrule:
-            from dateutil import rrule
+            from dateutilx import rrule
 
         if isinstance(fileobj, str):
             self._s = fileobj
@@ -1529,7 +1529,7 @@ def __get_gettz():
                                 tz = None
 
                         if not tz:
-                            from dateutil.zoneinfo import get_zonefile_instance
+                            from dateutilx.zoneinfo import get_zonefile_instance
 
                             tz = get_zonefile_instance().get(name)
 
@@ -1645,7 +1645,7 @@ def resolve_imaginary(dt):
 
     .. doctest::
 
-        >>> from dateutil import tz
+        >>> from dateutilx import tz
         >>> from datetime import datetime
         >>> NYC = tz.gettz('America/New_York')
         >>> print(tz.resolve_imaginary(datetime(2017, 3, 12, 2, 30, tzinfo=NYC)))

@@ -4,7 +4,7 @@ from io import BytesIO
 from pkgutil import get_data
 from tarfile import TarFile
 
-from dateutil.tz import TzFile as _TzFile
+from dateutilx.tz import TzFile as _TzFile
 
 __all__ = ["get_zonefile_instance", "gettz", "gettz_db_metadata"]
 

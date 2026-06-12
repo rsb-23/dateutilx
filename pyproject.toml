@@ -1,59 +1,54 @@
 [build-system]
-requires = ["setuptools", "setuptools_scm<8.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
-name = "python-dateutil"
+name = "dateutilx"
 dynamic = ["version"]
 description = "Modern extension to the standard Python datetime module"
 readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [{ name = "Gustavo Niemeyer", email = "gustavo@niemeyer.net" }]
+maintainers = [{ name = "Rishabh B" }]
 
 requires-python = ">=3.10"
+keywords = ["date", "time", "datetime", "timezone", "dateutil"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Software Development :: Libraries",
+]
+
 dependencies = ["tzdata; sys_platform == 'win32'"]
 
 [project.optional-dependencies]
 lint = ["pre-commit", "pylint"]
 test = ["hypothesis", "pytest", "pytest-cov"]
 
-[tool.towncrier]
-package = "dateutil"
-package_dir = "dateutil"
-filename = "NEWS"
-directory = "changelog.d"
-title_format = "Version {version} ({project_date})"
-issue_format = "GH #{issue}"
-template = "changelog.d/template.rst"
+[project.urls]
+Homepage      = "https://github.com/rsb-23/dateutilx"
+Documentation = "https://dateutil.readthedocs.io/en/stable/"
+Source        = "https://github.com/rsb-23/dateutilx"
 
-[[tool.towncrier.type]]
-directory = "data"
-name = "Data updates"
-showcontent = true
+# Build Config
+[tool.hatch.version]
+source = "vcs"
+[tool.hatch.build.targets.sdist]
+include = ["src/dateutilx","src/dateutil", "LICENSE", "README.md", "pyproject.toml"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/dateutilx","src/dateutil"]
 
-[[tool.towncrier.type]]
-directory = "deprecations"
-name = "Deprecations"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "feature"
-name = "Features"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "bugfix"
-name = "Bugfixes"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "doc"
-name = "Documentation changes"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "misc"
-name = "Misc"
-showcontent = true
-
+# Tool Config
 [tool.black]
 target-version = ["py311", "py312", "py313", "py314"]
 line-length = 120

@@ -68,7 +68,7 @@ class TzRes:
         """
         Load a timezone name from a DLL offset (integer).
 
-        >>> from dateutil.tzwin import TzRes
+        >>> from dateutilx.tzwin import TzRes
         >>> tzr = TzRes()
         >>> print(tzr.load_name(112))
         'Eastern Standard Time'
@@ -92,7 +92,7 @@ class TzRes:
         Parse strings as returned from the Windows registry into the time zone
         name as defined in the registry.
 
-        >>> from dateutil.tzwin import TzRes
+        >>> from dateutilx.tzwin import TzRes
         >>> tzr = TzRes()
         >>> print(tzr.name_from_string('@tzres.dll,-251'))
         'Dateline Daylight Time'
