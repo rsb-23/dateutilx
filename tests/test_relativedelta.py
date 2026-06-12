@@ -3,8 +3,8 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from dateutil.helper import Day
-from dateutil.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
+from dateutilx.helper import Day
+from dateutilx.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
 
 from ._common import NOT_A_VALUE
 

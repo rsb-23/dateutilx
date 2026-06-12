@@ -4,7 +4,7 @@ import pytest
 from hypothesis import example, given
 from hypothesis import strategies as st
 
-from dateutil import tz
+from dateutilx import tz
 
 EPOCHALYPSE = datetime.fromtimestamp(2147483647)
 NEGATIVE_EPOCHALYPSE = datetime.fromtimestamp(0) - timedelta(seconds=2147483648)

@@ -4,9 +4,9 @@ from datetime import date, datetime, time, timedelta
 
 import pytest
 
-from dateutil import tz
-from dateutil.parser import isoparse, isoparser
-from dateutil.tz import UTC
+from dateutilx import tz
+from dateutilx.parser import isoparse, isoparser
+from dateutilx.tz import UTC
 
 
 def _generate_tzoffsets(limited):

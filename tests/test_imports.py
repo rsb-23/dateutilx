@@ -3,7 +3,7 @@ from types import ModuleType
 
 import pytest
 
-from dateutil.helper import is_windows_os
+from dateutilx.helper import is_windows_os
 
 HOST_IS_WINDOWS = is_windows_os()
 
@@ -50,7 +50,7 @@ def test_lazy_import(clean_import, module):
     mod_obj = getattr(dateutil, module, None)
     assert isinstance(mod_obj, ModuleType)
 
-    mod_imported = importlib.import_module(f"dateutil.{module}")
+    mod_imported = importlib.import_module(f"dateutilx.{module}")
     assert mod_obj is mod_imported
 
 
@@ -89,7 +89,7 @@ def test_import_parser_from():
 def test_import_parser_all():
     # All interface
     # Other public classes
-    from dateutil.parser import parse, parser, parserinfo
+    from dateutilx.parser import parse, parser, parserinfo
 
     for var in (parse, parserinfo, parser):
         assert var is not None
@@ -105,13 +105,13 @@ def test_import_relative_delta_from():
 
 
 def test_import_relative_delta_all():
-    from dateutil.relativedelta import FR, MO, SA, SU, TH, TU, WE, RelativeDelta
+    from dateutilx.relativedelta import FR, MO, SA, SU, TH, TU, WE, RelativeDelta
 
     for var in (RelativeDelta, MO, TU, WE, TH, FR, SA, SU):
         assert var is not None
 
     # In the public interface but not in all
-    from dateutil.relativedelta import weekdays
+    from dateutilx.relativedelta import weekdays
 
     assert weekdays is not None
 
@@ -127,8 +127,8 @@ def test_import_rrule_from():
 
 def test_import_rrule_all():
     # fmt: off
-    from dateutil.helper import Frequency
-    from dateutil.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
+    from dateutilx.helper import Frequency
+    from dateutilx.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
 
     rr_all = (rrule, rruleset, rrulestr, Frequency,
               MO, TU, WE, TH, FR, SA, SU)
@@ -138,7 +138,7 @@ def test_import_rrule_all():
         assert var is not None
 
     # In the public interface but not in all
-    from dateutil.rrule import weekdays
+    from dateutilx.rrule import weekdays
 
     assert weekdays is not None
 
@@ -155,7 +155,7 @@ def test_import_tz_from():
 def test_import_tz_all():
     # pylint: disable=w0641
     # fmt: off
-    from dateutil.tz import (  # noqa: F401
+    from dateutilx.tz import (  # noqa: F401
         UTC,
         TzWin,
         TzWinLocal,
@@ -197,7 +197,7 @@ def test_import_tz_windows_from():
 
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_star():
-    from dateutil.tzwin import TzWin, TzWinLocal
+    from dateutilx.tzwin import TzWin, TzWinLocal
 
     tzwin_all = [TzWin, TzWinLocal]
 
@@ -215,7 +215,7 @@ def test_import_zone_info_from():
 
 
 def test_import_zone_info_star():
-    from dateutil.zoneinfo import gettz, gettz_db_metadata, rebuild
+    from dateutilx.zoneinfo import gettz, gettz_db_metadata, rebuild
 
     zi_all = (gettz, gettz_db_metadata, rebuild)
 

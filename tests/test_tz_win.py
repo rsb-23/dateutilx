@@ -3,15 +3,15 @@ import datetime as dt
 import unittest
 from datetime import datetime, timedelta
 
-from dateutil import tz
-from dateutil.helper import is_windows_os
-from dateutil.parser import parse
+from dateutilx import tz
+from dateutilx.helper import is_windows_os
+from dateutilx.parser import parse
 
 from ._common import COMPARES_EQUAL, TZWinContext
 
 IS_WIN = is_windows_os()
 try:
-    from dateutil import tzwin
+    from dateutilx import tzwin
 except ImportError as e:
     if IS_WIN:
         raise e

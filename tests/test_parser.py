@@ -5,11 +5,11 @@ from io import StringIO
 
 import pytest
 
-from dateutil import tz
-from dateutil.errors import ParserError, UnknownTimezoneWarning
-from dateutil.helper import is_windows_os
-from dateutil.parser import parse, parser, parserinfo
-from dateutil.tz import TzOffset
+from dateutilx import tz
+from dateutilx.errors import ParserError, UnknownTimezoneWarning
+from dateutilx.helper import is_windows_os
+from dateutilx.parser import parse, parser, parserinfo
+from dateutilx.tz import TzOffset
 
 from ._common import TZEnvContext
 

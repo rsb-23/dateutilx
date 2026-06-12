@@ -15,7 +15,7 @@ except ImportError:
     sys.path.append(os.path.join(here, "src"))
     print(sys.path)
 
-from dateutil.zoneinfo import rebuild
+from dateutilx.zoneinfo import rebuild
 
 METADATA_FILE = "zonefile_metadata.json"
 
