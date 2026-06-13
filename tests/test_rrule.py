@@ -1864,26 +1864,19 @@ class RRuleTest(unittest.TestCase):
         raise a :exception:`ValueError`.
         """
 
-        # In Python 2.7 you can use a context manager for this.
-        def make_bad_rrule():
+        with pytest.raises(ValueError):
             list(rrule(MINUTELY, interval=120, byhour=(10, 12, 14, 16), count=2, dtstart=datetime(1997, 9, 2, 9, 0)))
-
-        self.assertRaises(ValueError, make_bad_rrule)
 
     def test_secondly_bad_combo_rrule(self):
         """
         See :func:`testMinutelyBadComboRRule' for details.
         """
 
-        # In Python 2.7 you can use a context manager for this.
-        def make_bad_minute_rrule():
+        with pytest.raises(ValueError):
             list(rrule(SECONDLY, interval=360, byminute=(10, 28, 49), count=4, dtstart=datetime(1997, 9, 2, 9, 0)))
 
-        def make_bad_hour_rrule():
+        with pytest.raises(ValueError):
             list(rrule(SECONDLY, interval=43200, byhour=(2, 10, 18, 23), count=4, dtstart=datetime(1997, 9, 2, 9, 0)))
-
-        self.assertRaises(ValueError, make_bad_minute_rrule)
-        self.assertRaises(ValueError, make_bad_hour_rrule)
 
     def test_bad_until_count_rrule(self):
         """

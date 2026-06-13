@@ -41,10 +41,6 @@ EDT_TUPLE = ("EDT", timedelta(hours=-4), timedelta(hours=1))
 mark_tzlocal_nix = pytest.mark.skipif(IS_WIN, reason="requires Unix")(pytest.mark.tzlocal)
 
 
-def enfold(dt_time, fold=1):
-    return dt_time.replace(fold=fold)
-
-
 def get_timezone_tuple(dt):
     """Retrieve a (tzname, utcoffset, dst) tuple for a given DST"""
     return dt.tzname(), dt.utcoffset(), dt.dst()
@@ -1568,7 +1564,7 @@ class TZTest(unittest.TestCase):
     def test_file_end1(self):
         tzc = tz.tzfile(BytesIO(base64.b64decode(TZFILE_EST5EDT)))
         self.assertEqual(datetime(2003, 10, 26, 0, 59, tzinfo=tzc).tzname(), "EDT")
-        end_est = enfold(datetime(2003, 10, 26, 1, 00, tzinfo=tzc))
+        end_est = datetime(2003, 10, 26, 1, 00, tzinfo=tzc, fold=1)
         self.assertEqual(end_est.tzname(), "EST")
 
     def test_file_last_transition(self):
@@ -1650,7 +1646,6 @@ class TZTest(unittest.TestCase):
 
 @pytest.mark.tzfile
 def test_tzfile_sub_minute_offset():
-    # If user running python 3.6 or newer, exact offset is used
     tzc = tz.tzfile(BytesIO(base64.b64decode(EUROPE_HELSINKI)))
     offset = timedelta(hours=1, minutes=39, seconds=52)
     assert datetime(1900, 1, 1, 0, 0, tzinfo=tzc).utcoffset() == offset
@@ -1944,46 +1939,6 @@ class DatetimeExistsTest(unittest.TestCase):
         self.assertFalse(tz.datetime_exists(dt, tz=aest))
 
 
-class TestEnfold:
-    def test_enter_fold_default(self):
-        dt = enfold(datetime(2020, 1, 19, 3, 32))
-
-        assert dt.fold == 1
-
-    def test_enter_fold(self):
-        dt = enfold(datetime(2020, 1, 19, 3, 32), fold=1)
-
-        assert dt.fold == 1
-
-    def test_exit_fold(self):
-        dt = enfold(datetime(2020, 1, 19, 3, 32), fold=0)
-
-        # Before Python 3.6, dt.fold won't exist if fold is 0.
-        assert getattr(dt, "fold", 0) == 0
-
-    def test_defold(self):
-        dt = enfold(datetime(2020, 1, 19, 3, 32), fold=1)
-
-        dt2 = dt.replace(fold=0)
-
-        assert getattr(dt2, "fold", 0) == 0
-
-    def test_fold_replace_args(self):
-        # This test can be dropped when Python < 3.6 is dropped, since it
-        # is mainly to cover the `replace` method on _DatetimeWithFold
-        dt = enfold(datetime(1950, 1, 2, 12, 30, 15, 8), fold=1)
-
-        dt2 = dt.replace(1952, 2, 3, 13, 31, 16, 9)
-        assert dt2 == enfold(datetime(1952, 2, 3, 13, 31, 16, 9), fold=1)
-        assert dt2.fold == 1
-
-    def test_fold_replace_exception_duplicate_args(self):
-        dt = enfold(datetime(1999, 1, 3), fold=1)
-
-        with pytest.raises(TypeError):
-            dt.replace(1950, year=2000)  # pylint: disable=e1124
-
-
 @pytest.mark.tz_resolve_imaginary
 class ImaginaryDateTest(unittest.TestCase):
     def test_canberra_forward(self):
@@ -2020,7 +1975,7 @@ class ImaginaryDateTest(unittest.TestCase):
 def test_resolve_imaginary_ambiguous(dt):
     assert tz.resolve_imaginary(dt) is dt
 
-    dt_f = enfold(dt)
+    dt_f = dt.replace(fold=1)
     assert dt is not dt_f
     assert tz.resolve_imaginary(dt_f) is dt_f
 

@@ -21,7 +21,6 @@ Functions
     .. automethod:: gettz.nocache
     .. automethod:: gettz.cache_clear
 
-.. autofunction:: enfold
 
 .. autofunction:: datetime_ambiguous
 .. autofunction:: datetime_exists

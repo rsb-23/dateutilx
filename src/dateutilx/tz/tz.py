@@ -1524,8 +1524,7 @@ def __get_gettz():
                         if TzWin is not None:
                             try:
                                 tz = TzWin(name)
-                            except (OSError, UnicodeEncodeError):
-                                # UnicodeEncodeError is for Python 2.7 compat
+                            except ValueError:
                                 tz = None
 
                         if not tz:
