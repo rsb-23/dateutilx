@@ -67,7 +67,7 @@ class TZContextBase:
         Class method used to query whether or not this class allows time zone
         changes.
         """
-        guard = bool(os.environ.get(cls._guard_var_name, False))
+        guard = bool(os.environ.get(cls._guard_var_name))
 
         # _guard_allows_change gives the "default" behavior - if True, the
         # guard is overcoming a block. If false, the guard is causing a block.

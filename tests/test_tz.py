@@ -1427,7 +1427,6 @@ def test_tzstr_default_cmp(tzstr_1, tzstr_2):
 
 class TZICalTest(unittest.TestCase, TzFoldMixin):
     def _gettz_str_tuple(self, tzname):
-
         tzname_map = {
             "Australia/Sydney": TZ_AEST,
             "America/Toronto": TZ_EST,
@@ -1682,10 +1681,9 @@ class TZTest(unittest.TestCase):
         isstd_expected = (0, 0, 0, 1)
         tzc = tz.tzfile(BytesIO(base64.b64decode(NEW_YORK)))
         # gather the actual information as parsed by the tzfile class
-        isstd = []
-        for ttinfo in tzc._ttinfo_list:
-            # ttinfo objects contain boolean values
-            isstd.append(int(ttinfo.isstd))
+        # ttinfo objects contain boolean values
+        isstd = [int(ttinfo.isstd) for ttinfo in tzc._ttinfo_list]
+
         # ttinfo list may contain more entries than isstd file content
         isstd = tuple(isstd[: len(isstd_expected)])
         self.assertEqual(
@@ -2133,7 +2131,7 @@ def __get_kiritimati_resolve_imaginary_test():
     else:
         dates = (datetime(1995, 1, 1, 12, 30), datetime(1995, 1, 2, 12, 30))
 
-    return (tzi,) + dates
+    return (tzi, *dates)
 
 
 resolve_imaginary_tests = [

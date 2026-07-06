@@ -655,13 +655,13 @@ class Rrule(RruleBase):
 
         parts = [f"FREQ={self._freq.name}"]
         if self._interval != 1:
-            parts.append(f"INTERVAL={str(self._interval)}")
+            parts.append(f"INTERVAL={self._interval!s}")
 
         if self._wkst:
             parts.append(f"WKST={repr(Weekday(self._wkst))[:2]}")
 
         if self._count is not None:
-            parts.append(f"COUNT={str(self._count)}")
+            parts.append(f"COUNT={self._count!s}")
 
         if self._until:
             parts.append(self._until.strftime("UNTIL=%Y%m%dT%H%M%S"))

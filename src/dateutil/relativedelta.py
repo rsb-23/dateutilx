@@ -596,7 +596,7 @@ class RelativeDelta:
         for attr in ["year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"]:
             value = getattr(self, attr)
             if value is not None:
-                _tmp_list.append(f"{attr}={repr(value)}")
+                _tmp_list.append(f"{attr}={value!r}")
         return f"{self.__class__.__name__}({', '.join(_tmp_list)})"
 
 

@@ -24,8 +24,7 @@ def _generate_tzoffsets(limited):
         out.extend([_mkoffset(hm, "{:+03d}") for hm in hm_out_h])
 
         # Ones that have hours and minutes
-        hm_out = [] + hm_out_h
-        hm_out += [(-12, 15), (11, 30), (10, 2), (5, 15), (-5, 30)]
+        hm_out = [*hm_out_h, (-12, 15), (11, 30), (10, 2), (5, 15), (-5, 30)]
     else:
         hm_out = [(-5, -0)]
 
@@ -188,11 +187,12 @@ def test_isoparse_sep_none(datestr, sep):
 
 ##
 # Uncommon date formats
-TIME_ARGS = (
-    "time_args",
-    ((None, time(0), None),)
-    + tuple(("%H:%M:%S.%f", _t, _tz) for _t, _tz in it.product([time(0), time(9, 30), time(14, 47)], TZOFFSETS)),
-)
+
+# TIME_ARGS = (
+#     "time_args",
+#     ((None, time(0), None),)
+#     + tuple(("%H:%M:%S.%f", _t, _tz) for _t, _tz in it.product([time(0), time(9, 30), time(14, 47)], TZOFFSETS)),
+# )
 
 
 @pytest.mark.parametrize(

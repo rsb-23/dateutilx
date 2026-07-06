@@ -59,7 +59,7 @@ def _run_zic(zonedir, filepaths):
         raise
 
     bloat_args = ["-b", "fat"] if b"-b " in help_text else []
-    check_call(["zic"] + bloat_args + ["-d", zonedir] + filepaths)
+    check_call(["zic", *bloat_args, "-d", zonedir, *filepaths])
 
 
 def _print_on_nosuchfile(e):

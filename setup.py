@@ -12,7 +12,7 @@ if isfile("MANIFEST"):
 
 class Unsupported(TestCommand):
     def run(self):
-        sys.stderr.write("Running 'test' with setup.py is not supported. " "Use 'pytest' or 'tox' to run the tests.\n")
+        sys.stderr.write("Running 'test' with setup.py is not supported. Use 'pytest' or 'tox' to run the tests.\n")
         sys.exit(1)
 
 

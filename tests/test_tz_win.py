@@ -319,7 +319,6 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
 
 @unittest.skipUnless(IS_WIN, "Requires Windows")
 class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
-
     def setUp(self):
         self.tzclass = tzwin.TzWinLocal
         self.context = TZWinContext

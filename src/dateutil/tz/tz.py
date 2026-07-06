@@ -102,7 +102,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
         return dt
 
     def __eq__(self, other):
-        if not isinstance(other, (TzUTC, TzOffset)):
+        if not isinstance(other, TzUTC | TzOffset):
             return NotImplemented
 
         return isinstance(other, TzUTC) or (isinstance(other, TzOffset) and other._offset == ZERO)
@@ -172,7 +172,7 @@ class TzOffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
     __hash__ = None
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({repr(self._name)}, {int(self._offset.total_seconds())})"
+        return f"{self.__class__.__name__}({self._name!r}, {int(self._offset.total_seconds())})"
 
     __reduce__ = object.__reduce__
 
@@ -300,8 +300,8 @@ class _TTInfo:
         for attr in self.__slots__:
             value = getattr(self, attr)
             if value is not None:
-                _tmp_list.append(f"{attr}={repr(value)}")
-        return f'{self.__class__.__name__}({", ".join(_tmp_list)})'
+                _tmp_list.append(f"{attr}={value!r}")
+        return f"{self.__class__.__name__}({', '.join(_tmp_list)})"
 
     def __eq__(self, other):
         if not isinstance(other, _TTInfo):
@@ -801,7 +801,7 @@ class TzFile(_TzInfo):
     __hash__ = None
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({repr(self._filename)})"
+        return f"{self.__class__.__name__}({self._filename!r})"
 
     def __reduce__(self):
         return self.__reduce_ex__(None)
@@ -1074,7 +1074,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
         return relativedelta.RelativeDelta(**kwargs)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({repr(self._s)})"
+        return f"{self.__class__.__name__}({self._s!r})"
 
 
 class _TzIcalVtzComp:
@@ -1345,7 +1345,7 @@ class TzIcal:
                 invtz = True
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({repr(self._s)})"
+        return f"{self.__class__.__name__}({self._s!r})"
 
 
 if is_windows_os():

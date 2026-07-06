@@ -217,7 +217,6 @@ def test_parse_with_tzoffset(dstr, expected):
 
 
 class TestFormat:
-
     def test_ybd(self):
         # If we have a 4-digit year, a non-numeric month (abbreviated or not),
         # and a day (1 or 2 digits), then there is no ambiguity as to which
@@ -402,7 +401,6 @@ class TestTzinfoInputTypes:
 
 
 class ParserTest(unittest.TestCase):
-
     @classmethod
     def setup_class(cls):
         cls.tzinfos = {"BRST": -10800}
@@ -417,7 +415,6 @@ class ParserTest(unittest.TestCase):
         assert parser().parse(self.str_str) == parser().parse(self.uni_str)
 
     def test_parse_unicode_words(self):
-
         class RusParserInfo(parserinfo):
             MONTHS = [
                 ("янв", "Январь"),
@@ -700,7 +697,6 @@ class ParserTest(unittest.TestCase):
 
 
 class TestOutOfBounds:
-
     def test_no_year_zero(self):
         with pytest.raises(ParserError):
             parse("0000 Jun 20")
@@ -884,7 +880,7 @@ class TestTZVar:
             # dt == dt_exp
             assert dt.tzname() == dt_exp.tzname()
             assert dt.replace(tzinfo=None) == dt_exp.replace(tzinfo=None)
-            assert getattr(dt, "fold") == getattr(dt_exp, "fold")
+            assert dt.fold == dt_exp.fold
             assert dt.astimezone(tz.UTC) == dt_exp.astimezone(tz.UTC)
 
 
@@ -897,7 +893,7 @@ def test_parse_tzinfos_fold():
 
     assert dt == dt_exp
     assert dt.tzinfo is dt_exp.tzinfo
-    assert getattr(dt, "fold") == getattr(dt_exp, "fold")
+    assert dt.fold == dt_exp.fold
     assert dt.astimezone(tz.UTC) == dt_exp.astimezone(tz.UTC)
 
 

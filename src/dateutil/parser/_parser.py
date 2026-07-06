@@ -53,7 +53,7 @@ class _TimeLex:
     _split_decimal = re.compile("([.,])")
 
     def __init__(self, instream):
-        if isinstance(instream, (bytes, bytearray)):
+        if isinstance(instream, bytes | bytearray):
             instream = instream.decode()
 
         if isinstance(instream, str):
@@ -206,7 +206,6 @@ class _TimeLex:
 
 
 class _ResultBase:
-
     def __init__(self):
         for attr in self.__slots__:
             setattr(self, attr, None)
@@ -216,7 +215,7 @@ class _ResultBase:
         for attr in self.__slots__:
             value = getattr(self, attr)
             if value is not None:
-                _tmp_list.append(f"{attr}={repr(value)}")
+                _tmp_list.append(f"{attr}={value!r}")
         return f"{classname}({', '.join(_tmp_list)})"
 
     def __len__(self):
@@ -520,19 +519,18 @@ class _YMD(list):
                     # 99-01-Jan
                     year, day, month = self
 
-            else:
-                if self[0] > 31 or self.ystridx == 0 or (yearfirst and self[1] <= 12 and self[2] <= 31):
-                    # 99-01-01
-                    if dayfirst and self[2] <= 12:
-                        year, day, month = self
-                    else:
-                        year, month, day = self
-                elif self[0] > 12 or (dayfirst and self[1] <= 12):
-                    # 13-01-01
-                    day, month, year = self
+            elif self[0] > 31 or self.ystridx == 0 or (yearfirst and self[1] <= 12 and self[2] <= 31):
+                # 99-01-01
+                if dayfirst and self[2] <= 12:
+                    year, day, month = self
                 else:
-                    # 01-13-01
-                    month, day, year = self
+                    year, month, day = self
+            elif self[0] > 12 or (dayfirst and self[1] <= 12):
+                # 13-01-01
+                day, month, year = self
+            else:
+                # 01-13-01
+                month, day, year = self
 
         return year, month, day
 
@@ -621,7 +619,7 @@ class Parser:
         try:
             ret = self._build_naive(res, default)
         except ValueError as e:
-            raise ParserError(f"{str(e)}: %s", timestr) from e
+            raise ParserError(f"{e!s}: %s", timestr) from e
 
         if not ignoretz:
             ret = self._build_tzaware(ret, res, tzinfos)
@@ -1371,13 +1369,11 @@ class _TzParser:
                         offattr = "dstoffset"
                         res.dstabbr = "".join(_tmp_list[i:j])
 
-                    for ii in range(j):
-                        used_idxs.append(ii)
+                    used_idxs.extend([*range(j)])
                     i = j
                     if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in "0123456789"):
                         if _tmp_list[i] in ("+", "-"):
-                            # Yes, that's right.  See the TZ variable
-                            # documentation.
+                            # Yes, that's right. See the TZ variable documentation.
                             signal = (1, -1)[_tmp_list[i] == "+"]
                             used_idxs.append(i)
                             i += 1

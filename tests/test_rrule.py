@@ -2257,9 +2257,7 @@ class RRuleTest(unittest.TestCase):
         self.assertEqual(
             isinstance(
                 rrulestr(
-                    "DTSTART:19970902T090000\n"
-                    "RRULE:FREQ=YEARLY;COUNT=2;BYDAY=TU\n"
-                    "RRULE:FREQ=YEARLY;COUNT=1;BYDAY=TH\n"
+                    "DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=2;BYDAY=TU\nRRULE:FREQ=YEARLY;COUNT=1;BYDAY=TH\n"
                 ),
                 rruleset,
             ),
@@ -2306,9 +2304,7 @@ class RRuleTest(unittest.TestCase):
         self.assertEqual(
             list(
                 rrulestr(
-                    "DTSTART:19970902T090000\n"
-                    "RRULE:FREQ=YEARLY;COUNT=2;BYDAY=TU\n"
-                    "RRULE:FREQ=YEARLY;COUNT=1;BYDAY=TH\n"
+                    "DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;COUNT=2;BYDAY=TU\nRRULE:FREQ=YEARLY;COUNT=1;BYDAY=TH\n"
                 )
             ),
             [datetime(1997, 9, 2, 9, 0), datetime(1997, 9, 4, 9, 0), datetime(1997, 9, 9, 9, 0)],
