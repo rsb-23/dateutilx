@@ -1,19 +1,21 @@
-# -*- coding: utf-8 -*-
 """
 This module offers a generic Easter computing method for any given year, using
 Western, Orthodox or Julian algorithms.
 """
 
 import datetime
+from enum import IntEnum
 
-__all__ = ["easter", "EASTER_JULIAN", "EASTER_ORTHODOX", "EASTER_WESTERN"]
-
-EASTER_JULIAN = 1
-EASTER_ORTHODOX = 2
-EASTER_WESTERN = 3
+__all__ = ["easter", "EasterAlgo"]
 
 
-def easter(year, method=EASTER_WESTERN):
+class EasterAlgo(IntEnum):
+    JULIAN = 1
+    ORTHODOX = 2
+    WESTERN = 3
+
+
+def easter(year, method: EasterAlgo | int = EasterAlgo.WESTERN):
     """
     This method was ported from the work done by GM Arts,
     on top of the algorithm by Claus Tondering, which was
@@ -41,16 +43,18 @@ def easter(year, method=EASTER_WESTERN):
 
     More about the algorithm may be found at:
 
-    `GM Arts: Easter Algorithms <http://www.gmarts.org/index.php?go=415>`_
+    `GM Arts: Easter Algorithms <https://www.gmarts.org/index.php?go=415>`_
 
     and
 
     `The Calendar FAQ: Easter <https://www.tondering.dk/claus/cal/easter.php>`_
 
     """
-
-    if not (1 <= method <= 3):
-        raise ValueError("invalid method")
+    # todo: simplify for base 3.12
+    try:
+        EasterAlgo(method)
+    except ValueError as e:
+        raise ValueError("invalid Easter method") from e
 
     # g - Golden year - 1
     # c - Century
@@ -67,23 +71,23 @@ def easter(year, method=EASTER_WESTERN):
     e = 0
     if method < 3:
         # Old method
-        i = (19*g + 15) % 30
-        j = (y + y//4 + i) % 7
+        i = (19 * g + 15) % 30
+        j = (y + y // 4 + i) % 7
         if method == 2:
             # Extra dates to convert Julian to Gregorian date
             e = 10
             if y > 1600:
-                e = e + y//100 - 16 - (y//100 - 16)//4
+                e = e + y // 100 - 16 - (y // 100 - 16) // 4
     else:
         # New method
-        c = y//100
-        h = (c - c//4 - (8*c + 13)//25 + 19*g + 15) % 30
-        i = h - (h//28)*(1 - (h//28)*(29//(h + 1))*((21 - g)//11))
-        j = (y + y//4 + i + 2 - c + c//4) % 7
+        c = y // 100
+        h = (c - c // 4 - (8 * c + 13) // 25 + 19 * g + 15) % 30
+        i = h - (h // 28) * (1 - (h // 28) * (29 // (h + 1)) * ((21 - g) // 11))
+        j = (y + y // 4 + i + 2 - c + c // 4) % 7
 
     # p can be from -6 to 56 corresponding to dates 22 March to 23 May
     # (later dates apply to method 2, although 23 May never actually occurs)
     p = i - j + e
-    d = 1 + (p + 27 + (p + 6)//40) % 31
-    m = 3 + (p + 26)//30
+    d = 1 + (p + 27 + (p + 6) // 40) % 31
+    m = 3 + (p + 26) // 30
     return datetime.date(int(y), int(m), int(d))

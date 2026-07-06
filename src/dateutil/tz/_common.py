@@ -1,38 +1,13 @@
-from six import PY2
-
-from functools import wraps
-
 from datetime import datetime, timedelta, tzinfo
-
+from functools import wraps
 
 ZERO = timedelta(0)
 
-__all__ = ['tzname_in_python2', 'enfold']
-
-
-def tzname_in_python2(namefunc):
-    """Change unicode output into bytestrings in Python 2
-
-    tzname() API changed in Python 3. It used to return bytes, but was changed
-    to unicode strings
-    """
-    if PY2:
-        @wraps(namefunc)
-        def adjust_encoding(*args, **kwargs):
-            name = namefunc(*args, **kwargs)
-            if name is not None:
-                name = name.encode()
-
-            return name
-
-        return adjust_encoding
-    else:
-        return namefunc
-
+__all__ = ["enfold", "TzRangeBase"]
 
 # The following is adapted from Alexander Belopolsky's tz library
 # https://github.com/abalkin/tz
-if hasattr(datetime, 'fold'):
+if hasattr(datetime, "fold"):
     # This is the pre-python 3.6 fold situation
     def enfold(dt, fold=1):
         """
@@ -55,6 +30,7 @@ if hasattr(datetime, 'fold'):
         return dt.replace(fold=fold)
 
 else:
+
     class _DatetimeWithFold(datetime):
         """
         This is a class designed to provide a PEP 495-compliant interface for
@@ -63,6 +39,7 @@ else:
 
         .. versionadded:: 2.6.0
         """
+
         __slots__ = ()
 
         def replace(self, *args, **kwargs):
@@ -76,14 +53,11 @@ else:
             This is reimplemented in ``_DatetimeWithFold`` because pypy3 will
             return a ``datetime.datetime`` even if ``fold`` is unchanged.
             """
-            argnames = (
-                'year', 'month', 'day', 'hour', 'minute', 'second',
-                'microsecond', 'tzinfo'
-            )
+            argnames = ("year", "month", "day", "hour", "minute", "second", "microsecond", "tzinfo")
 
             for arg, argname in zip(args, argnames):
                 if argname in kwargs:
-                    raise TypeError('Duplicate argument: {}'.format(argname))
+                    raise TypeError(f"Duplicate argument: {argname}")
 
                 kwargs[argname] = arg
 
@@ -91,7 +65,7 @@ else:
                 if argname not in kwargs:
                     kwargs[argname] = getattr(self, argname)
 
-            dt_class = self.__class__ if kwargs.get('fold', 1) else datetime
+            dt_class = self.__class__ if kwargs.get("fold", 1) else datetime
 
             return dt_class(**kwargs)
 
@@ -117,16 +91,13 @@ else:
 
         .. versionadded:: 2.6.0
         """
-        if getattr(dt, 'fold', 0) == fold:
+        if getattr(dt, "fold", 0) == fold:
             return dt
 
         args = dt.timetuple()[:6]
         args += (dt.microsecond, dt.tzinfo)
 
-        if fold:
-            return _DatetimeWithFold(*args)
-        else:
-            return datetime(*args)
+        return _DatetimeWithFold(*args) if fold else datetime(*args)
 
 
 def _validate_fromutc_inputs(f):
@@ -134,6 +105,7 @@ def _validate_fromutc_inputs(f):
     The CPython version of ``fromutc`` checks that the input is a ``datetime``
     object and that ``self`` is attached as its ``tzinfo``.
     """
+
     @wraps(f)
     def fromutc(self, dt):
         if not isinstance(dt, datetime):
@@ -146,7 +118,7 @@ def _validate_fromutc_inputs(f):
     return fromutc
 
 
-class _tzinfo(tzinfo):
+class _TzInfo(tzinfo):
     """
     Base class for all ``dateutil`` ``tzinfo`` objects.
     """
@@ -195,14 +167,12 @@ class _tzinfo(tzinfo):
         """
         if self.is_ambiguous(dt_wall):
             delta_wall = dt_wall - dt_utc
-            _fold = int(delta_wall == (dt_utc.utcoffset() - dt_utc.dst()))
-        else:
-            _fold = 0
+            return int(delta_wall == (dt_utc.utcoffset() - dt_utc.dst()))
 
-        return _fold
+        return 0
 
     def _fold(self, dt):
-        return getattr(dt, 'fold', 0)
+        return getattr(dt, "fold", 0)
 
     def _fromutc(self, dt):
         """
@@ -221,8 +191,7 @@ class _tzinfo(tzinfo):
         # Re-implement the algorithm from Python's datetime.py
         dtoff = dt.utcoffset()
         if dtoff is None:
-            raise ValueError("fromutc() requires a non-None utcoffset() "
-                             "result")
+            raise ValueError("fromutc() requires a non-None utcoffset() result")
 
         # The original datetime.py code assumes that `dst()` defaults to
         # zero during ambiguous times. PEP 495 inverts this presumption, so
@@ -237,8 +206,7 @@ class _tzinfo(tzinfo):
         # ambiguous dates.
         dtdst = enfold(dt, fold=1).dst()
         if dtdst is None:
-            raise ValueError("fromutc(): dt.dst gave inconsistent "
-                             "results; cannot convert")
+            raise ValueError("fromutc(): dt.dst gave inconsistent results; cannot convert")
         return dt + dtdst
 
     @_validate_fromutc_inputs
@@ -264,7 +232,7 @@ class _tzinfo(tzinfo):
         return enfold(dt_wall, fold=_fold)
 
 
-class tzrangebase(_tzinfo):
+class TzRangeBase(_TzInfo):
     """
     This is an abstract base class for time zones represented by an annual
     transition into and out of DST. Child classes should implement the following
@@ -286,38 +254,31 @@ class tzrangebase(_tzinfo):
 
     .. versionadded:: 2.6.0
     """
+
     def __init__(self):
-        raise NotImplementedError('tzrangebase is an abstract base class')
+        raise NotImplementedError("tzrangebase is an abstract base class")
 
     def utcoffset(self, dt):
         isdst = self._isdst(dt)
 
         if isdst is None:
             return None
-        elif isdst:
-            return self._dst_offset
-        else:
-            return self._std_offset
+
+        return self._dst_offset if isdst else self._std_offset
 
     def dst(self, dt):
         isdst = self._isdst(dt)
 
         if isdst is None:
             return None
-        elif isdst:
-            return self._dst_base_offset
-        else:
-            return ZERO
 
-    @tzname_in_python2
+        return self._dst_base_offset if isdst else ZERO
+
     def tzname(self, dt):
-        if self._isdst(dt):
-            return self._dst_abbr
-        else:
-            return self._std_abbr
+        return self._dst_abbr if self._isdst(dt) else self._std_abbr
 
     def fromutc(self, dt):
-        """ Given a datetime in UTC, return local time """
+        """Given a datetime in UTC, return local time"""
         if not isinstance(dt, datetime):
             raise TypeError("fromutc() requires a datetime argument")
 
@@ -340,11 +301,7 @@ class tzrangebase(_tzinfo):
 
         isdst = self._naive_isdst(dt_utc, utc_transitions)
 
-        if isdst:
-            dt_wall = dt + self._dst_offset
-        else:
-            dt_wall = dt + self._std_offset
-
+        dt_wall = dt + (self._dst_offset if isdst else self._std_offset)
         _fold = int(not isdst and self.is_ambiguous(dt_wall))
 
         return enfold(dt_wall, fold=_fold)
@@ -366,15 +323,15 @@ class tzrangebase(_tzinfo):
         if not self.hasdst:
             return False
 
-        start, end = self.transitions(dt.year)
+        _, end = self.transitions(dt.year)
 
         dt = dt.replace(tzinfo=None)
-        return (end <= dt < end + self._dst_base_offset)
+        return end <= dt < end + self._dst_base_offset
 
     def _isdst(self, dt):
         if not self.hasdst:
             return False
-        elif dt is None:
+        if dt is None:
             return None
 
         transitions = self.transitions(dt.year)
@@ -387,14 +344,10 @@ class tzrangebase(_tzinfo):
         isdst = self._naive_isdst(dt, transitions)
 
         # Handle ambiguous dates
-        if not isdst and self.is_ambiguous(dt):
-            return not self._fold(dt)
-        else:
-            return isdst
+        return not self._fold(dt) if not isdst and self.is_ambiguous(dt) else isdst
 
     def _naive_isdst(self, dt, transitions):
         dston, dstoff = transitions
-
         dt = dt.replace(tzinfo=None)
 
         if dston < dstoff:
@@ -414,6 +367,6 @@ class tzrangebase(_tzinfo):
         return not (self == other)
 
     def __repr__(self):
-        return "%s(...)" % self.__class__.__name__
+        return f"{self.__class__.__name__}(...)"
 
     __reduce__ = object.__reduce__

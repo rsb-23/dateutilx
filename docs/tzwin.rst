@@ -19,4 +19,3 @@ Classes
 .. autoclass:: tzwinlocal
     :members: display, transitions
     :undoc-members:
-

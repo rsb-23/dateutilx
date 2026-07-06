@@ -1,20 +1,24 @@
+# pylint: disable=all
+import json
 import logging
 import os
-import tempfile
 import shutil
-import json
+import tempfile
 from subprocess import check_call, check_output
 from tarfile import TarFile
 
 from dateutil.zoneinfo import METADATA_FN, ZONEFILENAME
 
 
-def rebuild(filename, tag=None, format="gz", zonegroups=[], metadata=None):
+def rebuild(filename, tag=None, format_="gz", zonegroups=None, metadata=None):
     """Rebuild the internal timezone info in dateutil/zoneinfo/zoneinfo*tar*
 
     filename is the timezone tarball from ``ftp.iana.org/tz``.
 
     """
+    zonegroups = zonegroups or []
+    metadata = metadata or {}
+
     tmpdir = tempfile.mkdtemp()
     zonedir = os.path.join(tmpdir, "zoneinfo")
     moduledir = os.path.dirname(__file__)
@@ -27,10 +31,10 @@ def rebuild(filename, tag=None, format="gz", zonegroups=[], metadata=None):
             _run_zic(zonedir, filepaths)
 
         # write metadata file
-        with open(os.path.join(zonedir, METADATA_FN), 'w') as f:
+        with open(os.path.join(zonedir, METADATA_FN), "w") as f:
             json.dump(metadata, f, indent=4, sort_keys=True)
         target = os.path.join(moduledir, ZONEFILENAME)
-        with TarFile.open(target, "w:%s" % format) as tf:
+        with TarFile.open(target, f"w:{format_}") as tf:
             for entry in os.listdir(zonedir):
                 entrypath = os.path.join(zonedir, entry)
                 tf.add(entrypath, entry)
@@ -54,11 +58,7 @@ def _run_zic(zonedir, filepaths):
         _print_on_nosuchfile(e)
         raise
 
-    if b"-b " in help_text:
-        bloat_args = ["-b", "fat"]
-    else:
-        bloat_args = []
-
+    bloat_args = ["-b", "fat"] if b"-b " in help_text else []
     check_call(["zic"] + bloat_args + ["-d", zonedir] + filepaths)
 
 
@@ -72,4 +72,5 @@ def _print_on_nosuchfile(e):
         logging.error(
             "Could not find zic. Perhaps you need to install "
             "libc-bin or some other package that provides it, "
-            "or it's not in your PATH?")
+            "or it's not in your PATH?"
+        )
