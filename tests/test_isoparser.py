@@ -21,7 +21,7 @@ def _generate_tzoffsets(limited):
     if not limited:
         # The subset that's just hours
         hm_out_h = [(h, 0) for h in (-23, -5, 0, 5, 23)]
-        out.extend([_mkoffset(hm, "{:+03d}") for hm in hm_out_h])
+        out += [_mkoffset(hm, "{:+03d}") for hm in hm_out_h]
 
         # Ones that have hours and minutes
         hm_out = [*hm_out_h, (-12, 15), (11, 30), (10, 2), (5, 15), (-5, 30)]
@@ -32,8 +32,7 @@ def _generate_tzoffsets(limited):
     out += [_mkoffset(hm, fmt) for hm in hm_out for fmt in fmts]
 
     # Also add in UTC and naive
-    out.append((UTC, "Z"))
-    out.append((None, ""))
+    out += ((UTC, "Z"), (None, ""))
 
     return out
 
@@ -98,17 +97,17 @@ def _isoparse_date_and_time(dt, date_fmt, time_fmt, tzoffset, microsecond_precis
 DATETIMES = [datetime(1998, 4, 16, 12), datetime(2019, 11, 18, 23), datetime(2014, 12, 16, 4)]
 
 
-@pytest.mark.parametrize("dt", tuple(DATETIMES))
+@pytest.mark.parametrize("dt", DATETIMES)
 @pytest.mark.parametrize("date_fmt", YMD_FMTS)
 @pytest.mark.parametrize("tzoffset", TZOFFSETS)
 def test_ymd_h(dt, date_fmt, tzoffset):
     _isoparse_date_and_time(dt, date_fmt, "%H", tzoffset)
 
 
-DATETIMES = [datetime(2012, 1, 6, 9, 37)]
+DATETIMES = (datetime(2012, 1, 6, 9, 37),)
 
 
-@pytest.mark.parametrize("dt", tuple(DATETIMES))
+@pytest.mark.parametrize("dt", DATETIMES)
 @pytest.mark.parametrize("date_fmt", YMD_FMTS)
 @pytest.mark.parametrize("time_fmt", ("%H%M", "%H:%M"))
 @pytest.mark.parametrize("tzoffset", TZOFFSETS)
@@ -120,7 +119,7 @@ DATETIMES = [datetime(2003, 9, 2, 22, 14, 2), datetime(2003, 8, 8, 14, 9, 14), d
 HMS_FMTS = ("%H%M%S", "%H:%M:%S")
 
 
-@pytest.mark.parametrize("dt", tuple(DATETIMES))
+@pytest.mark.parametrize("dt", DATETIMES)
 @pytest.mark.parametrize("date_fmt", YMD_FMTS)
 @pytest.mark.parametrize("time_fmt", HMS_FMTS)
 @pytest.mark.parametrize("tzoffset", TZOFFSETS)
@@ -128,12 +127,12 @@ def test_ymd_hms(dt, date_fmt, time_fmt, tzoffset):
     _isoparse_date_and_time(dt, date_fmt, time_fmt, tzoffset)
 
 
-DATETIMES = [datetime(2017, 11, 27, 6, 14, 30, 123456)]
+DATETIMES = (datetime(2017, 11, 27, 6, 14, 30, 123456),)
 
 
-@pytest.mark.parametrize("dt", tuple(DATETIMES))
+@pytest.mark.parametrize("dt", DATETIMES)
 @pytest.mark.parametrize("date_fmt", YMD_FMTS)
-@pytest.mark.parametrize("time_fmt", (x + sep + "%f" for x in HMS_FMTS for sep in ".,"))
+@pytest.mark.parametrize("time_fmt", [f"{x}{sep}%f" for x in HMS_FMTS for sep in ".,"])
 @pytest.mark.parametrize("tzoffset", TZOFFSETS)
 @pytest.mark.parametrize("precision", list(range(3, 7)))
 def test_ymd_hms_micro(dt, date_fmt, time_fmt, tzoffset, precision):
