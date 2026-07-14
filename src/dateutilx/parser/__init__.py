@@ -13,6 +13,7 @@ __all__ = ["parse", "parser", "parserinfo", "isoparse", "isoparser"]
 
 
 def __deprecated_private_func(f):
+
     msg = (
         "{name} is a private function and may break without warning, "
         "it will be moved and or renamed in future versions."
@@ -28,6 +29,7 @@ def __deprecated_private_func(f):
 
 
 def __deprecate_private_class(c):
+
     msg = "{name} is a private class and may break without warning, it will be moved and or renamed in future versions."
     msg = msg.format(name=c.__name__)
 

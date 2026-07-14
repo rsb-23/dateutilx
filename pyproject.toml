@@ -31,21 +31,22 @@ requires-python = ">=3.10"
 dependencies = ["tzdata; sys_platform == 'win32'"]
 
 [dependency-groups]
-lint = ["pre-commit", "pylint"]
+build = ["build", "twine"]
+lint = ["pre-commit"]
 test = ["hypothesis", "pytest", "pytest-cov"]
 
 [project.urls]
-Homepage      = "https://github.com/rsb-23/dateutilx"
+Homepage = "https://github.com/rsb-23/dateutilx"
 Documentation = "https://dateutil.readthedocs.io/en/stable/"
-Source        = "https://github.com/rsb-23/dateutilx"
+Source = "https://github.com/rsb-23/dateutilx"
 
 # Build Config
 [tool.hatch.version]
 source = "vcs"
 [tool.hatch.build.targets.sdist]
-include = ["src/dateutilx","src/dateutil", "LICENSE", "README.md", "pyproject.toml"]
+include = ["src/dateutilx", "src/dateutil", "LICENSE", "README.md", "pyproject.toml"]
 [tool.hatch.build.targets.wheel]
-packages = ["src/dateutilx","src/dateutil"]
+packages = ["src/dateutilx", "src/dateutil"]
 
 [tool.coverage.report]
 fail_under = 85.0

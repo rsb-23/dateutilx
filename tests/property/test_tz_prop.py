@@ -32,8 +32,8 @@ def test_gettz_returns_local(gettz_arg, dt):
     # of utcoffset(), comparisons with the datetime always return false, so we
     # must handle the case of ambiguous and imaginary datetimes here for the
     # property to remain valid.
-    if tz.enfold(dt_act, fold=0).utcoffset() == tz.enfold(dt_act, fold=1).utcoffset():
+    if dt_act.replace(fold=0).utcoffset() == dt_act.replace(fold=1).utcoffset():
         assert dt_act == dt_exp
     else:
-        assert tz.enfold(dt, fold=0).astimezone().utcoffset() != tz.enfold(dt, fold=1).astimezone().utcoffset()
+        assert dt.replace(fold=0).astimezone().utcoffset() != dt.replace(fold=1).astimezone().utcoffset()
         assert dt_act != dt_exp
