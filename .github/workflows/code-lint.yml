@@ -19,8 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install '.[ lint ]'
-          pre-commit install
+          pip install --group lint
 
       - name: Run pre-commit
         env:
