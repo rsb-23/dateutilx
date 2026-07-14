@@ -9,7 +9,7 @@ from dateutilx.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
 
 from .freezegun import freeze_time
 
-MODULE = "dateutil.rrule"
+MODULE = "dateutilx.rrule"
 YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 
 NYC = tz.gettz("America/New_York")

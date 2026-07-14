@@ -21,7 +21,7 @@ from typing import Any
 
 from dateutilx.helper import is_windows_os
 
-from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs, enfold
+from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
 from .win import TzWin, TzWinLocal
 
@@ -384,7 +384,7 @@ class TzFile(_TzInfo):
 
     .. testsetup:: tzfile
 
-        from dateutil.tz import gettz
+        from dateutilx.tz import gettz
         from datetime import datetime
 
     .. doctest:: tzfile
@@ -722,7 +722,7 @@ class TzFile(_TzInfo):
 
         fold = self.is_ambiguous(dt_out, idx=idx)
 
-        return enfold(dt_out, fold=int(fold))
+        return dt_out.replace(fold=int(fold))
 
     def is_ambiguous(self, dt, idx=None):
         """
@@ -1524,14 +1524,16 @@ def __get_gettz():
                         if TzWin is not None:
                             try:
                                 tz = TzWin(name)
-                            except (OSError, UnicodeEncodeError):
-                                # UnicodeEncodeError is for Python 2.7 compat
+                            except ValueError:
                                 tz = None
 
                         if not tz:
-                            from dateutilx.zoneinfo import get_zonefile_instance
+                            from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-                            tz = get_zonefile_instance().get(name)
+                            try:
+                                tz = ZoneInfo(name)
+                            except (ZoneInfoNotFoundError, KeyError):
+                                tz = None
 
                         if not tz:
                             for c in name:
@@ -1623,11 +1625,15 @@ def datetime_ambiguous(dt, tz=None):
         with contextlib.suppress(Exception):
             return tz.is_ambiguous(dt)
 
+    # A gap (imaginary) time cannot be ambiguous.
+    if not datetime_exists(dt, tz=tz):
+        return False
+
     # If it doesn't come out and tell us it's ambiguous, we'll just check if
     # the fold attribute has any effect on this particular date and time.
     dt = dt.replace(tzinfo=tz)
-    wall_0 = enfold(dt, fold=0)
-    wall_1 = enfold(dt, fold=1)
+    wall_0 = dt.replace(fold=0)
+    wall_1 = dt.replace(fold=1)
 
     same_offset = wall_0.utcoffset() == wall_1.utcoffset()
     same_dst = wall_0.dst() == wall_1.dst()

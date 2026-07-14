@@ -3,101 +3,7 @@ from functools import wraps
 
 ZERO = timedelta(0)
 
-__all__ = ["enfold", "TzRangeBase"]
-
-# The following is adapted from Alexander Belopolsky's tz library
-# https://github.com/abalkin/tz
-if hasattr(datetime, "fold"):
-    # This is the pre-python 3.6 fold situation
-    def enfold(dt, fold=1):
-        """
-        Provides a unified interface for assigning the ``fold`` attribute to
-        datetimes both before and after the implementation of PEP-495.
-
-        :param fold:
-            The value for the ``fold`` attribute in the returned datetime. This
-            should be either 0 or 1.
-
-        :return:
-            Returns an object for which ``getattr(dt, 'fold', 0)`` returns
-            ``fold`` for all versions of Python. In versions prior to
-            Python 3.6, this is a ``_DatetimeWithFold`` object, which is a
-            subclass of :py:class:`datetime.datetime` with the ``fold``
-            attribute added, if ``fold`` is 1.
-
-        .. versionadded:: 2.6.0
-        """
-        return dt.replace(fold=fold)
-
-else:
-
-    class _DatetimeWithFold(datetime):
-        """
-        This is a class designed to provide a PEP 495-compliant interface for
-        Python versions before 3.6. It is used only for dates in a fold, so
-        the ``fold`` attribute is fixed at ``1``.
-
-        .. versionadded:: 2.6.0
-        """
-
-        __slots__ = ()
-
-        def replace(self, *args, **kwargs):
-            """
-            Return a datetime with the same attributes, except for those
-            attributes given new values by whichever keyword arguments are
-            specified. Note that tzinfo=None can be specified to create a naive
-            datetime from an aware datetime with no conversion of date and time
-            data.
-
-            This is reimplemented in ``_DatetimeWithFold`` because pypy3 will
-            return a ``datetime.datetime`` even if ``fold`` is unchanged.
-            """
-            argnames = ("year", "month", "day", "hour", "minute", "second", "microsecond", "tzinfo")
-
-            for arg, argname in zip(args, argnames):
-                if argname in kwargs:
-                    raise TypeError(f"Duplicate argument: {argname}")
-
-                kwargs[argname] = arg
-
-            for argname in argnames:
-                if argname not in kwargs:
-                    kwargs[argname] = getattr(self, argname)
-
-            dt_class = self.__class__ if kwargs.get("fold", 1) else datetime
-
-            return dt_class(**kwargs)
-
-        @property
-        def fold(self):
-            return 1
-
-    def enfold(dt, fold=1):
-        """
-        Provides a unified interface for assigning the ``fold`` attribute to
-        datetimes both before and after the implementation of PEP-495.
-
-        :param fold:
-            The value for the ``fold`` attribute in the returned datetime. This
-            should be either 0 or 1.
-
-        :return:
-            Returns an object for which ``getattr(dt, 'fold', 0)`` returns
-            ``fold`` for all versions of Python. In versions prior to
-            Python 3.6, this is a ``_DatetimeWithFold`` object, which is a
-            subclass of :py:class:`datetime.datetime` with the ``fold``
-            attribute added, if ``fold`` is 1.
-
-        .. versionadded:: 2.6.0
-        """
-        if getattr(dt, "fold", 0) == fold:
-            return dt
-
-        args = dt.timetuple()[:6]
-        args += (dt.microsecond, dt.tzinfo)
-
-        return _DatetimeWithFold(*args) if fold else datetime(*args)
+__all__ = ["TzRangeBase"]
 
 
 def _validate_fromutc_inputs(f):
@@ -140,8 +46,8 @@ class _TzInfo(tzinfo):
 
         dt = dt.replace(tzinfo=self)
 
-        wall_0 = enfold(dt, fold=0)
-        wall_1 = enfold(dt, fold=1)
+        wall_0 = dt.replace(fold=0)
+        wall_1 = dt.replace(fold=1)
 
         same_offset = wall_0.utcoffset() == wall_1.utcoffset()
         same_dt = wall_0.replace(tzinfo=None) == wall_1.replace(tzinfo=None)
@@ -204,7 +110,7 @@ class _TzInfo(tzinfo):
         dt += delta
         # Set fold=1 so we can default to being in the fold for
         # ambiguous dates.
-        dtdst = enfold(dt, fold=1).dst()
+        dtdst = dt.replace(fold=1).dst()
         if dtdst is None:
             raise ValueError("fromutc(): dt.dst gave inconsistent results; cannot convert")
         return dt + dtdst
@@ -229,7 +135,7 @@ class _TzInfo(tzinfo):
         _fold = self._fold_status(dt, dt_wall)
 
         # Set the default fold value for ambiguous dates
-        return enfold(dt_wall, fold=_fold)
+        return dt_wall.replace(fold=_fold)
 
 
 class TzRangeBase(_TzInfo):
@@ -304,7 +210,7 @@ class TzRangeBase(_TzInfo):
         dt_wall = dt + (self._dst_offset if isdst else self._std_offset)
         _fold = int(not isdst and self.is_ambiguous(dt_wall))
 
-        return enfold(dt_wall, fold=_fold)
+        return dt_wall.replace(fold=_fold)
 
     def is_ambiguous(self, dt):
         """

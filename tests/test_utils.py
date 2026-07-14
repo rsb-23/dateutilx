@@ -6,7 +6,7 @@ from dateutilx.utils import within_delta
 
 from .freezegun import freeze_time
 
-MODULE = "dateutil.utils"
+MODULE = "dateutilx.utils"
 NYC = tz.gettz("America/New_York")
 
 

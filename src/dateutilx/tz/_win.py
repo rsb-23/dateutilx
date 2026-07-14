@@ -215,8 +215,11 @@ class TzWin(TzWinBase):
 
         with winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE) as handle:
             tzkeyname = f"{TZKEYNAME}\\{name}"
-            with winreg.OpenKey(handle, tzkeyname) as tzkey:
-                keydict = values_to_dict(tzkey)
+            try:
+                with winreg.OpenKey(handle, tzkeyname) as tzkey:
+                    keydict = values_to_dict(tzkey)
+            except FileNotFoundError as e:
+                raise ValueError(f"Timezone '{name}' not found") from e
 
         self._std_abbr = keydict["Std"]
         self._dst_abbr = keydict["Dlt"]
