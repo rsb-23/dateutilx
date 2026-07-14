@@ -1103,9 +1103,8 @@ class _TzIcalVtz(_TzInfo):
 
         dt = dt.replace(tzinfo=None)
 
-        with contextlib.suppress(ValueError):
-            with self._cache_lock:
-                return self._cachecomp[self._cachedate.index((dt, self._fold(dt)))]
+        with contextlib.suppress(ValueError), self._cache_lock:
+            return self._cachecomp[self._cachedate.index((dt, self._fold(dt)))]
 
         lastcompdt = None
         lastcomp = None

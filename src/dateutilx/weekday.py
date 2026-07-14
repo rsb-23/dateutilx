@@ -2,7 +2,7 @@ from dateutilx.helper import Day
 
 
 class NthWeekday:
-    __slots__ = ["weekday", "n"]
+    __slots__ = ["n", "weekday"]
 
     def __init__(self, wkday: Day, n: int | None = None):
         if n == 0:

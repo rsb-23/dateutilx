@@ -1612,10 +1612,8 @@ class TZTest(unittest.TestCase):
         isstd_expected = (0, 0, 0, 1)
         tzc = tz.tzfile(BytesIO(base64.b64decode(NEW_YORK)))
         # gather the actual information as parsed by the tzfile class
-        isstd = []
-        for ttinfo in tzc._ttinfo_list:
-            # ttinfo objects contain boolean values
-            isstd.append(int(ttinfo.isstd))
+        # ttinfo objects contain boolean values
+        isstd = [int(ttinfo.isstd) for ttinfo in tzc._ttinfo_list]
         # ttinfo list may contain more entries than isstd file content
         isstd = tuple(isstd[: len(isstd_expected)])
         self.assertEqual(

@@ -805,7 +805,7 @@ class Parser:
                         and info.jump(_tokens[i + 2])
                         and _tokens[i + 3] == "("
                         and _tokens[i + 5] == ")"
-                        and 3 <= len(_tokens[i + 4])
+                        and len(_tokens[i + 4]) >= 3
                         and self._could_be_tzname(res.hour, res.tzname, None, _tokens[i + 4])
                     ):
                         # -0300 (BRST)
