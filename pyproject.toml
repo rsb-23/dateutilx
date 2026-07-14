@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "dateutilx"
 dynamic = ["version"]
 description = "Modern extension to the standard Python datetime module"
-readme = "README.rst"
+readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Rishabh B" }]
 
