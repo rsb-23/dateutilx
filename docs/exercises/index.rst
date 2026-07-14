@@ -239,4 +239,3 @@ To solve this exercise, copy-paste this script into a document, change anything 
 .. raw:: html
 
     </details>
-

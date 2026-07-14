@@ -26,4 +26,3 @@ Warnings and Exceptions
 .. autoclass:: dateutil.parser.ParserError
 
 .. autoclass:: dateutil.parser.UnknownTimezoneWarning
-

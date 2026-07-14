@@ -1,65 +1,63 @@
 [build-system]
-requires = [
-    "setuptools; python_version != '3.3'",
-    "setuptools<40.0; python_version == '3.3'",
-    "setuptools_scm<8.0"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dateutilx"
+dynamic = ["version"]
+description = "Modern extension to the standard Python datetime module"
+readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [{ name = "Rishabh B" }]
+
+keywords = ["date", "time", "datetime", "timezone", "dateutil"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Software Development :: Libraries",
 ]
-build-backend = "setuptools.build_meta"
 
-[tool.towncrier]
-    package = "dateutil"
-    package_dir = "dateutil"
-    filename = "NEWS"
-    directory = "changelog.d"
-    title_format = "Version {version} ({project_date})"
-    issue_format = "GH #{issue}"
-    template = "changelog.d/template.rst"
+requires-python = ">=3.10"
+dependencies = ["tzdata; sys_platform == 'win32'"]
 
-    [[tool.towncrier.type]]
-        directory = "data"
-        name = "Data updates"
-        showcontent = true
+[dependency-groups]
+build = ["build", "twine"]
+lint = ["pre-commit"]
+test = ["hypothesis", "pytest", "pytest-cov"]
 
-    [[tool.towncrier.type]]
-        directory = "deprecations"
-        name = "Deprecations"
-        showcontent = true
+[project.urls]
+Homepage = "https://github.com/rsb-23/dateutilx"
+Documentation = "https://dateutil.readthedocs.io/en/stable/"
+Source = "https://github.com/rsb-23/dateutilx"
 
-    [[tool.towncrier.type]]
-        directory = "feature"
-        name = "Features"
-        showcontent = true
+# Build Config
+[tool.hatch.version]
+source = "vcs"
+[tool.hatch.build.targets.sdist]
+include = ["src/dateutilx", "src/dateutil", "LICENSE", "README.md", "pyproject.toml"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/dateutilx", "src/dateutil"]
 
-    [[tool.towncrier.type]]
-        directory = "bugfix"
-        name = "Bugfixes"
-        showcontent = true
+[tool.coverage.report]
+fail_under = 85.0
+[tool.coverage.run]
+source = ["src/"]
 
-    [[tool.towncrier.type]]
-        directory = "doc"
-        name = "Documentation changes"
-        showcontent = true
-
-    [[tool.towncrier.type]]
-        directory = "misc"
-        name = "Misc"
-        showcontent = true
-
-[tool.black]
-line-length = 80
-
-[tool.isort]
-atomic=true
-force_grid_wrap=0
-include_trailing_comma=true
-known_first_party = ["dateutil"]
-known_third_party=[
-    "pytest",
-    "hypothesis",
-    "six",
-    "freezegun",
-    "mock",
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*_test.py", "*_solution.py", ]
+xfail_strict = true
+filterwarnings = ["error", "error::DeprecationWarning", "error::PendingDeprecationWarning", ]
+markers = [
+    "gettz", "import_star", "isoparser", "parserinfo", "rrule", "rruleset", "rrulestr",
+    "smoke", "tz_resolve_imaginary", "tzfile", "tzlocal", "tzoffset", "tzstr",
 ]
-multi_line_output=3
-use_parentheses=true
-

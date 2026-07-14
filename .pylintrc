@@ -1,0 +1,48 @@
+[MASTER]
+jobs=2
+ignore-paths=(?!(src|tests))/*
+
+[FORMAT]
+max-line-length = 130
+
+[DESIGN]
+max-args = 10
+max-attributes = 18
+max-bool-expr = 15
+max-branches = 83
+max-locals = 52
+max-module-lines = 4000
+max-nested-blocks = 8
+max-positional-arguments = 22
+max-public-methods = 45
+max-returns = 7
+max-statements = 180
+
+[MESSAGES CONTROL]
+disable=
+	I,
+	# E
+	import-error, #15 keep
+	no-member, #69 k
+	unsubscriptable-object, #2keep
+	# W
+	abstract-method, #4keep
+	attribute-defined-outside-init, #79 k
+	fixme, #keep
+	global-statement, #7 k
+	protected-access, #39 k
+	redefined-outer-name, #20 k
+	unused-argument, #keep
+	unused-wildcard-import, #2keep
+	wildcard-import, #2keep
+	# C
+	import-outside-toplevel, #34 keep
+	invalid-name, #1034 k
+	missing-docstring, #keep
+	superfluous-parens, #13 keep
+	wrong-import-position, #3keep
+	# R
+	cyclic-import, #5keep
+	duplicate-code, #keep
+	stop-iteration-return, #2keep
+	too-few-public-methods, #19 k
