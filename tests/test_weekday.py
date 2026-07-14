@@ -1,6 +1,6 @@
 import unittest
 
-from dateutil.weekday import FR, MO, SA, SU, TH, TU, WE, Weekday
+from dateutilx.weekday import FR, MO, SA, SU, TH, TU, WE, Weekday
 
 
 class WeekdayTest(unittest.TestCase):

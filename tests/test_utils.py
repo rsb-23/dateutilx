@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 
-from dateutil import tz, utils
-from dateutil.tz import UTC
-from dateutil.utils import within_delta
+from dateutilx import tz, utils
+from dateutilx.tz import UTC
+from dateutilx.utils import within_delta
 
 from .freezegun import freeze_time
 

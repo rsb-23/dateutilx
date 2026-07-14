@@ -7,7 +7,7 @@ import tempfile
 from subprocess import check_call, check_output
 from tarfile import TarFile
 
-from dateutil.zoneinfo import METADATA_FN, ZONEFILENAME
+from dateutilx.zoneinfo import METADATA_FN, ZONEFILENAME
 
 
 def rebuild(filename, tag=None, format_="gz", zonegroups=None, metadata=None):

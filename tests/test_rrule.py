@@ -3,9 +3,9 @@ from datetime import date, datetime
 
 import pytest
 
-from dateutil import tz
-from dateutil.helper import Frequency
-from dateutil.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
+from dateutilx import tz
+from dateutilx.helper import Frequency
+from dateutilx.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
 
 from .freezegun import freeze_time
 

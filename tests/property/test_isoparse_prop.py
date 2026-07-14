@@ -2,8 +2,8 @@ import pytest
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from dateutil import tz
-from dateutil.parser import isoparse
+from dateutilx import tz
+from dateutilx.parser import isoparse
 
 # Strategies
 TIME_ZONE_STRATEGY = st.sampled_from(

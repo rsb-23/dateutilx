@@ -11,10 +11,10 @@ from io import BytesIO, StringIO
 
 import pytest
 
-from dateutil import tz, zoneinfo
-from dateutil.helper import is_windows_os
-from dateutil.parser import parse
-from dateutil.relativedelta import SU, TH, RelativeDelta
+from dateutilx import tz, zoneinfo
+from dateutilx.helper import is_windows_os
+from dateutilx.parser import parse
+from dateutilx.relativedelta import SU, TH, RelativeDelta
 
 from ._common import COMPARES_EQUAL, PicklableMixin, TZEnvContext
 from ._data import (
