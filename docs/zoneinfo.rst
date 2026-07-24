@@ -1,11 +1,11 @@
 ========
 zoneinfo
 ========
-.. automodule:: dateutil.zoneinfo
+.. automodule:: dateutilx.zoneinfo
    :members:
    :undoc-members:
 
-.. automodule:: dateutil.zoneinfo.rebuild
+.. automodule:: dateutilx.zoneinfo.rebuild
    :members: rebuild
 
 zonefile_metadata

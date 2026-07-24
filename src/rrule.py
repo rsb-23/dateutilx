@@ -436,7 +436,7 @@ class Rrule(RruleBase):
         if count is not None and until:
             warn(
                 "Using both 'count' and 'until' is inconsistent with RFC 5545"
-                " and has been deprecated in dateutil. Future versions will "
+                " and has been deprecated in dateutilx. Future versions will "
                 "raise an error.",
                 DeprecationWarning,
             )
@@ -1381,7 +1381,7 @@ class _RRuleStr:
         than one line and should be joined before processing.
 
     :param forceset:
-        If set ``True`` forces a :class:`dateutil.rrule.rruleset` to
+        If set ``True`` forces a :class:`dateutilx.rrule.rruleset` to
         be returned.
 
     :param compatible:
@@ -1394,16 +1394,16 @@ class _RRuleStr:
     :param tzids:
         If given, a callable or mapping used to retrieve a
         :class:`datetime.tzinfo` from a string representation.
-        Defaults to :func:`dateutil.tz.gettz`.
+        Defaults to :func:`dateutilx.tz.gettz`.
 
     :param tzinfos:
         Additional time zone names / aliases which may be present in a string
-        representation.  See :func:`dateutil.parser.parse` for more
+        representation.  See :func:`dateutilx.parser.parse` for more
         information.
 
     :return:
-        Returns a :class:`dateutil.rrule.rruleset` or
-        :class:`dateutil.rrule.rrule`
+        Returns a :class:`dateutilx.rrule.rruleset` or
+        :class:`dateutilx.rrule.rrule`
     """
 
     @staticmethod

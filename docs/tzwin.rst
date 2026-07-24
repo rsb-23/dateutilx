@@ -2,9 +2,9 @@
 tz.win
 ======
 
-.. py:currentmodule:: dateutil.tz.win
+.. py:currentmodule:: dateutilx.tz.win
 
-.. automodule:: dateutil.tz.win
+.. automodule:: dateutilx.tz.win
 
 Classes
 -------

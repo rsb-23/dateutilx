@@ -374,7 +374,7 @@ class TzFile(_TzInfo):
         file on disk that you want to read into a Python ``tzinfo`` object.
         If you want to get a ``tzfile`` representing a specific IANA zone,
         (e.g. ``'America/New_York'``), you should call
-        :func:`dateutil.tz.gettz` with the zone identifier.
+        :func:`dateutilx.tz.gettz` with the zone identifier.
 
 
     **Examples:**

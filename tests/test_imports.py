@@ -32,7 +32,7 @@ def clean_import():
 
 @pytest.mark.parametrize("module", ["easter", "parser", "relativedelta", "rrule", "tz"])
 def test_lazy_import(clean_import, module):
-    """Test that dateutil.[submodule] works for all py version"""
+    """Test that dateutilx.[submodule] works for all py version"""
 
     import importlib
 
@@ -46,7 +46,7 @@ def test_lazy_import(clean_import, module):
 
 
 def test_import_version_str():
-    """Test that dateutil.__version__ can be imported"""
+    """Test that dateutilx.__version__ can be imported"""
 
 
 def test_import_version_root():
@@ -55,7 +55,7 @@ def test_import_version_root():
     assert hasattr(dateutilx, "__version__")
 
 
-# Test that dateutil.easter-related imports work properly
+# Test that dateutilx.easter-related imports work properly
 def test_import_easter_direct():
     pass
 
@@ -68,7 +68,7 @@ def test_import_easter_start():
     pass
 
 
-#  Test that dateutil.parser-related imports work properly
+#  Test that dateutilx.parser-related imports work properly
 def test_import_parser_direct():
     pass
 
@@ -86,7 +86,7 @@ def test_import_parser_all():
         assert var is not None
 
 
-# Test that dateutil.relativedelta-related imports work properly
+# Test that dateutilx.relativedelta-related imports work properly
 def test_import_relative_delta_direct():
     pass
 
@@ -107,7 +107,7 @@ def test_import_relative_delta_all():
     assert weekdays is not None
 
 
-# Test that dateutil.rrule related imports work properly
+# Test that dateutilx.rrule related imports work properly
 def test_import_rrule_direct():
     pass
 
@@ -134,7 +134,7 @@ def test_import_rrule_all():
     assert weekdays is not None
 
 
-# Test that dateutil.tz related imports work properly
+# Test that dateutilx.tz related imports work properly
 def test_import_tztest_direct():
     pass
 
@@ -175,7 +175,7 @@ def test_import_tz_all():
         assert lvars[var] is not None
 
 
-# Test that dateutil.tzwin related imports work properly
+# Test that dateutilx.tzwin related imports work properly
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_direct():
     pass

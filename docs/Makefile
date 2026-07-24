@@ -88,9 +88,9 @@ qthelp: venv
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/dateutil.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/dateutilx.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/dateutil.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/dateutilx.qhc"
 
 devhelp: venv
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp

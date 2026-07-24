@@ -1,6 +1,6 @@
 ======
 easter
 ======
-.. automodule:: dateutil.easter
+.. automodule:: dateutilx.easter
    :members:
    :undoc-members:
