@@ -45,7 +45,7 @@ copyright = "2019, dateutil"
 # built documents.
 #
 # The short X.Y version.
-from dateutilx import __version__ as VERSION  # Explicitly use a relative path # noqa
+from src import __version__ as VERSION  # Explicitly use a relative path # noqa
 
 version = VERSION
 # The full version, including alpha/beta/rc tags.

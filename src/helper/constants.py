@@ -1,10 +1,5 @@
 import calendar
-import sys
 from enum import IntEnum
-
-
-def is_windows_os() -> bool:
-    return sys.platform.startswith("win")
 
 
 class Frequency(IntEnum):

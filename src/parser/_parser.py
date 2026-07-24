@@ -38,8 +38,8 @@ from decimal import Decimal
 from io import StringIO
 from warnings import warn
 
-from dateutilx import relativedelta, tz
-from dateutilx.errors import ParserError, UnknownTimezoneWarning
+from src import relativedelta, tz
+from src.errors import ParserError, UnknownTimezoneWarning
 
 from .utils import standard_dt_parser
 
@@ -564,8 +564,8 @@ class Parser:
             .. doctest::
                :options: +NORMALIZE_WHITESPACE
 
-                >>> from dateutilx.parser import parse
-                >>> from dateutilx.tz import gettz
+                >>> from src.parser import parse
+                >>> from src.tz import gettz
                 >>> tzinfos = {"BRST": -7200, "CST": gettz("America/Chicago")}
                 >>> parse("2012-01-19 17:21:00 BRST", tzinfos=tzinfos)
                 datetime.datetime(2012, 1, 19, 17, 21, tzinfo=tzoffset(u'BRST', -7200))
@@ -669,7 +669,7 @@ class Parser:
 
             .. doctest::
 
-                >>> from dateutilx.parser import parse
+                >>> from src.parser import parse
                 >>> parse("Today is January 1, 2047 at 8:21:00AM", fuzzy_with_tokens=True)
                 (datetime.datetime(2047, 1, 1, 8, 21), (u'Today is ', u' ', u'at '))
 
@@ -1274,8 +1274,8 @@ def parse(timestr, parser_info=None, **kwargs):
         .. doctest::
            :options: +NORMALIZE_WHITESPACE
 
-            >>> from dateutilx.parser import parse
-            >>> from dateutilx.tz import gettz
+            >>> from src.parser import parse
+            >>> from src.tz import gettz
             >>> tzinfos = {"BRST": -7200, "CST": gettz("America/Chicago")}
             >>> parse("2012-01-19 17:21:00 BRST", tzinfos=tzinfos)
             datetime.datetime(2012, 1, 19, 17, 21, tzinfo=tzoffset(u'BRST', -7200))
@@ -1311,7 +1311,7 @@ def parse(timestr, parser_info=None, **kwargs):
 
         .. doctest::
 
-            >>> from dateutilx.parser import parse
+            >>> from src.parser import parse
             >>> parse("Today is January 1, 2047 at 8:21:00AM", fuzzy_with_tokens=True)
             (datetime.datetime(2047, 1, 1, 8, 21), (u'Today is ', u' ', u'at '))
 

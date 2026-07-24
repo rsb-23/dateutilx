@@ -6,7 +6,7 @@ from types import NotImplementedType
 from typing import Self, TypeAlias
 from warnings import warn
 
-from dateutilx.weekday import Day, Weekday, weekdays
+from src.weekday import Day, Weekday, weekdays
 
 MO, TU, WE, TH, FR, SA, SU = weekdays
 
@@ -91,7 +91,7 @@ class RelativeDelta:
     For example
 
     >>> from datetime import datetime
-    >>> from dateutilx.relativedelta import RelativeDelta, MO
+    >>> from src.relativedelta import RelativeDelta, MO
     >>> dt = datetime(2018, 4, 9, 13, 37, 0)
     >>> delta = RelativeDelta(hours=25, day=1, weekday=MO(1))
     >>> dt + delta

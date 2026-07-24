@@ -12,7 +12,7 @@ import re
 from datetime import date, datetime, time, timedelta
 from functools import wraps
 
-from dateutilx.tz import UTC, TzOffset
+from src.tz import UTC, TzOffset
 
 __all__ = ["isoparse", "isoparser"]
 

@@ -6,7 +6,7 @@ ups#1: upstream, GH#1: current repo
 
 from datetime import datetime
 
-from dateutilx import parser
+from src import parser
 
 
 def test_parse_colon_separated_date():

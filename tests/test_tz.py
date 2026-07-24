@@ -11,10 +11,10 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from dateutilx import tz
-from dateutilx.helper import is_windows_os
-from dateutilx.parser import parse
-from dateutilx.relativedelta import SU, TH, RelativeDelta
+from src import tz
+from src.helper import is_windows_os
+from src.parser import parse
+from src.relativedelta import SU, TH, RelativeDelta
 
 from ._common import COMPARES_EQUAL, PicklableMixin, TZEnvContext
 from ._data import (
