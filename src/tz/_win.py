@@ -7,22 +7,23 @@ Attempting to import this module on a non-Windows platform will raise an
 """
 
 # This code was originally contributed by Jeffrey Harris.
-import datetime
+import datetime as dt
 import struct
+from typing import Any
 
 from ._common import TzRangeBase
 
 try:
     import ctypes
-    import winreg
+    import winreg  # noqa
     from ctypes import wintypes
-except (ValueError, ImportError) as e:
+except (ValueError, ImportError) as err:
     # ValueError is raised on non-Windows systems for some horrible reason.
-    raise ImportError("Running tzwin on non-Windows system") from e
+    raise ImportError("Running tzwin on non-Windows system") from err
 
 __all__ = ["TzRes", "TzWin", "TzWinLocal"]
 
-ONEWEEK = datetime.timedelta(7)
+ONEWEEK = dt.timedelta(7)
 
 TZKEYNAMENT = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"
 TZKEYNAME9X = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Time Zones"
@@ -124,7 +125,7 @@ class TzWinBase(TzRangeBase):
     def __init__(self):
         raise NotImplementedError("tzwinbase is an abstract base class")
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         # Compare on all relevant dimensions, including name.
         if not isinstance(other, TzWinBase):
             return NotImplemented
@@ -230,8 +231,8 @@ class TzWin(TzWinBase):
         tup = struct.unpack("=3l16h", keydict["TZI"])
         stdoffset = -tup[0] - tup[1]  # Bias + StandardBias * -1
         dstoffset = stdoffset - tup[2]  # + DaylightBias * -1
-        self._std_offset = datetime.timedelta(minutes=stdoffset)
-        self._dst_offset = datetime.timedelta(minutes=dstoffset)
+        self._std_offset = dt.timedelta(minutes=stdoffset)
+        self._dst_offset = dt.timedelta(minutes=dstoffset)
 
         # for the meaning see the win32 TIME_ZONE_INFORMATION structure docs
         # http://msdn.microsoft.com/en-us/library/windows/desktop/ms725481(v=vs.85).aspx
@@ -287,8 +288,8 @@ class TzWinLocal(TzWinBase):
         stdoffset = -keydict["Bias"] - keydict["StandardBias"]
         dstoffset = stdoffset - keydict["DaylightBias"]
 
-        self._std_offset = datetime.timedelta(minutes=stdoffset)
-        self._dst_offset = datetime.timedelta(minutes=dstoffset)
+        self._std_offset = dt.timedelta(minutes=stdoffset)
+        self._dst_offset = dt.timedelta(minutes=dstoffset)
 
         # For reasons unclear, in this particular key, the day of week has been
         # moved to the END of the SYSTEMTIME structure.
@@ -321,7 +322,7 @@ class TzWinLocal(TzWinBase):
 def picknthweekday(year, month, dayofweek: int, hour, minute, whichweek: int):
     """dayofweek == 0 means Sunday, whichweek 5 means last instance"""
     assert 0 < whichweek <= 5
-    first = datetime.datetime(year, month, 1, hour, minute)
+    first = dt.datetime(year, month, 1, hour, minute)
 
     # This will work if dayofweek is ISO weekday (1-7) or Microsoft-style (0-6),
     # Because 7 % 7 = 0

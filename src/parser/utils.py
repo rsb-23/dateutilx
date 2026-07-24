@@ -1,5 +1,6 @@
 import datetime as dt
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any
 
 _SEP_TABLE = str.maketrans(" :.T-/\\", "_" * 7)
 
@@ -49,14 +50,12 @@ def _try_parse(timestr: str, fmt: str) -> dt.datetime | None:
         # normalise microsecond fields: strftime always emits 6 digits
         if "%f" in fmt:
             reconstructed = reconstructed.rstrip("0") or "0"
-        if reconstructed != timestr:
-            return None
-        return parsed
+        return None if reconstructed != timestr else parsed
     except ValueError:
         return None
 
 
-def standard_dt_parser(timestr: str, max_workers: int = 3) -> dt.datetime:
+def standard_dt_parser(timestr: Any, max_workers: int = 3) -> dt.datetime:
     timestr = str(timestr).strip()
     timestr = timestr.translate(_SEP_TABLE)
     timestr = timestr.lower()

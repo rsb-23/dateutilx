@@ -101,7 +101,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
         """
         return dt
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzUTC | TzOffset):
             return NotImplemented
 
@@ -163,7 +163,7 @@ class TzOffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
         """
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzOffset):
             return NotImplemented
 
@@ -303,7 +303,7 @@ class _TTInfo:
                 _tmp_list.append(f"{attr}={value!r}")
         return f"{self.__class__.__name__}({', '.join(_tmp_list)})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, _TTInfo):
             return NotImplemented
 
@@ -789,7 +789,7 @@ class TzFile(_TzInfo):
             return None
         return self._find_ttinfo(dt).abbr
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzFile):
             return NotImplemented
         return (
@@ -946,7 +946,7 @@ class TzRange(TzRangeBase):
 
         return start, end
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzRange):
             return NotImplemented
 

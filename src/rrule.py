@@ -15,6 +15,7 @@ import re
 import sys
 from functools import wraps
 from math import gcd
+from typing import Any
 from warnings import warn
 
 from .helper import Day, Frequency
@@ -1288,10 +1289,10 @@ class RruleSet(RruleBase):
         def __gt__(self, other):
             return self.dt > other.dt
 
-        def __eq__(self, other):
+        def __eq__(self, other: Any):
             return self.dt == other.dt
 
-        def __ne__(self, other):
+        def __ne__(self, other: Any):
             return self.dt != other.dt
 
     def __init__(self, cache=False):

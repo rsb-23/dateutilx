@@ -92,9 +92,9 @@ class RelativeDelta:
 
     >>> from datetime import datetime
     >>> from src.relativedelta import RelativeDelta, MO
-    >>> dt = datetime(2018, 4, 9, 13, 37, 0)
+    >>> dt_ = datetime(2018, 4, 9, 13, 37, 0)
     >>> delta = RelativeDelta(hours=25, day=1, weekday=MO(1))
-    >>> dt + delta
+    >>> dt_ + delta
     dt.datetime(2018, 4, 2, 14, 37)
 
     First, the day is set to 1 (the first of the month), then 25 hours
