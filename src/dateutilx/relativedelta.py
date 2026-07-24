@@ -2,7 +2,8 @@ import calendar
 import datetime
 import operator
 from math import copysign
-from typing import TypeAlias
+from types import NotImplementedType
+from typing import Self, TypeAlias
 from warnings import warn
 
 from dateutilx.weekday import Day, Weekday, weekdays
@@ -11,6 +12,9 @@ MO, TU, WE, TH, FR, SA, SU = weekdays
 
 __all__ = ["RelativeDelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
 Number: TypeAlias = float | int
+
+_0FIELDS = "years", "months", "days", "hours", "minutes", "seconds", "microseconds"
+_NONE_FIELDS = "year", "month", "day", "hour", "minute", "second", "microsecond"
 
 
 class RelativeDelta:
@@ -289,6 +293,17 @@ class RelativeDelta:
         else:
             self.years = 0
 
+    def _make_relativedelta(self, **kwargs) -> Self:
+        """Factory method to create a new RelativeDelta with given overrides."""
+        _0fields = {field: kwargs.get(field, getattr(self, field)) for field in _0FIELDS}
+        _none_fields = {field: kwargs.get(field, getattr(self, field)) for field in _NONE_FIELDS}
+        return self.__class__(
+            **_0fields,
+            **_none_fields,
+            leapdays=kwargs.get("leapdays", self.leapdays),
+            weekday=kwargs.get("weekday", self.weekday),
+        )
+
     def normalized(self):
         """
         Return a version of this object represented entirely using integer
@@ -315,63 +330,32 @@ class RelativeDelta:
         microseconds = round(self.microseconds + 1e6 * (seconds_f - seconds))
 
         # Constructor carries overflow back up with call to _fix()
-        return self.__class__(
-            years=self.years,
-            months=self.months,
-            days=days,
-            hours=hours,
-            minutes=minutes,
-            seconds=seconds,
-            microseconds=microseconds,
-            leapdays=self.leapdays,
-            year=self.year,
-            month=self.month,
-            day=self.day,
-            weekday=self.weekday,
-            hour=self.hour,
-            minute=self.minute,
-            second=self.second,
-            microsecond=self.microsecond,
+        return self._make_relativedelta(
+            days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds
         )
 
     def __add__(self, other):
         if isinstance(other, RelativeDelta):
-            return self.__class__(
+            kwargs = {
+                field: getattr(self, field) if getattr(other, field) is None else getattr(other, field)
+                for field in _NONE_FIELDS
+            }
+            return self._make_relativedelta(
                 years=other.years + self.years,
                 months=other.months + self.months,
                 days=other.days + self.days,
                 hours=other.hours + self.hours,
                 minutes=other.minutes + self.minutes,
                 seconds=other.seconds + self.seconds,
-                microseconds=(other.microseconds + self.microseconds),
+                microseconds=other.microseconds + self.microseconds,
                 leapdays=other.leapdays or self.leapdays,
-                year=(other.year if other.year is not None else self.year),
-                month=(other.month if other.month is not None else self.month),
-                day=(other.day if other.day is not None else self.day),
-                weekday=(other.weekday if other.weekday is not None else self.weekday),
-                hour=(other.hour if other.hour is not None else self.hour),
-                minute=(other.minute if other.minute is not None else self.minute),
-                second=(other.second if other.second is not None else self.second),
-                microsecond=(other.microsecond if other.microsecond is not None else self.microsecond),
+                **kwargs,
             )
         if isinstance(other, datetime.timedelta):
-            return self.__class__(
-                years=self.years,
-                months=self.months,
+            return self._make_relativedelta(
                 days=self.days + other.days,
-                hours=self.hours,
-                minutes=self.minutes,
                 seconds=self.seconds + other.seconds,
                 microseconds=self.microseconds + other.microseconds,
-                leapdays=self.leapdays,
-                year=self.year,
-                month=self.month,
-                day=self.day,
-                weekday=self.weekday,
-                hour=self.hour,
-                minute=self.minute,
-                second=self.second,
-                microsecond=self.microsecond,
             )
 
         if not isinstance(other, datetime.date):
@@ -423,7 +407,11 @@ class RelativeDelta:
         if not isinstance(other, RelativeDelta):
             return NotImplemented  # In case the other object defines __rsub__
 
-        return self.__class__(
+        kwargs = {
+            field: getattr(other, field) if getattr(self, field) is None else getattr(self, field)
+            for field in _NONE_FIELDS
+        }
+        return self._make_relativedelta(
             years=self.years - other.years,
             months=self.months - other.months,
             days=self.days - other.days,
@@ -432,104 +420,34 @@ class RelativeDelta:
             seconds=self.seconds - other.seconds,
             microseconds=self.microseconds - other.microseconds,
             leapdays=self.leapdays or other.leapdays,
-            year=(self.year if self.year is not None else other.year),
-            month=(self.month if self.month is not None else other.month),
-            day=(self.day if self.day is not None else other.day),
-            weekday=(self.weekday if self.weekday is not None else other.weekday),
-            hour=(self.hour if self.hour is not None else other.hour),
-            minute=(self.minute if self.minute is not None else other.minute),
-            second=(self.second if self.second is not None else other.second),
-            microsecond=(self.microsecond if self.microsecond is not None else other.microsecond),
+            **kwargs,
         )
 
     def __abs__(self):
-        return self.__class__(
-            years=abs(self.years),
-            months=abs(self.months),
-            days=abs(self.days),
-            hours=abs(self.hours),
-            minutes=abs(self.minutes),
-            seconds=abs(self.seconds),
-            microseconds=abs(self.microseconds),
-            leapdays=self.leapdays,
-            year=self.year,
-            month=self.month,
-            day=self.day,
-            weekday=self.weekday,
-            hour=self.hour,
-            minute=self.minute,
-            second=self.second,
-            microsecond=self.microsecond,
-        )
+        fields = {field: abs(getattr(self, field)) for field in _0FIELDS}
+        return self._make_relativedelta(**fields)
 
     def __neg__(self):
-        return self.__class__(
-            years=-self.years,
-            months=-self.months,
-            days=-self.days,
-            hours=-self.hours,
-            minutes=-self.minutes,
-            seconds=-self.seconds,
-            microseconds=-self.microseconds,
-            leapdays=self.leapdays,
-            year=self.year,
-            month=self.month,
-            day=self.day,
-            weekday=self.weekday,
-            hour=self.hour,
-            minute=self.minute,
-            second=self.second,
-            microsecond=self.microsecond,
-        )
+        fields = {field: -getattr(self, field) for field in _0FIELDS}
+        return self._make_relativedelta(**fields)
 
     def __bool__(self):
-        return not (
-            not self.years
-            and not self.months
-            and not self.days
-            and not self.hours
-            and not self.minutes
-            and not self.seconds
-            and not self.microseconds
-            and not self.leapdays
-            and self.year is None
-            and self.month is None
-            and self.day is None
-            and self.weekday is None
-            and self.hour is None
-            and self.minute is None
-            and self.second is None
-            and self.microsecond is None
-        )
+        s_fields = (getattr(self, field) for field in _0FIELDS)
+        attribs = (getattr(self, field) for field in _NONE_FIELDS)
+        return any([*s_fields, self.leapdays, self.weekday, *[x is not None for x in attribs]])
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> NotImplementedType | Self:
         try:
             f = float(other)
         except TypeError:
             return NotImplemented
 
-        return self.__class__(
-            years=int(self.years * f),
-            months=int(self.months * f),
-            days=int(self.days * f),
-            hours=int(self.hours * f),
-            minutes=int(self.minutes * f),
-            seconds=int(self.seconds * f),
-            microseconds=int(self.microseconds * f),
-            leapdays=self.leapdays,
-            year=self.year,
-            month=self.month,
-            day=self.day,
-            weekday=self.weekday,
-            hour=self.hour,
-            minute=self.minute,
-            second=self.second,
-            microsecond=self.microsecond,
-        )
+        fields = {field: int(getattr(self, field) * f) for field in _0FIELDS}
+        return self._make_relativedelta(**fields)
 
     __rmul__ = __mul__
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, RelativeDelta):
             return NotImplemented
 
@@ -545,21 +463,8 @@ class RelativeDelta:
                 return False
 
         return (
-            self.years == other.years
-            and self.months == other.months
-            and self.days == other.days
-            and self.hours == other.hours
-            and self.minutes == other.minutes
-            and self.seconds == other.seconds
-            and self.microseconds == other.microseconds
+            all((getattr(self, field) == getattr(other, field) for field in _0FIELDS + _NONE_FIELDS))
             and self.leapdays == other.leapdays
-            and self.year == other.year
-            and self.month == other.month
-            and self.day == other.day
-            and self.hour == other.hour
-            and self.minute == other.minute
-            and self.second == other.second
-            and self.microsecond == other.microsecond
         )
 
     def __hash__(self):
@@ -577,7 +482,7 @@ class RelativeDelta:
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def __div__(self, other):
+    def __div__(self, other) -> NotImplementedType | Self:
         try:
             reciprocal = 1 / float(other)
         except TypeError:
