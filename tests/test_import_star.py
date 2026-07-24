@@ -22,3 +22,4 @@ def test_imported_modules():
     assert dateutilx.relativedelta == new_locals.pop("relativedelta")
     assert dateutilx.rrule == new_locals.pop("rrule")
     assert dateutilx.tz == new_locals.pop("tz")
+    assert dateutilx.utils == new_locals.pop("utils")

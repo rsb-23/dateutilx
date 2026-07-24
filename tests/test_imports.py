@@ -30,7 +30,7 @@ def clean_import():
         sys.modules[mod_name] = mod
 
 
-@pytest.mark.parametrize("module", ["easter", "parser", "relativedelta", "rrule", "tz"])
+@pytest.mark.parametrize("module", ["easter", "parser", "relativedelta", "rrule", "tz", "utils"])
 def test_lazy_import(clean_import, module):
     """Test that dateutilx.[submodule] works for all py version"""
 

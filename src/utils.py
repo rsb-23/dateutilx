@@ -5,12 +5,7 @@ datetimes.
 .. versionadded:: 2.7.0
 """
 
-import sys
 from datetime import datetime, time
-
-
-def is_windows_os() -> bool:
-    return sys.platform.startswith("win")
 
 
 def today(tzinfo=None):

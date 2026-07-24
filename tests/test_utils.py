@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 
 from src import tz
-from src.helper import default_tzinfo, today, within_delta
+from src.utils import default_tzinfo, today, within_delta
 
 from .freezegun import freeze_time
 
-MODULE = "src.helper.utils"
+MODULE = "src.utils"
 UTC = tz.UTC
 NYC = tz.gettz("America/New_York")
 

@@ -1,2 +1,4 @@
 from .constants import Day, Frequency, Month
-from .utils import default_tzinfo, is_windows_os, today, within_delta
+from .funcs import is_windows_os
+
+__all__ = ["Day", "Frequency", "Month", "is_windows_os"]
