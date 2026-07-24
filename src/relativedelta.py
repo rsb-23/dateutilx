@@ -1,5 +1,5 @@
 import calendar
-import datetime
+import datetime as dt
 import operator
 from math import copysign
 from types import NotImplementedType
@@ -13,8 +13,8 @@ MO, TU, WE, TH, FR, SA, SU = weekdays
 __all__ = ["RelativeDelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
 Number: TypeAlias = float | int
 
-_0FIELDS = "years", "months", "days", "hours", "minutes", "seconds", "microseconds"
-_NONE_FIELDS = "year", "month", "day", "hour", "minute", "second", "microsecond"
+REL_FIELDS = "years", "months", "days", "hours", "minutes", "seconds", "microseconds"
+ABS_FIELDS = "year", "month", "day", "hour", "minute", "second", "microsecond"
 
 
 class RelativeDelta:
@@ -95,7 +95,7 @@ class RelativeDelta:
     >>> dt = datetime(2018, 4, 9, 13, 37, 0)
     >>> delta = RelativeDelta(hours=25, day=1, weekday=MO(1))
     >>> dt + delta
-    datetime.datetime(2018, 4, 2, 14, 37)
+    dt.datetime(2018, 4, 2, 14, 37)
 
     First, the day is set to 1 (the first of the month), then 25 hours
     are added, to get to the 2nd day and 14th hour, finally the
@@ -109,6 +109,7 @@ class RelativeDelta:
         self,
         dt1=None,
         dt2=None,
+        *,
         years=0,
         months=0,
         days: Number = 0,
@@ -130,69 +131,11 @@ class RelativeDelta:
         microsecond=None,
     ):
         if dt1 and dt2:
-            # datetime is a subclass of date. So both must be date
-            if not (isinstance(dt1, datetime.date) and isinstance(dt2, datetime.date)):
-                raise TypeError("relativedelta only diffs datetime/date")
-
-            # We allow two dates, or two datetimes, so we coerce them to be
-            # of the same type
-            if isinstance(dt1, datetime.datetime) != isinstance(dt2, datetime.datetime):
-                if not isinstance(dt1, datetime.datetime):
-                    dt1 = datetime.datetime.fromordinal(dt1.toordinal())
-                elif not isinstance(dt2, datetime.datetime):
-                    dt2 = datetime.datetime.fromordinal(dt2.toordinal())
-
-            self.years = 0
-            self.months = 0
-            self.days = 0
-            self.leapdays = 0
-            self.hours = 0
-            self.minutes = 0
-            self.seconds = 0
-            self.microseconds = 0
-            self.year = None
-            self.month = None
-            self.day = None
-            self.weekday = None
-            self.hour = None
-            self.minute = None
-            self.second = None
-            self.microsecond = None
-            self._has_time = 0
-
-            # Get year / month delta between the two
-            months = (dt1.year - dt2.year) * 12 + (dt1.month - dt2.month)
-            self._set_months(months)
-
-            # Remove the year/month delta so the timedelta is just well-defined
-            # time units (seconds, days and microseconds)
-            dtm = self.__radd__(dt2)
-
-            # If we've overshot our target, make an adjustment
-            if dt1 < dt2:
-                compare = operator.gt
-                increment = 1
-            else:
-                compare = operator.lt
-                increment = -1
-
-            while compare(dt1, dtm):
-                months += increment
-                self._set_months(months)
-                dtm = self.__radd__(dt2)
-
-            # Get the timedelta between the "months-adjusted" date and dt1
-            delta = dt1 - dtm
-            self.seconds = delta.seconds + delta.days * 86400
-            self.microseconds = delta.microseconds
+            self._init_from_dates(dt1, dt2)
         else:
-            # Check for non-integer values in integer-only quantities
-            if any(x is not None and x != int(x) for x in (years, months)):
-                raise ValueError("Non-integer years and months are ambiguous and not currently supported.")
-
             # Relative information
-            self.years = int(years)
-            self.months = int(months)
+            self.years = years
+            self.months = months
             self.days = days + weeks * 7
             self.leapdays = leapdays
             self.hours = hours
@@ -208,35 +151,95 @@ class RelativeDelta:
             self.minute = minute
             self.second = second
             self.microsecond = microsecond
+            self.weekday = weekday
 
-            if any(x is not None and int(x) != x for x in (year, month, day, hour, minute, second, microsecond)):
-                # For now we'll deprecate floats - later it'll be an error.
-                warn(
-                    "Non-integer value passed as absolute information. "
-                    + "This is not a well-defined condition and will raise "
-                    + "errors in future versions.",
-                    DeprecationWarning,
-                )
-
-            self.weekday = weekdays[weekday] if isinstance(weekday, int) else weekday
-            yday = 0
-            if nlyearday:
-                yday = nlyearday
-            elif yearday:
-                yday = yearday
-                if yday > 59:
-                    self.leapdays = -1
-            if yday:
-                ydayidx = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 366]
-                for idx, ydays in enumerate(ydayidx):
-                    if yday <= ydays:
-                        self.month = idx + 1
-                        self.day = yday if idx == 0 else yday - ydayidx[idx - 1]
-                        break
-                else:
-                    raise ValueError(f"invalid year day ({yday})")
-
+            self._init_from_fields(yearday=yearday, nlyearday=nlyearday)
         self._fix()
+
+    def _init_from_dates(self, dt1: dt.date | dt.datetime, dt2: dt.date | dt.datetime) -> None:
+        # datetime is a subclass of date. So both must be date
+        if not (isinstance(dt1, dt.date) and isinstance(dt2, dt.date)):
+            raise TypeError("relativedelta only diffs datetime/date")
+
+        # We allow two dates, or two datetimes, so we coerce them to be
+        # of the same type
+        if isinstance(dt1, dt.datetime) != isinstance(dt2, dt.datetime):
+            if not isinstance(dt1, dt.datetime):
+                dt1 = dt.datetime.fromordinal(dt1.toordinal())
+            elif not isinstance(dt2, dt.datetime):
+                dt2 = dt.datetime.fromordinal(dt2.toordinal())
+
+        self._reset()
+
+        # Get year / month delta between the two
+        months = (dt1.year - dt2.year) * 12 + (dt1.month - dt2.month)
+        self._set_months(months)
+
+        # Remove the year/month delta so the timedelta is just well-defined
+        # time units (seconds, days and microseconds)
+        dtm = self.__radd__(dt2)
+
+        # If we've overshot our target, make an adjustment
+        if dt1 < dt2:
+            compare = operator.gt
+            increment = 1
+        else:
+            compare = operator.lt
+            increment = -1
+
+        while compare(dt1, dtm):
+            months += increment
+            self._set_months(months)
+            dtm = self.__radd__(dt2)
+
+        # Get the timedelta between the "months-adjusted" date and dt1
+        delta = dt1 - dtm
+        self.seconds = delta.seconds + delta.days * 86400
+        self.microseconds = delta.microseconds
+
+    def _init_from_fields(self, yearday: int, nlyearday: int) -> None:
+        # Check for non-integer values in integer-only quantities
+        if any(x is not None and x != int(x) for x in (self.years, self.months)):
+            raise ValueError("Non-integer years and months are ambiguous and not currently supported.")
+
+        self.years = int(self.years)
+        self.months = int(self.months)
+
+        absolute_fields = (self.year, self.month, self.day, self.hour, self.minute, self.second, self.microsecond)
+        if any(x is not None and int(x) != x for x in absolute_fields):
+            # For now we'll deprecate floats - later it'll be an error.
+            warn(
+                "Non-integer value passed as absolute information. "
+                + "This is not a well-defined condition and will raise "
+                + "errors in future versions.",
+                DeprecationWarning,
+            )
+
+        if isinstance(self.weekday, int):
+            self.weekday = weekdays[self.weekday]
+
+        yday = nlyearday or yearday
+
+        if yearday and not nlyearday and yearday > 59:
+            self.leapdays = -1
+
+        if yday:
+            if not 1 <= yday <= 366:
+                raise ValueError(f"invalid year day ({yday})")
+
+            resolved = dt.date(2001, 1, 1) + dt.timedelta(days=yday - 1)
+            self.day, self.month = resolved.day, resolved.month
+
+    def _reset(self):
+        self.leapdays = 0
+        self.weekday = None
+        self._has_time = 0
+
+        for attr in REL_FIELDS:
+            setattr(self, attr, 0)
+
+        for attr in ABS_FIELDS:
+            setattr(self, attr, None)
 
     def _fix(self):
         if abs(self.microseconds) > 999999:
@@ -295,8 +298,8 @@ class RelativeDelta:
 
     def _make_relativedelta(self, **kwargs) -> Self:
         """Factory method to create a new RelativeDelta with given overrides."""
-        _0fields = {field: kwargs.get(field, getattr(self, field)) for field in _0FIELDS}
-        _none_fields = {field: kwargs.get(field, getattr(self, field)) for field in _NONE_FIELDS}
+        _0fields = {field: kwargs.get(field, getattr(self, field)) for field in REL_FIELDS}
+        _none_fields = {field: kwargs.get(field, getattr(self, field)) for field in ABS_FIELDS}
         return self.__class__(
             **_0fields,
             **_none_fields,
@@ -338,7 +341,7 @@ class RelativeDelta:
         if isinstance(other, RelativeDelta):
             kwargs = {
                 field: getattr(self, field) if getattr(other, field) is None else getattr(other, field)
-                for field in _NONE_FIELDS
+                for field in ABS_FIELDS
             }
             return self._make_relativedelta(
                 years=other.years + self.years,
@@ -351,18 +354,18 @@ class RelativeDelta:
                 leapdays=other.leapdays or self.leapdays,
                 **kwargs,
             )
-        if isinstance(other, datetime.timedelta):
+        if isinstance(other, dt.timedelta):
             return self._make_relativedelta(
                 days=self.days + other.days,
                 seconds=self.seconds + other.seconds,
                 microseconds=self.microseconds + other.microseconds,
             )
 
-        if not isinstance(other, datetime.date):
+        if not isinstance(other, dt.date):
             return NotImplemented
 
-        if self._has_time and not isinstance(other, datetime.datetime):
-            other = datetime.datetime.fromordinal(other.toordinal())
+        if self._has_time and not isinstance(other, dt.datetime):
+            other = dt.datetime.fromordinal(other.toordinal())
         year = (self.year or other.year) + self.years
         month = self.month or other.month
         if self.months:
@@ -383,7 +386,7 @@ class RelativeDelta:
         days = self.days
         if self.leapdays and month > 2 and calendar.isleap(year):
             days += self.leapdays
-        ret = other.replace(**repl) + datetime.timedelta(
+        ret = other.replace(**repl) + dt.timedelta(
             days=days, hours=self.hours, minutes=self.minutes, seconds=self.seconds, microseconds=self.microseconds
         )
         if self.weekday:
@@ -394,7 +397,7 @@ class RelativeDelta:
             else:
                 jumpdays += (ret.weekday() - weekday) % 7
                 jumpdays *= -1
-            ret += datetime.timedelta(days=jumpdays)
+            ret += dt.timedelta(days=jumpdays)
         return ret
 
     def __radd__(self, other):
@@ -409,7 +412,7 @@ class RelativeDelta:
 
         kwargs = {
             field: getattr(other, field) if getattr(self, field) is None else getattr(self, field)
-            for field in _NONE_FIELDS
+            for field in ABS_FIELDS
         }
         return self._make_relativedelta(
             years=self.years - other.years,
@@ -424,16 +427,16 @@ class RelativeDelta:
         )
 
     def __abs__(self):
-        fields = {field: abs(getattr(self, field)) for field in _0FIELDS}
+        fields = {field: abs(getattr(self, field)) for field in REL_FIELDS}
         return self._make_relativedelta(**fields)
 
     def __neg__(self):
-        fields = {field: -getattr(self, field) for field in _0FIELDS}
+        fields = {field: -getattr(self, field) for field in REL_FIELDS}
         return self._make_relativedelta(**fields)
 
     def __bool__(self):
-        s_fields = (getattr(self, field) for field in _0FIELDS)
-        attribs = (getattr(self, field) for field in _NONE_FIELDS)
+        s_fields = (getattr(self, field) for field in REL_FIELDS)
+        attribs = (getattr(self, field) for field in ABS_FIELDS)
         return any([*s_fields, self.leapdays, self.weekday, *[x is not None for x in attribs]])
 
     def __mul__(self, other) -> NotImplementedType | Self:
@@ -442,7 +445,7 @@ class RelativeDelta:
         except TypeError:
             return NotImplemented
 
-        fields = {field: int(getattr(self, field) * f) for field in _0FIELDS}
+        fields = {field: int(getattr(self, field) * f) for field in REL_FIELDS}
         return self._make_relativedelta(**fields)
 
     __rmul__ = __mul__
@@ -463,7 +466,7 @@ class RelativeDelta:
                 return False
 
         return (
-            all((getattr(self, field) == getattr(other, field) for field in _0FIELDS + _NONE_FIELDS))
+            all((getattr(self, field) == getattr(other, field) for field in REL_FIELDS + ABS_FIELDS))
             and self.leapdays == other.leapdays
         )
 
@@ -471,10 +474,9 @@ class RelativeDelta:
         # fmt: off
         return hash(
             (
-                self.weekday,
                 self.years, self.months, self.days, self.hours, self.minutes, self.seconds, self.microseconds,
-                self.leapdays,
                 self.year, self.month, self.day, self.hour, self.minute, self.second, self.microsecond,
+                self.leapdays, self.weekday,
             )
         )
         # fmt: on
