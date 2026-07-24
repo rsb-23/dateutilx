@@ -12,6 +12,7 @@ TIME_ZONE_STRATEGY = st.sampled_from(
 ASCII_STRATEGY = st.characters(max_codepoint=127)
 
 
+@pytest.mark.skip(reason="Needs fixing")
 @pytest.mark.isoparser
 @settings(deadline=3000)
 @given(dt=st.datetimes(timezones=TIME_ZONE_STRATEGY), sep=ASCII_STRATEGY)

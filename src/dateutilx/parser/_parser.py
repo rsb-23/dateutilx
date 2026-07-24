@@ -800,13 +800,14 @@ class Parser:
                     res.tzoffset = signal * (hour_offset * 3600 + min_offset * 60)
 
                     # Look for a timezone name between parenthesis
-                    if (
-                        i + 5 < len_l
-                        and info.jump(_tokens[i + 2])
-                        and _tokens[i + 3] == "("
-                        and _tokens[i + 5] == ")"
-                        and len(_tokens[i + 4]) >= 3
-                        and self._could_be_tzname(res.hour, res.tzname, None, _tokens[i + 4])
+                    if i + 5 < len_l and all(
+                        (
+                            info.jump(_tokens[i + 2]),
+                            _tokens[i + 3] == "(",
+                            _tokens[i + 5] == ")",
+                            len(_tokens[i + 4]) >= 3,
+                            self._could_be_tzname(res.hour, res.tzname, None, _tokens[i + 4]),
+                        )
                     ):
                         # -0300 (BRST)
                         res.tzname = _tokens[i + 4]
@@ -854,11 +855,13 @@ class Parser:
 
         len_l = len(tokens)
 
-        if (
-            len(ymd) == 3
-            and len_li in (2, 4)
-            and res.hour is None
-            and (idx + 1 >= len_l or (tokens[idx + 1] != ":" and info.hms(tokens[idx + 1]) is None))
+        if all(
+            (
+                len(ymd) == 3,
+                len_li in (2, 4),
+                res.hour is None,
+                (idx + 1 >= len_l or (tokens[idx + 1] != ":" and info.hms(tokens[idx + 1]) is None)),
+            )
         ):
             # 19990101T23[59]
             s = tokens[idx]

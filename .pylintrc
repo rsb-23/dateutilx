@@ -8,14 +8,12 @@ max-line-length = 130
 [DESIGN]
 max-args = 10
 max-attributes = 18
-max-bool-expr = 15
 max-branches = 83
 max-locals = 52
 max-module-lines = 4000
 max-nested-blocks = 8
 max-positional-arguments = 22
 max-public-methods = 45
-max-returns = 7
 max-statements = 180
 
 [MESSAGES CONTROL]

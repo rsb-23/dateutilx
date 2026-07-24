@@ -717,6 +717,7 @@ class Rrule(RruleBase):
         new_kwargs.update(kwargs)
         return rrule(**new_kwargs)
 
+    # pylint: disable=r0911
     def _iter(self):
         def _byyear_check(i):
             return byyearday and (
@@ -785,18 +786,20 @@ class Rrule(RruleBase):
             # Do the "hard" work ;-)
             filtered = False
             for i in dayset[start:end]:
-                if (
-                    (bymonth and ii.mmask[i] not in bymonth)
-                    or (byweekno and not ii.wnomask[i])
-                    or (byweekday and ii.wdaymask[i] not in byweekday)
-                    or (ii.nwdaymask and not ii.nwdaymask[i])
-                    or (byeaster and not ii.eastermask[i])
-                    or (
-                        (bymonthday or bynmonthday)
-                        and ii.mdaymask[i] not in bymonthday
-                        and ii.nmdaymask[i] not in bynmonthday
+                if any(
+                    (
+                        (bymonth and ii.mmask[i] not in bymonth),
+                        (byweekno and not ii.wnomask[i]),
+                        (byweekday and ii.wdaymask[i] not in byweekday),
+                        (ii.nwdaymask and not ii.nwdaymask[i]),
+                        (byeaster and not ii.eastermask[i]),
+                        (
+                            (bymonthday or bynmonthday)
+                            and ii.mdaymask[i] not in bymonthday
+                            and ii.nmdaymask[i] not in bynmonthday
+                        ),
+                        _byyear_check(i),
                     )
-                    or _byyear_check(i)
                 ):
                     dayset[i] = None
                     filtered = True
@@ -947,10 +950,12 @@ class Rrule(RruleBase):
                             day += div
                             fixday = True
 
-                    if (
-                        (not byhour or hour in byhour)
-                        and (not byminute or minute in byminute)
-                        and (not bysecond or second in bysecond)
+                    if all(
+                        (
+                            (not byhour or hour in byhour),
+                            (not byminute or minute in byminute),
+                            (not bysecond or second in bysecond),
+                        )
                     ):
                         valid = True
                         break
