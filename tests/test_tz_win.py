@@ -1,7 +1,9 @@
 import contextlib
 import datetime as dt
-import unittest
 from datetime import datetime, timedelta
+from unittest import TestCase
+
+import pytest
 
 from src import tz
 from src.helper import is_windows_os
@@ -186,8 +188,8 @@ class TzWinFoldMixin:
             self.assertEqual(dt0, dt1)
 
 
-@unittest.skipUnless(IS_WIN, "Requires Windows")
-class TzWinTest(unittest.TestCase, TzWinFoldMixin):
+@pytest.mark.skipif(not IS_WIN, reason="Requires Windows")
+class TzWinTest(TestCase, TzWinFoldMixin):
     def setUp(self):
         self.tzclass = tzwin.TzWin
 
@@ -317,8 +319,8 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).tzname(), "South Africa Standard Time")
 
 
-@unittest.skipUnless(IS_WIN, "Requires Windows")
-class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
+@pytest.mark.skipif(not IS_WIN, reason="Requires Windows")
+class TzWinLocalTest(TestCase, TzWinFoldMixin):
     def setUp(self):
         self.tzclass = tzwin.TzWinLocal
         self.context = TZWinContext

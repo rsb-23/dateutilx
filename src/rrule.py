@@ -8,12 +8,13 @@ including support for caching of results.
 import _thread
 import calendar
 import contextlib
-import datetime
+import datetime as dt
 import heapq
 import itertools
+import operator
 import re
 import sys
-from functools import wraps
+from functools import lru_cache, wraps
 from math import gcd
 from typing import Any
 from warnings import warn
@@ -231,23 +232,15 @@ class RruleBase:
         started = False
 
         _output = []
+        before_cmp = operator.gt if inc else operator.ge
+        after_cmp = operator.ge if inc else operator.gt
         for i in gen:
-            if inc:
-                if i > before:
-                    break
-                if started:
-                    _output.append(i)
-                elif i >= after:
-                    started = True
-                    _output.append(i)
-            else:
-                if i >= before:
-                    break
-                if started:
-                    _output.append(i)
-                elif i > after:
-                    started = True
-                    _output.append(i)
+            if before_cmp(i, before):
+                break
+            if not started and after_cmp(i, after):
+                started = True
+            if started:
+                _output.append(i)
         return _output
 
 
@@ -400,11 +393,11 @@ class Rrule(RruleBase):
         global easter
         if not dtstart:
             if until and until.tzinfo:
-                dtstart = datetime.datetime.now(tz=until.tzinfo).replace(microsecond=0)
+                dtstart = dt.datetime.now(tz=until.tzinfo).replace(microsecond=0)
             else:
-                dtstart = datetime.datetime.now().replace(microsecond=0)
-        elif not isinstance(dtstart, datetime.datetime):
-            dtstart = datetime.datetime.fromordinal(dtstart.toordinal())
+                dtstart = dt.datetime.now().replace(microsecond=0)
+        elif not isinstance(dtstart, dt.datetime):
+            dtstart = dt.datetime.fromordinal(dtstart.toordinal())
         else:
             dtstart = dtstart.replace(microsecond=0)
         self._dtstart = dtstart
@@ -419,8 +412,8 @@ class Rrule(RruleBase):
         # been supplied (the string retrieval will just use .get())
         self._original_rule = {}
 
-        if until and not isinstance(until, datetime.datetime):
-            until = datetime.datetime.fromordinal(until.toordinal())
+        if until and not isinstance(until, dt.datetime):
+            until = dt.datetime.fromordinal(until.toordinal())
         self._until = until
 
         if self._dtstart and self._until:
@@ -636,7 +629,7 @@ class Rrule(RruleBase):
             for hour in self._byhour:
                 for minute in self._byminute:
                     self._timeset.extend(
-                        datetime.time(hour, minute, second, tzinfo=self._tzinfo) for second in self._bysecond
+                        dt.time(hour, minute, second, tzinfo=self._tzinfo) for second in self._bysecond
                     )
             self._timeset.sort()
             self._timeset = tuple(self._timeset)
@@ -720,6 +713,7 @@ class Rrule(RruleBase):
 
     # pylint: disable=r0911
     def _iter(self):
+        @lru_cache(20)
         def _byyear_check(i):
             return byyearday and (
                 (i < ii.yearlen and i + 1 not in byyearday and -ii.yearlen + i not in byyearday)
@@ -819,8 +813,8 @@ class Rrule(RruleBase):
                     except IndexError:
                         pass
                     else:
-                        date = datetime.date.fromordinal(ii.yearordinal + i)
-                        res = datetime.datetime.combine(date, time)
+                        date = dt.date.fromordinal(ii.yearordinal + i)
+                        res = dt.datetime.combine(date, time)
                         if res not in poslist:
                             poslist.append(res)
                 poslist.sort()
@@ -840,9 +834,9 @@ class Rrule(RruleBase):
             else:
                 for i in dayset[start:end]:
                     if i is not None:
-                        date = datetime.date.fromordinal(ii.yearordinal + i)
+                        date = dt.date.fromordinal(ii.yearordinal + i)
                         for time in timeset:
-                            res = datetime.datetime.combine(date, time)
+                            res = dt.datetime.combine(date, time)
                             if until and res > until:
                                 self._len = total
                                 return
@@ -861,7 +855,7 @@ class Rrule(RruleBase):
             fixday = False
             if freq == YEARLY:
                 year += interval
-                if year > datetime.MAXYEAR:
+                if year > dt.MAXYEAR:
                     self._len = total
                     return
                 ii.rebuild(year, month)
@@ -874,7 +868,7 @@ class Rrule(RruleBase):
                     if month == 0:
                         month = 12
                         year -= 1
-                    if year > datetime.MAXYEAR:
+                    if year > dt.MAXYEAR:
                         self._len = total
                         return
                 ii.rebuild(year, month)
@@ -977,7 +971,7 @@ class Rrule(RruleBase):
                         if month == 13:
                             month = 1
                             year += 1
-                            if year > datetime.MAXYEAR:
+                            if year > dt.MAXYEAR:
                                 self._len = total
                                 return
                         daysinmonth = calendar.monthrange(year, month)[1]
@@ -1086,11 +1080,11 @@ class _IterInfo:
         if year != self.lastyear:
             self.yearlen = 365 + calendar.isleap(year)
             self.nextyearlen = 365 + calendar.isleap(year + 1)
-            firstyday = datetime.date(year, 1, 1)
+            firstyday = dt.date(year, 1, 1)
             self.yearordinal = firstyday.toordinal()
             self.yearweekday = firstyday.weekday()
 
-            wday = datetime.date(year, 1, 1).weekday()
+            wday = dt.date(year, 1, 1).weekday()
             if self.yearlen == 365:
                 self.mmask = M365MASK
                 self.mdaymask = MDAY365MASK
@@ -1158,7 +1152,7 @@ class _IterInfo:
                     # days from last year's last week number in
                     # this year.
                     if -1 not in rr._byweekno:
-                        lyearweekday = datetime.date(year - 1, 1, 1).weekday()
+                        lyearweekday = dt.date(year - 1, 1, 1).weekday()
                         lno1wkst = (7 - lyearweekday + rr._wkst) % 7
                         lyearlen = 365 + calendar.isleap(year - 1)
                         if lno1wkst >= 4:
@@ -1219,7 +1213,7 @@ class _IterInfo:
     def wdayset(self, year, month, day):
         # We need to handle cross-year weeks here.
         dset = [None] * (self.yearlen + 7)
-        i = datetime.date(year, month, day).toordinal() - self.yearordinal
+        i = dt.date(year, month, day).toordinal() - self.yearordinal
         start = i
         for _ in range(7):
             dset[i] = i
@@ -1233,7 +1227,7 @@ class _IterInfo:
 
     def ddayset(self, year, month, day):
         dset = [None] * self.yearlen
-        i = datetime.date(year, month, day).toordinal() - self.yearordinal
+        i = dt.date(year, month, day).toordinal() - self.yearordinal
         dset[i] = i
         return dset, i, i + 1
 
@@ -1241,18 +1235,18 @@ class _IterInfo:
         tset = []
         rr = self.rrule
         for minute_ in rr._byminute:
-            tset.extend(datetime.time(hour, minute_, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond)
+            tset.extend(dt.time(hour, minute_, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond)
         tset.sort()
         return tset
 
     def mtimeset(self, hour, minute, second):
         rr = self.rrule
-        tset = [datetime.time(hour, minute, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond]
+        tset = [dt.time(hour, minute, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond]
         tset.sort()
         return tset
 
     def stimeset(self, hour, minute, second):
-        return (datetime.time(hour, minute, second, tzinfo=self.rrule._tzinfo),)
+        return (dt.time(hour, minute, second, tzinfo=self.rrule._tzinfo),)
 
 
 class RruleSet(RruleBase):

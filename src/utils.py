@@ -5,7 +5,7 @@ datetimes.
 .. versionadded:: 2.7.0
 """
 
-from datetime import datetime, time
+import datetime as dt
 
 
 def today(tzinfo=None):
@@ -20,8 +20,8 @@ def today(tzinfo=None):
         at midnight.
     """
 
-    dt = datetime.now(tzinfo)
-    return datetime.combine(dt.date(), time(0, tzinfo=tzinfo))
+    _dt = dt.datetime.now(tzinfo)
+    return dt.datetime.combine(_dt.date(), dt.time(0, tzinfo=tzinfo))
 
 
 def default_tzinfo(dt, tzinfo):

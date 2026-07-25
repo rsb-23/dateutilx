@@ -1696,7 +1696,7 @@ class TzPickleTest(PicklableMixin, unittest.TestCase):
         tzc = tz.tzfile(BytesIO(base64.b64decode(NEW_YORK)))
         self.assert_picklable(tzc)
 
-    @unittest.skip("Known failure")
+    @pytest.mark.skip("Known failure: Cannot pickle")
     def test_pickle_tzical(self):
         tzc = tz.tzical(StringIO(TZICAL_EST5EDT)).get()
         self.assert_picklable(tzc)
