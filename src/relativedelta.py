@@ -6,7 +6,7 @@ from types import NotImplementedType
 from typing import Self, TypeAlias
 from warnings import warn
 
-from src.weekday import Day, Weekday, weekdays
+from src.weekday import Weekday, weekdays
 
 MO, TU, WE, TH, FR, SA, SU = weekdays
 
@@ -122,7 +122,7 @@ class RelativeDelta:
         year=None,
         month=None,
         day=None,
-        weekday: Weekday | Day | None = None,
+        weekday: Weekday | int | None = None,
         yearday=None,
         nlyearday=None,
         hour=None,
@@ -151,7 +151,7 @@ class RelativeDelta:
             self.minute = minute
             self.second = second
             self.microsecond = microsecond
-            self.weekday = weekday
+            self.weekday: Weekday | None = weekdays[weekday] if isinstance(weekday, int) else weekday
 
             self._init_from_fields(yearday=yearday, nlyearday=nlyearday)
         self._fix()
@@ -177,7 +177,7 @@ class RelativeDelta:
 
         # Remove the year/month delta so the timedelta is just well-defined
         # time units (seconds, days and microseconds)
-        dtm = self.__radd__(dt2)
+        dtm = self + dt2
 
         # If we've overshot our target, make an adjustment
         if dt1 < dt2:
@@ -190,7 +190,7 @@ class RelativeDelta:
         while compare(dt1, dtm):
             months += increment
             self._set_months(months)
-            dtm = self.__radd__(dt2)
+            dtm = self + dt2
 
         # Get the timedelta between the "months-adjusted" date and dt1
         delta = dt1 - dtm
@@ -214,9 +214,6 @@ class RelativeDelta:
                 + "errors in future versions.",
                 DeprecationWarning,
             )
-
-        if isinstance(self.weekday, int):
-            self.weekday = weekdays[self.weekday]
 
         yday = nlyearday or yearday
 
@@ -298,11 +295,11 @@ class RelativeDelta:
 
     def _make_relativedelta(self, **kwargs) -> Self:
         """Factory method to create a new RelativeDelta with given overrides."""
-        _0fields = {field: kwargs.get(field, getattr(self, field)) for field in REL_FIELDS}
-        _none_fields = {field: kwargs.get(field, getattr(self, field)) for field in ABS_FIELDS}
+        rel_fields = {field: kwargs.get(field, getattr(self, field)) for field in REL_FIELDS}
+        abs_fields = {field: kwargs.get(field, getattr(self, field)) for field in ABS_FIELDS}
         return self.__class__(
-            **_0fields,
-            **_none_fields,
+            **rel_fields,
+            **abs_fields,
             leapdays=kwargs.get("leapdays", self.leapdays),
             weekday=kwargs.get("weekday", self.weekday),
         )

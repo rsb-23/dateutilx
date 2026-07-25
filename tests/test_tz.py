@@ -870,8 +870,8 @@ class TZRangeTest(unittest.TestCase, TzFoldMixin):
                 -18000,
                 "EDT",
                 -14400,
-                relativedelta(hours=+2, month=4, day=1, weekday=SU(+1)),
-                relativedelta(hours=+1, month=10, day=31, weekday=SU(-1)),
+                start=relativedelta(hours=+2, month=4, day=1, weekday=SU(+1)),
+                end=relativedelta(hours=+1, month=10, day=31, weekday=SU(-1)),
             ),
         )
 

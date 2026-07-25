@@ -178,11 +178,11 @@ class TzWinBase(TzRangeBase):
             return None
 
         dston = picknthweekday(
-            year, self._dstmonth, self._dstdayofweek, self._dsthour, self._dstminute, self._dstweeknumber
+            year, self._dstmonth, self._dstdayofweek, self._dsthour, self._dstminute, whichweek=self._dstweeknumber
         )
 
         dstoff = picknthweekday(
-            year, self._stdmonth, self._stddayofweek, self._stdhour, self._stdminute, self._stdweeknumber
+            year, self._stdmonth, self._stddayofweek, self._stdhour, self._stdminute, whichweek=self._stdweeknumber
         )
 
         # Ambiguous dates default to the STD side
@@ -319,7 +319,7 @@ class TzWinLocal(TzWinBase):
         return self.__class__, ()
 
 
-def picknthweekday(year, month, dayofweek: int, hour, minute, whichweek: int):
+def picknthweekday(year, month, dayofweek: int, hour, minute, *, whichweek: int):
     """dayofweek == 0 means Sunday, whichweek 5 means last instance"""
     assert 0 < whichweek <= 5
     first = dt.datetime(year, month, 1, hour, minute)

@@ -634,7 +634,7 @@ class Parser:
         ]
         # fmt: on
 
-    def _parse(self, timestr, dayfirst=None, yearfirst=None, fuzzy=False, fuzzy_with_tokens=False):
+    def _parse(self, timestr, dayfirst=None, yearfirst=None, fuzzy: bool = False, fuzzy_with_tokens: bool = False):
         """
         Private method which performs the heavy lifting of parsing, called from
         ``parse()``, which passes on its ``kwargs`` to this function.
@@ -678,12 +678,8 @@ class Parser:
             fuzzy = True
 
         info = self.info
-
-        if dayfirst is None:
-            dayfirst = info.dayfirst
-
-        if yearfirst is None:
-            yearfirst = info.yearfirst
+        dayfirst = dayfirst or info.dayfirst
+        yearfirst = yearfirst or info.yearfirst
 
         res = self._Result()
         _tokens = _TimeLex.split(timestr)  # Splits the timestr into tokens
@@ -706,7 +702,7 @@ class Parser:
 
                 if value is not None:
                     # Numeric token
-                    i = self._parse_numeric_token(_tokens, i, info, ymd, res, fuzzy)
+                    i = self._parse_numeric_token(_tokens, i, info=info, ymd=ymd, res=res, fuzzy=fuzzy)
 
                 # Check weekday
                 elif info.weekday(_tokens[i]) is not None:
@@ -843,7 +839,7 @@ class Parser:
 
         return res, None
 
-    def _parse_numeric_token(self, tokens, idx, info, ymd, res, fuzzy):
+    def _parse_numeric_token(self, tokens, idx, *, info, ymd, res, fuzzy):
         # Token is a number
         value_repr = tokens[idx]
         try:
@@ -1352,8 +1348,9 @@ class _TzParser:
             self.end = self._Attr()
 
     def parse(self, tzstr):
+        tzstr_pattern = re.compile(r"([,:.]|[a-zA-Z]+|[0-9]+)")
         res = self._Result()
-        _tmp_list = [x for x in re.split(r"([,:.]|[a-zA-Z]+|[0-9]+)", tzstr) if x]
+        _tmp_list = [x for x in re.split(tzstr_pattern, tzstr) if x]
         used_idxs = []
         try:
             i, len_l = 0, len(_tmp_list)
@@ -1363,43 +1360,43 @@ class _TzParser:
                 j = i
                 while j < len_l and not [x for x in _tmp_list[j] if x in "0123456789:,-+"]:
                     j += 1
-                if j != i:
-                    if not res.stdabbr:
-                        offattr = "stdoffset"
-                        res.stdabbr = "".join(_tmp_list[i:j])
-                    else:
-                        offattr = "dstoffset"
-                        res.dstabbr = "".join(_tmp_list[i:j])
+                if j == i:
+                    break
 
-                    used_idxs.extend([*range(j)])
-                    i = j
-                    if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in "0123456789"):
-                        if _tmp_list[i] in ("+", "-"):
-                            # Yes, that's right. See the TZ variable documentation.
-                            signal = (1, -1)[_tmp_list[i] == "+"]
-                            used_idxs.append(i)
-                            i += 1
-                        else:
-                            signal = -1
-                        len_li = len(_tmp_list[i])
-                        if len_li == 4:
-                            # -0300
-                            setattr(res, offattr, (int(_tmp_list[i][:2]) * 3600 + int(_tmp_list[i][2:]) * 60) * signal)
-                        elif i + 1 < len_l and _tmp_list[i + 1] == ":":
-                            # -03:00
-                            setattr(res, offattr, (int(_tmp_list[i]) * 3600 + int(_tmp_list[i + 2]) * 60) * signal)
-                            used_idxs.append(i)
-                            i += 2
-                        elif len_li <= 2:
-                            # -[0]3
-                            setattr(res, offattr, int(_tmp_list[i][:2]) * 3600 * signal)
-                        else:
-                            return None
+                if not res.stdabbr:
+                    offattr = "stdoffset"
+                    res.stdabbr = "".join(_tmp_list[i:j])
+                else:
+                    offattr = "dstoffset"
+                    res.dstabbr = "".join(_tmp_list[i:j])
+
+                used_idxs.extend([*range(j)])
+                i = j
+                if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in "0123456789"):
+                    if _tmp_list[i] in ("+", "-"):
+                        # Yes, that's right. See the TZ variable documentation.
+                        signal = (1, -1)[_tmp_list[i] == "+"]
                         used_idxs.append(i)
                         i += 1
-                    if res.dstabbr:
-                        break
-                else:
+                    else:
+                        signal = -1
+                    len_li = len(_tmp_list[i])
+                    if len_li == 4:
+                        # -0300
+                        setattr(res, offattr, (int(_tmp_list[i][:2]) * 3600 + int(_tmp_list[i][2:]) * 60) * signal)
+                    elif i + 1 < len_l and _tmp_list[i + 1] == ":":
+                        # -03:00
+                        setattr(res, offattr, (int(_tmp_list[i]) * 3600 + int(_tmp_list[i + 2]) * 60) * signal)
+                        used_idxs.append(i)
+                        i += 2
+                    elif len_li <= 2:
+                        # -[0]3
+                        setattr(res, offattr, int(_tmp_list[i][:2]) * 3600 * signal)
+                    else:
+                        return None
+                    used_idxs.append(i)
+                    i += 1
+                if res.dstabbr:
                     break
 
             if i < len_l:

@@ -9,7 +9,7 @@ skip-magic-trailing-comma = true
 
 [lint]
 select = ["F", "E", "W", "B", "I", "PL", "RUF005", "RUF010"]
-ignore = ["E203", "E501", "B028", "B905", "PLC0415","PLR0124", "PLR2004", "PLW0603","PLW1641", "PLW2901"]
+ignore = ["E203", "E501", "B028", "B905", "PLC0415", "PLR0124", "PLW0603", "PLW1641", "PLW2901"]
 
 [lint.per-file-ignores]
 "*/__init__.py" = ["F401"]
@@ -19,14 +19,11 @@ split-on-trailing-comma = false
 combine-as-imports = false
 
 [lint.pylint]
+allow-magic-value-types = ["bytes", "int", "str"]
 max-args = 21
-#max-attributes = 18
 max-bool-expr = 15
-max-branches = 83
+max-branches = 63
 max-locals = 52
-#max-module-lines = 4000
-max-nested-blocks = 8
-#max-positional-arguments = 22
 max-public-methods = 45
 max-returns = 7
 max-statements = 180
