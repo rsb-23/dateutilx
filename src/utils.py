@@ -20,8 +20,7 @@ def today(tzinfo=None):
         at midnight.
     """
 
-    _dt = dt.datetime.now(tzinfo)
-    return dt.datetime.combine(_dt.date(), dt.time(0, tzinfo=tzinfo))
+    return dt.datetime.now(tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def default_tzinfo(dt, tzinfo):

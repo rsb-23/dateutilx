@@ -461,7 +461,7 @@ class TzFile(_TzInfo):
         # six four-byte values of type long, written in a
         # ``standard'' byte order (the high-order  byte
         # of the value is written first).
-        if fileobj.read(4).decode() != "TZif":
+        if fileobj.read(4) != b"TZif":
             raise ValueError("magic not found")
 
         fileobj.read(16)
@@ -1093,8 +1093,7 @@ class _TzIcalVtz(_TzInfo):
 
         self._tzid = tzid
         self._comps = comps or []
-        self._cachedate = []
-        self._cachecomp = []
+        self._cache = OrderedDict()
         self._cache_lock = _thread.allocate_lock()
 
     def _find_comp(self, dt):
@@ -1103,8 +1102,12 @@ class _TzIcalVtz(_TzInfo):
 
         dt = dt.replace(tzinfo=None)
 
-        with contextlib.suppress(ValueError), self._cache_lock:
-            return self._cachecomp[self._cachedate.index((dt, self._fold(dt)))]
+        cache_key = (dt, self._fold(dt))
+        with self._cache_lock:
+            with contextlib.suppress(KeyError):
+                cached = self._cache.pop(cache_key)
+                self._cache[cache_key] = cached
+                return cached
 
         lastcompdt = None
         lastcomp = None
@@ -1129,12 +1132,10 @@ class _TzIcalVtz(_TzInfo):
                 lastcomp = comp[0]
 
         with self._cache_lock:
-            self._cachedate.insert(0, (dt, self._fold(dt)))
-            self._cachecomp.insert(0, lastcomp)
-
-            if len(self._cachedate) > 10:
-                self._cachedate.pop()
-                self._cachecomp.pop()
+            self._cache[cache_key] = lastcomp
+            self._cache.move_to_end(cache_key, last=False)
+            if len(self._cache) > 10:
+                self._cache.popitem()
 
         return lastcomp
 

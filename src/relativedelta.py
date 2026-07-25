@@ -434,7 +434,7 @@ class RelativeDelta:
     def __bool__(self):
         s_fields = (getattr(self, field) for field in REL_FIELDS)
         attribs = (getattr(self, field) for field in ABS_FIELDS)
-        return any([*s_fields, self.leapdays, self.weekday, *[x is not None for x in attribs]])
+        return any((*s_fields, self.leapdays, self.weekday, *(x is not None for x in attribs)))
 
     def __mul__(self, other) -> NotImplementedType | Self:
         try:

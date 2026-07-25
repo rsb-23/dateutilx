@@ -66,7 +66,7 @@ def easter(year, method: EasterAlgo | int = EasterAlgo.WESTERN):
     # e - Extra days to add for method 2 (converting Julian
     #     date to Gregorian date)
 
-    y = year
+    y = int(year)
     g = y % 19
     e = 0
     if method < 3:
@@ -90,4 +90,4 @@ def easter(year, method: EasterAlgo | int = EasterAlgo.WESTERN):
     p = i - j + e
     d = 1 + (p + 27 + (p + 6) // 40) % 31
     m = 3 + (p + 26) // 30
-    return datetime.date(int(y), int(m), int(d))
+    return datetime.date(y, m, d)

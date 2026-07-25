@@ -21,7 +21,10 @@ def _takes_ascii(f):
     @wraps(f)
     def func(self, str_in, *args, **kwargs):
         # If it's a stream, read the whole thing
-        str_in = getattr(str_in, "read", lambda: str_in)()
+        read = getattr(str_in, "read", None)
+
+        if read is not None:
+            str_in = read()
 
         # If it's unicode, turn it into bytes, since ISO-8601 only covers ASCII
         if isinstance(str_in, str):
@@ -312,12 +315,7 @@ class IsoParser:
             raise ValueError(f"Invalid weekday: {day}")
 
         # Get week 1 for the specific year:
-        jan_4 = dt.date(year, 1, 4)  # Week 1 always has January 4th in it
-        week_1 = jan_4 - dt.timedelta(days=jan_4.isocalendar()[2] - 1)
-
-        # Now add the specific number of weeks and days to get what we want
-        week_offset = (week - 1) * 7 + (day - 1)
-        return week_1 + dt.timedelta(days=week_offset)
+        return dt.date.fromisocalendar(year, week, day)
 
     def _parse_isotime(self, timestr):
         len_str = len(timestr)

@@ -15,7 +15,7 @@ import itertools
 import operator
 import re
 import sys
-from functools import lru_cache, wraps
+from functools import wraps
 from itertools import product
 from math import gcd
 from typing import Any
@@ -614,12 +614,10 @@ class Rrule(RruleBase):
 
         self._timeset = None
         if self._freq < HOURLY:
-            self._timeset = [
+            self._timeset = tuple(
                 dt.time(hour, minute, second, tzinfo=self._tzinfo)
                 for hour, minute, second in product(self._byhour, self._byminute, self._bysecond)
-            ]
-            self._timeset.sort()
-            self._timeset = tuple(self._timeset)
+            )
 
     def __str__(self):
         """
@@ -700,7 +698,6 @@ class Rrule(RruleBase):
 
     # pylint: disable=r0911
     def _iter(self):
-        @lru_cache(20)
         def _byyear_check(i):
             return byyearday and (
                 (i < ii.yearlen and i + 1 not in byyearday and -ii.yearlen + i not in byyearday)
@@ -747,13 +744,10 @@ class Rrule(RruleBase):
             timeset = self._timeset
         else:
             gettimeset = {HOURLY: ii.htimeset, MINUTELY: ii.mtimeset, SECONDLY: ii.stimeset}[freq]
-            if any(
-                freq >= min_freq and by_set and val not in by_set
-                for min_freq, by_set, val in [
-                    (HOURLY, self._byhour, hour),
-                    (MINUTELY, self._byminute, minute),
-                    (SECONDLY, self._bysecond, second),
-                ]
+            if (
+                (freq >= HOURLY and byhour and hour not in byhour)
+                or (freq >= MINUTELY and byminute and minute not in byminute)
+                or (freq >= SECONDLY and bysecond and second not in bysecond)
             ):
                 timeset = ()
             else:
@@ -766,45 +760,44 @@ class Rrule(RruleBase):
 
             # Do the "hard" work ;-)
             filtered = False
-            for i in dayset[start:end]:
-                if any(
-                    (
-                        (bymonth and ii.mmask[i] not in bymonth),
-                        (byweekno and not ii.wnomask[i]),
-                        (byweekday and ii.wdaymask[i] not in byweekday),
-                        (ii.nwdaymask and not ii.nwdaymask[i]),
-                        (byeaster and not ii.eastermask[i]),
-                        (
-                            (bymonthday or bynmonthday)
-                            and ii.mdaymask[i] not in bymonthday
-                            and ii.nmdaymask[i] not in bynmonthday
-                        ),
-                        _byyear_check(i),
+            for i in range(start, end):
+                if dayset[i] is None:
+                    continue
+                if (
+                    (bymonth and ii.mmask[i] not in bymonth)
+                    or (byweekno and not ii.wnomask[i])
+                    or (byweekday and ii.wdaymask[i] not in byweekday)
+                    or (ii.nwdaymask and not ii.nwdaymask[i])
+                    or (byeaster and not ii.eastermask[i])
+                    or (
+                        (bymonthday or bynmonthday)
+                        and ii.mdaymask[i] not in bymonthday
+                        and ii.nmdaymask[i] not in bynmonthday
                     )
+                    or _byyear_check(i)
                 ):
                     dayset[i] = None
                     filtered = True
 
             # Output results
             if bysetpos and timeset:
-                poslist = []
+                valid_days = [i for i in dayset[start:end] if i is not None]
+                poslist = set()
+                timeset_len = len(timeset)
                 for pos in bysetpos:
                     if pos < 0:
-                        daypos, timepos = divmod(pos, len(timeset))
+                        daypos, timepos = divmod(pos, timeset_len)
                     else:
-                        daypos, timepos = divmod(pos - 1, len(timeset))
+                        daypos, timepos = divmod(pos - 1, timeset_len)
                     try:
-                        i = [x for x in dayset[start:end] if x is not None][daypos]
+                        i = valid_days[daypos]
                         time = timeset[timepos]
                     except IndexError:
-                        pass
-                    else:
-                        date = dt.date.fromordinal(ii.yearordinal + i)
-                        res = dt.datetime.combine(date, time)
-                        if res not in poslist:
-                            poslist.append(res)
-                poslist.sort()
-                for res in poslist:
+                        continue
+                    date = dt.date.fromordinal(ii.yearordinal + i)
+                    poslist.add(dt.datetime.combine(date, time))
+
+                for res in sorted(poslist):
                     if until and res > until:
                         self._len = total
                         return
@@ -997,10 +990,10 @@ class Rrule(RruleBase):
         if isinstance(byxxx, int):
             byxxx = (byxxx,)
 
+        interval_gcd = gcd(self._interval, base)
         for num in byxxx:
-            i_gcd = gcd(self._interval, base)
             # Use divmod rather than % because we need to wrap negative nums.
-            if i_gcd == 1 or divmod(num - start, i_gcd)[1] == 0:
+            if interval_gcd == 1 or divmod(num - start, interval_gcd)[1] == 0:
                 cset.add(num)
 
         if not cset:
@@ -1216,18 +1209,15 @@ class _IterInfo:
         return dset, i, i + 1
 
     def htimeset(self, hour, minute, second):
-        tset = []
         rr = self.rrule
-        for minute_ in rr._byminute:
-            tset.extend(dt.time(hour, minute_, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond)
-        tset.sort()
-        return tset
+        return tuple(
+            dt.time(hour, minute_, second_, tzinfo=rr._tzinfo)
+            for minute_, second_ in product(rr._byminute, rr._bysecond)
+        )
 
     def mtimeset(self, hour, minute, second):
         rr = self.rrule
-        tset = [dt.time(hour, minute, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond]
-        tset.sort()
-        return tset
+        return tuple(dt.time(hour, minute, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond)
 
     def stimeset(self, hour, minute, second):
         return (dt.time(hour, minute, second, tzinfo=self.rrule._tzinfo),)

@@ -18,11 +18,9 @@ class NthWeekday:
 
     def __eq__(self, other: Any) -> bool:
         try:
-            if self.weekday != other.weekday or self.n != other.n:
-                return False
+            return (self.weekday, self.n) == (other.weekday, other.n)
         except AttributeError:
             return False
-        return True
 
     def __repr__(self) -> str:
         name = self.weekday.name

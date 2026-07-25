@@ -6,10 +6,11 @@ ignore-paths=(?!(src|tests))/*
 max-line-length = 130
 
 [DESIGN]
+max-bool-expr = 15 #k
 max-args = 10
 max-attributes = 18
 max-branches = 63
-max-locals = 52
+max-locals = 55
 max-module-lines = 1700
 max-nested-blocks = 6
 max-public-methods = 40

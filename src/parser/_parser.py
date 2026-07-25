@@ -34,6 +34,7 @@ import string
 import time
 import warnings
 from calendar import monthrange
+from collections import deque
 from decimal import Decimal
 from io import StringIO
 from warnings import warn
@@ -65,7 +66,7 @@ class _TimeLex:
 
         self.instream = instream
         self.charstack = []
-        self.tokenstack = []
+        self.tokenstack = deque()
         self.eof = False
 
     def get_token(self):
@@ -83,7 +84,7 @@ class _TimeLex:
         demands that multiple tokens be parsed at once.
         """
         if self.tokenstack:
-            return self.tokenstack.pop(0)
+            return self.tokenstack.popleft()
 
         seenletters = False
         token = None
@@ -309,10 +310,7 @@ class ParserInfo:
         return self._hms.get(name.lower())
 
     def ampm(self, name):
-        try:
-            return self._ampm[name.lower()]
-        except KeyError:
-            return None
+        return self._ampm.get(name.lower())
 
     def pertain(self, name):
         return name.lower() in self._pertain
