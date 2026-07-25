@@ -204,7 +204,7 @@ class TzWinTest(TestCase, TzWinFoldMixin):
 
         self.assertEqual(tzr.name_from_string("Samoa Daylight Time"), "Samoa Daylight Time")
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             tzr.name_from_string("@tzres.dll,100")
 
     def test_isdst_zone_with_no_daylight_saving(self):

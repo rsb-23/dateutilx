@@ -479,6 +479,8 @@ class RelativeDelta:
         # fmt: on
 
     def __ne__(self, other):
+        if not isinstance(other, RelativeDelta):
+            return NotImplemented
         return not self.__eq__(other)
 
     def __div__(self, other) -> NotImplementedType | Self:

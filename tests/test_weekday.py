@@ -1,11 +1,13 @@
 import unittest
 
+import pytest
+
 from src.weekday import FR, MO, SA, SU, TH, TU, WE, Weekday
 
 
 class WeekdayTest(unittest.TestCase):
     def test_invalid_nth_weekday(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             FR(0)
 
     def test_weekday_callable(self):

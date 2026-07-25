@@ -10,9 +10,9 @@ max-args = 10
 max-attributes = 18
 max-branches = 63
 max-locals = 52
-max-module-lines = 4000
+max-module-lines = 1700
 max-nested-blocks = 6
-max-public-methods = 45
+max-public-methods = 40
 max-statements = 135
 
 [MESSAGES CONTROL]
