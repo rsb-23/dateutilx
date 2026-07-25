@@ -8,14 +8,14 @@ relativedelta examples
 
 .. testsetup:: relativedelta
 
-    from datetime import *; from dateutil.relativedelta import *
+    from datetime import *; from dateutilx.relativedelta import *
     import calendar
     NOW = datetime(2003, 9, 17, 20, 54, 47, 282310)
     TODAY = date(2003, 9, 17)
 
 Let's begin our trip::
 
-    >>> from datetime import *; from dateutil.relativedelta import *
+    >>> from datetime import *; from dateutilx.relativedelta import *
     >>> import calendar
 
 Store some values::
@@ -216,8 +216,8 @@ Prepare the environment.
 
 .. testsetup:: rrule
 
-    from dateutil.rrule import *
-    from dateutil.parser import *
+    from dateutilx.rrule import *
+    from dateutilx.parser import *
     from datetime import *
     import pprint
     import sys
@@ -225,8 +225,8 @@ Prepare the environment.
 
 .. doctest:: rrule
 
-    >>> from dateutil.rrule import *
-    >>> from dateutil.parser import *
+    >>> from dateutilx.rrule import *
+    >>> from dateutilx.parser import *
     >>> from datetime import *
 
     >>> import pprint
@@ -756,10 +756,10 @@ Daily, for 7 days, jumping Saturday and Sunday occurrences.
 
     import datetime
 
-    from dateutil.parser import parse
-    from dateutil.rrule import rrule, rruleset
-    from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY
-    from dateutil.rrule import MO, TU, WE, TH, FR, SA, SU
+    from dateutilx.parser import parse
+    from dateutilx.rrule import rrule, rruleset
+    from dateutilx.rrule import YEARLY, MONTHLY, WEEKLY, DAILY
+    from dateutilx.rrule import MO, TU, WE, TH, FR, SA, SU
 
     import pprint
     import sys
@@ -805,8 +805,8 @@ Every 10 days, 5 occurrences.
 
 .. testsetup:: rrulestr
 
-    from dateutil.parser import parse
-    from dateutil.rrule import rruleset, rrulestr
+    from dateutilx.parser import parse
+    from dateutilx.rrule import rruleset, rrulestr
 
     import pprint
     import sys
@@ -847,16 +847,16 @@ Notice that when using a single rule, it returns an
    :options: +ELLIPSIS
 
     >>> rrulestr("FREQ=DAILY;INTERVAL=10;COUNT=5")
-    <dateutil.rrule.rrule object at 0x...>
+    <dateutilx.rrule.rrule object at 0x...>
 
     >>> rrulestr("""
     ... DTSTART:19970902T090000
     ... RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5
     ... """)
-    <dateutil.rrule.rrule object at 0x...>
+    <dateutilx.rrule.rrule object at 0x...>
 
     >>> rrulestr("FREQ=DAILY;INTERVAL=10;COUNT=5", forceset=True)
-    <dateutil.rrule.rruleset object at 0x...>
+    <dateutilx.rrule.rruleset object at 0x...>
 
 
 But when an `rruleset` is needed, it is automatically used.
@@ -869,7 +869,7 @@ But when an `rruleset` is needed, it is automatically used.
     ... RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5
     ... RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
     ... """)
-    <dateutil.rrule.rruleset object at 0x...>
+    <dateutilx.rrule.rruleset object at 0x...>
 
 
 parse examples
@@ -878,8 +878,8 @@ The following code will prepare the environment:
 
 .. doctest:: tz
 
-    >>> from dateutil.parser import *
-    >>> from dateutil.tz import *
+    >>> from dateutilx.parser import *
+    >>> from dateutilx.tz import *
     >>> from datetime import *
     >>> TZOFFSETS = {"BRST": -10800}
     >>> BRSTTZ = tzoffset("BRST", -10800)
@@ -1194,7 +1194,7 @@ Override parserinfo with a custom parserinfo
 
 .. doctest:: tz
 
-   >>> from dateutil.parser import parse, parserinfo
+   >>> from dateutilx.parser import parse, parserinfo
    >>> class CustomParserInfo(parserinfo):
    ...     # e.g. edit a property of parserinfo to allow a custom 12 hour format
    ...     AMPM = [("am", "a", "xm"), ("pm", "p")]
@@ -1228,7 +1228,7 @@ tzoffset examples
    :options: +NORMALIZE_WHITESPACE
 
     >>> from datetime import *
-    >>> from dateutil.tz import *
+    >>> from dateutilx.tz import *
 
     >>> datetime.now(tzoffset("BRST", -10800))
     datetime.datetime(2003, 9, 27, 9, 52, 43, 624904,
@@ -1248,7 +1248,7 @@ tzlocal examples
 .. doctest:: tzlocal
 
     >>> from datetime import *
-    >>> from dateutil.tz import *
+    >>> from dateutilx.tz import *
 
     >>> datetime.now(tzlocal())
     datetime.datetime(2003, 9, 27, 10, 1, 43, 673605,
@@ -1292,7 +1292,7 @@ Here is the example mentioned in the
     import os
     import time
     from datetime import datetime
-    from dateutil.tz import tzstr
+    from dateutilx.tz import tzstr
 
 .. doctest:: tzstr
 
@@ -1348,14 +1348,14 @@ tzrange examples
 
 .. testsetup:: tzrange
 
-    from dateutil.tz import tzrange, tzstr
+    from dateutilx.tz import tzrange, tzstr
 
 .. doctest:: tzrange
 
     >>> tzstr('EST5EDT') == tzrange("EST", -18000, "EDT")
     True
 
-    >>> from dateutil.relativedelta import *
+    >>> from dateutilx.relativedelta import *
     >>> range1 = tzrange("EST", -18000, "EDT")
     >>> range2 = tzrange("EST", -18000, "EDT", -14400,
     ...                  relativedelta(hours=+2, month=4, day=1,
@@ -1383,7 +1383,7 @@ tzfile examples
 .. testsetup:: tzfile
 
     from datetime import datetime
-    from dateutil.tz import tzfile, UTC
+    from dateutilx.tz import tzfile, UTC
 
 .. doctest:: tzfile
    :options: +NORMALIZE_WHITESPACE
@@ -1430,7 +1430,7 @@ And here is an example exploring a `tzical` type:
 
 .. doctest:: tzfile
 
-    >>> from dateutil.tz import *; from datetime import *
+    >>> from dateutilx.tz import *; from datetime import *
 
     >>> tz = tzical('samples/EST5EDT.ics')
     >>> tz.keys()

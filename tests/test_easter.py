@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from dateutilx.easter import EasterAlgo, easter
+from src.easter import EasterAlgo, easter
 
 # fmt: off
 # List of easters between 1990 and 2050

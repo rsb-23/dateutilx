@@ -5,11 +5,11 @@ from io import StringIO
 
 import pytest
 
-from dateutilx import tz
-from dateutilx.errors import ParserError, UnknownTimezoneWarning
-from dateutilx.helper import is_windows_os
-from dateutilx.parser import parse, parser, parserinfo
-from dateutilx.tz import TzOffset
+from src import tz
+from src.errors import ParserError, UnknownTimezoneWarning
+from src.helper import is_windows_os
+from src.parser import parse, parser, parserinfo
+from src.tz import TzOffset
 
 from ._common import TZEnvContext
 
@@ -675,26 +675,29 @@ class ParserTest(unittest.TestCase):
         res = parse(dtstr, default=self.default)
         assert res == datetime(2017, 11, self.default.day, 2, 17)
 
-    def test_validate_hour(self):
-        # See GH353
-        invalid = "201A-01-01T23:58:39.239769+03:00"
-        with pytest.raises(ParserError):
-            parse(invalid)
 
-    def test_era_trailing_year(self):
-        dstr = "AD2001"
-        res = parse(dstr)
-        assert res.year == 2001, res
+def test_validate_hour():
+    # See GH353
+    invalid = "201A-01-01T23:58:39.239769+03:00"
+    with pytest.raises(ParserError):
+        parse(invalid)
 
-    def test_includes_timestr(self):
-        timestr = "2020-13-97T44:61:83"
 
-        try:
-            parse(timestr)
-        except ParserError as e:
-            assert e.args[1] == timestr
-        else:
-            pytest.fail("Failed to raise ParserError")
+def test_era_trailing_year():
+    dstr = "AD2001"
+    res = parse(dstr)
+    assert res.year == 2001, res
+
+
+def test_includes_timestr():
+    timestr = "2020-13-97T44:61:83"
+
+    try:
+        parse(timestr)
+    except ParserError as e:
+        assert e.args[1] == timestr
+    else:
+        pytest.fail("Failed to raise ParserError")
 
 
 class TestOutOfBounds:

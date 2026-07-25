@@ -42,7 +42,7 @@ class _FakeDatetimeModule:
 
 
 def freeze_time(frozen_dt: datetime, module, *, tz_offset=0):
-    to_patch = f"{module}.datetime"
+    to_patch = f"{module}.dt"
     if tz_offset:
         offset = dt.timezone(dt.timedelta(hours=-tz_offset))
         frozen_dt = frozen_dt.replace(tzinfo=offset).astimezone()

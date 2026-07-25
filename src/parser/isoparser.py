@@ -8,11 +8,11 @@ ISO-8601 specification.
 """
 
 import calendar
+import datetime as dt
 import re
-from datetime import date, datetime, time, timedelta
 from functools import wraps
 
-from dateutilx.tz import UTC, TzOffset
+from src.tz import UTC, TzOffset
 
 __all__ = ["isoparse", "isoparser"]
 
@@ -21,7 +21,10 @@ def _takes_ascii(f):
     @wraps(f)
     def func(self, str_in, *args, **kwargs):
         # If it's a stream, read the whole thing
-        str_in = getattr(str_in, "read", lambda: str_in)()
+        read = getattr(str_in, "read", None)
+
+        if read is not None:
+            str_in = read()
 
         # If it's unicode, turn it into bytes, since ISO-8601 only covers ASCII
         if isinstance(str_in, str):
@@ -104,10 +107,10 @@ class IsoParser:
         - `±HHMM`
         - `±HH`
 
-        Offsets will be represented as :class:`dateutil.tz.tzoffset` objects,
+        Offsets will be represented as :class:`dateutilx.tz.tzoffset` objects,
         with the exception of UTC, which will be represented as
-        :class:`dateutil.tz.tzutc`. Time zone offsets equivalent to UTC (such
-        as `+00:00`) will also be represented as :class:`dateutil.tz.tzutc`.
+        :class:`dateutilx.tz.tzutc`. Time zone offsets equivalent to UTC (such
+        as `+00:00`) will also be represented as :class:`dateutilx.tz.tzutc`.
 
         :param dt_str:
             A string or stream containing only an ISO-8601 datetime string
@@ -138,9 +141,9 @@ class IsoParser:
 
         if len(components) > 3 and components[3] == 24:
             components[3] = 0
-            return datetime(*components) + timedelta(days=1)
+            return dt.datetime(*components) + dt.timedelta(days=1)
 
-        return datetime(*components)
+        return dt.datetime(*components)
 
     @_takes_ascii
     def parse_isodate(self, datestr):
@@ -156,7 +159,7 @@ class IsoParser:
         components, pos = self._parse_isodate(datestr)
         if pos < len(datestr):
             raise ValueError(f"String contains unknown ISO components: {datestr.decode('ascii')!r}")
-        return date(*components)
+        return dt.date(*components)
 
     @_takes_ascii
     def parse_isotime(self, timestr):
@@ -172,7 +175,7 @@ class IsoParser:
         components = self._parse_isotime(timestr)
         if components[0] == 24:
             components[0] = 0
-        return time(*components)
+        return dt.time(*components)
 
     @_takes_ascii
     def parse_tzstr(self, tzstr, zero_as_utc=True):
@@ -185,11 +188,11 @@ class IsoParser:
             A string representing an ISO time zone offset
 
         :param zero_as_utc:
-            Whether to return :class:`dateutil.tz.tzutc` for zero-offset zones
+            Whether to return :class:`dateutilx.tz.tzutc` for zero-offset zones
 
         :return:
-            Returns :class:`dateutil.tz.tzoffset` for offsets and
-            :class:`dateutil.tz.tzutc` for ``Z`` and (if ``zero_as_utc`` is
+            Returns :class:`dateutilx.tz.tzoffset` for offsets and
+            :class:`dateutilx.tz.tzutc` for ``Z`` and (if ``zero_as_utc`` is
             specified) offsets equivalent to UTC.
         """
         return self._parse_tzstr(tzstr, zero_as_utc=zero_as_utc)
@@ -199,18 +202,18 @@ class IsoParser:
     _TIME_SEP = b":"
     _FRACTION_REGEX = re.compile(b"[.,]([0-9]+)")
 
-    def _parse_isodate(self, dt_str):
+    def _parse_isodate(self, dt_str: str) -> tuple:
+        if len(dt_str) < 4:
+            raise ValueError("ISO string too short")
+
         try:
             return self._parse_isodate_common(dt_str)
         except ValueError:
             return self._parse_isodate_uncommon(dt_str)
 
-    def _parse_isodate_common(self, dt_str):
+    def _parse_isodate_common(self, dt_str: str) -> tuple:
         len_str = len(dt_str)
         components = [1, 1, 1]
-
-        if len_str < 4:
-            raise ValueError("ISO string too short")
 
         # Year
         components[0] = int(dt_str[:4])
@@ -245,10 +248,7 @@ class IsoParser:
         components[2] = int(dt_str[pos : pos + 2])
         return components, pos + 2
 
-    def _parse_isodate_uncommon(self, dt_str):
-        if len(dt_str) < 4:
-            raise ValueError("ISO string too short")
-
+    def _parse_isodate_uncommon(self, dt_str: str) -> tuple:
         # All ISO formats start with the year
         year = int(dt_str[:4])
 
@@ -283,7 +283,7 @@ class IsoParser:
             if ordinal_day < 1 or ordinal_day > (365 + calendar.isleap(year)):
                 raise ValueError(f"Invalid ordinal day {ordinal_day} for year {year}")
 
-            base_date = date(year, 1, 1) + timedelta(days=ordinal_day - 1)
+            base_date = dt.date(year, 1, 1) + dt.timedelta(days=ordinal_day - 1)
 
         components = [base_date.year, base_date.month, base_date.day]
         return components, pos
@@ -315,12 +315,7 @@ class IsoParser:
             raise ValueError(f"Invalid weekday: {day}")
 
         # Get week 1 for the specific year:
-        jan_4 = date(year, 1, 4)  # Week 1 always has January 4th in it
-        week_1 = jan_4 - timedelta(days=jan_4.isocalendar()[2] - 1)
-
-        # Now add the specific number of weeks and days to get what we want
-        week_offset = (week - 1) * 7 + (day - 1)
-        return week_1 + timedelta(days=week_offset)
+        return dt.date.fromisocalendar(year, week, day)
 
     def _parse_isotime(self, timestr):
         len_str = len(timestr)

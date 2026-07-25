@@ -5,7 +5,7 @@ datetimes.
 .. versionadded:: 2.7.0
 """
 
-from datetime import datetime, time
+import datetime as dt
 
 
 def today(tzinfo=None):
@@ -20,8 +20,7 @@ def today(tzinfo=None):
         at midnight.
     """
 
-    dt = datetime.now(tzinfo)
-    return datetime.combine(dt.date(), time(0, tzinfo=tzinfo))
+    return dt.datetime.now(tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def default_tzinfo(dt, tzinfo):
@@ -34,9 +33,9 @@ def default_tzinfo(dt, tzinfo):
 
     .. doctest::
 
-        >>> from dateutilx.tz import tzoffset
-        >>> from dateutilx.parser import parse
-        >>> from dateutilx.utils import default_tzinfo
+        >>> from src.tz import tzoffset
+        >>> from src.parser import parse
+        >>> from src.utils import default_tzinfo
         >>> dflt_tz = tzoffset("EST", -18000)
         >>> print(default_tzinfo(parse('2014-01-01 12:30 UTC'), dflt_tz))
         2014-01-01 12:30:00+00:00

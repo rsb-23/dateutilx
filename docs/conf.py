@@ -45,7 +45,7 @@ copyright = "2019, dateutil"
 # built documents.
 #
 # The short X.Y version.
-from dateutilx import __version__ as VERSION  # Explicitly use a relative path # noqa
+from src import __version__ as VERSION  # Explicitly use a relative path # noqa
 
 version = VERSION
 # The full version, including alpha/beta/rc tags.
@@ -210,7 +210,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [("index", "dateutil.tex", "dateutil Documentation", "dateutil", "manual")]
+latex_documents = [("index", "dateutilx.tex", "dateutil Documentation", "dateutil", "manual")]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.

@@ -19,7 +19,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any
 
-from dateutilx.helper import is_windows_os
+from src.helper import is_windows_os
 
 from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
@@ -40,7 +40,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
     .. doctest::
 
         >>> import datetime as dt
-        >>> from dateutilx.tz import *
+        >>> from src.tz import *
 
         >>> dt.datetime.now()
         datetime.datetime(2003, 9, 27, 9, 40, 1, 521290)
@@ -57,7 +57,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
 
         .. doctest::
 
-            >>> from dateutilx.tz import tzutc, UTC
+            >>> from src.tz import tzutc, UTC
             >>> tzutc() is tzutc()
             True
             >>> tzutc() is UTC
@@ -101,7 +101,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
         """
         return dt
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzUTC | TzOffset):
             return NotImplemented
 
@@ -163,7 +163,7 @@ class TzOffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
         """
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzOffset):
             return NotImplemented
 
@@ -303,7 +303,7 @@ class _TTInfo:
                 _tmp_list.append(f"{attr}={value!r}")
         return f"{self.__class__.__name__}({', '.join(_tmp_list)})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, _TTInfo):
             return NotImplemented
 
@@ -374,7 +374,7 @@ class TzFile(_TzInfo):
         file on disk that you want to read into a Python ``tzinfo`` object.
         If you want to get a ``tzfile`` representing a specific IANA zone,
         (e.g. ``'America/New_York'``), you should call
-        :func:`dateutil.tz.gettz` with the zone identifier.
+        :func:`dateutilx.tz.gettz` with the zone identifier.
 
 
     **Examples:**
@@ -384,7 +384,7 @@ class TzFile(_TzInfo):
 
     .. testsetup:: tzfile
 
-        from dateutilx.tz import gettz
+        from src.tz import gettz
         from datetime import datetime
 
     .. doctest:: tzfile
@@ -461,7 +461,7 @@ class TzFile(_TzInfo):
         # six four-byte values of type long, written in a
         # ``standard'' byte order (the high-order  byte
         # of the value is written first).
-        if fileobj.read(4).decode() != "TZif":
+        if fileobj.read(4) != b"TZif":
             raise ValueError("magic not found")
 
         fileobj.read(16)
@@ -789,7 +789,7 @@ class TzFile(_TzInfo):
             return None
         return self._find_ttinfo(dt).abbr
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzFile):
             return NotImplemented
         return (
@@ -867,14 +867,14 @@ class TzRange(TzRangeBase):
 
     .. testsetup:: tzrange
 
-        >>> from dateutilx.tz import tzrange, tzstr
+        >>> from src.tz import tzrange, tzstr
 
     .. doctest:: tzrange
 
         >>> tzstr('EST5EDT') == tzrange("EST", -18000, "EDT")
         True
 
-        >>> from dateutilx.relativedelta import *
+        >>> from src.relativedelta import *
         >>> range1 = tzrange("EST", -18000, "EDT")
         >>> range2 = tzrange("EST", -18000, "EDT", -14400,
         ...                  RelativeDelta(hours=+2, month=4, day=1,
@@ -886,9 +886,9 @@ class TzRange(TzRangeBase):
 
     """
 
-    def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, start=None, end=None):
+    def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, *, start=None, end=None):
         # global relativedelta
-        from dateutilx.relativedelta import SU, RelativeDelta
+        from src.relativedelta import SU, RelativeDelta
 
         self._std_abbr = stdabbr
         self._dst_abbr = dstabbr
@@ -946,7 +946,7 @@ class TzRange(TzRangeBase):
 
         return start, end
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, TzRange):
             return NotImplemented
 
@@ -1009,7 +1009,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
 
     def __init__(self, s, posix_offset=False):
         global parser
-        from dateutilx.parser import _parser as parser
+        from src.parser import _parser as parser
 
         self._s = s
 
@@ -1038,7 +1038,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
         self.hasdst = bool(self._start_delta)
 
     def _delta(self, x, isend=0):
-        from dateutilx import relativedelta
+        from src import relativedelta
 
         kwargs = {}
         if x.month is not None:
@@ -1093,8 +1093,7 @@ class _TzIcalVtz(_TzInfo):
 
         self._tzid = tzid
         self._comps = comps or []
-        self._cachedate = []
-        self._cachecomp = []
+        self._cache = OrderedDict()
         self._cache_lock = _thread.allocate_lock()
 
     def _find_comp(self, dt):
@@ -1103,8 +1102,12 @@ class _TzIcalVtz(_TzInfo):
 
         dt = dt.replace(tzinfo=None)
 
-        with contextlib.suppress(ValueError), self._cache_lock:
-            return self._cachecomp[self._cachedate.index((dt, self._fold(dt)))]
+        cache_key = (dt, self._fold(dt))
+        with self._cache_lock:
+            with contextlib.suppress(KeyError):
+                cached = self._cache.pop(cache_key)
+                self._cache[cache_key] = cached
+                return cached
 
         lastcompdt = None
         lastcomp = None
@@ -1129,12 +1132,10 @@ class _TzIcalVtz(_TzInfo):
                 lastcomp = comp[0]
 
         with self._cache_lock:
-            self._cachedate.insert(0, (dt, self._fold(dt)))
-            self._cachecomp.insert(0, lastcomp)
-
-            if len(self._cachedate) > 10:
-                self._cachedate.pop()
-                self._cachecomp.pop()
+            self._cache[cache_key] = lastcomp
+            self._cache.move_to_end(cache_key, last=False)
+            if len(self._cache) > 10:
+                self._cache.popitem()
 
         return lastcomp
 
@@ -1175,7 +1176,7 @@ class TzIcal:
     def __init__(self, fileobj):
         global rrule
         if not rrule:
-            from dateutilx import rrule
+            from src import rrule
 
         if isinstance(fileobj, str):
             self._s = fileobj
@@ -1246,22 +1247,20 @@ class TzIcal:
             raise ValueError("empty string")
 
         # Unfold
-        i = 0
-        while i < len(lines):
-            line = lines[i].rstrip()
+        unfolded_lines = []
+        for raw in lines:
+            line = raw.rstrip()
             if not line:
-                del lines[i]
-            elif i > 0 and line[0] == " ":
-                lines[i - 1] += line[1:]
-                del lines[i]
+                continue
+            if unfolded_lines and line[0] == " ":
+                unfolded_lines[-1] += line[1:]
             else:
-                i += 1
+                unfolded_lines.append(line)
 
-        tzid = None
+        tzid = comptype = None
         comps = []
         invtz = False
-        comptype = None
-        for line in lines:
+        for line in unfolded_lines:
             if not line:
                 continue
             name, value = line.split(":", 1)
@@ -1270,78 +1269,80 @@ class TzIcal:
                 raise ValueError("empty property name")
             name = parms[0].upper()
             parms = parms[1:]
-            if invtz:
-                if name == "BEGIN":
-                    if value not in ("STANDARD", "DAYLIGHT"):
-                        raise ValueError(f"unknown component: {value}")
-                    comptype = value
-                    founddtstart = False
-                    tzoffsetfrom = None
-                    tzoffsetto = None
-                    rrulelines = []
-                    tzname = None
-                elif name == "END":
-                    if value == "VTIMEZONE":
-                        if comptype:
-                            raise ValueError(f"component not closed: {comptype}")
-                        if not tzid:
-                            raise ValueError("mandatory TZID not found")
-                        if not comps:
-                            raise ValueError("at least one component is needed")
-                        # Process vtimezone
-                        self._vtz[tzid] = _TzIcalVtz(tzid, comps)
-                        invtz = False
-                    elif value == comptype:
-                        if not founddtstart:
-                            raise ValueError("mandatory DTSTART not found")
-                        if tzoffsetfrom is None:
-                            raise ValueError("mandatory TZOFFSETFROM not found")
-                        if tzoffsetto is None:
-                            raise ValueError("mandatory TZOFFSETFROM not found")
-                        # Process component
-                        rr = None
-                        if rrulelines:
-                            rr = rrule.rrulestr("\n".join(rrulelines), compatible=True, ignoretz=True, cache=True)
-                        comp = _TzIcalVtzComp(tzoffsetfrom, tzoffsetto, (comptype == "DAYLIGHT"), tzname, rr)
-                        comps.append(comp)
-                        comptype = None
-                    else:
-                        raise ValueError(f"invalid component end: {value}")
-                elif comptype:
-                    if name == "DTSTART":
-                        # DTSTART in VTIMEZONE takes a subset of valid RRULE
-                        # values under RFC 5545.
-                        for parm in parms:
-                            if parm != "VALUE=DATE-TIME":
-                                raise ValueError(f"Unsupported DTSTART param in VTIMEZONE: {parm}")
-                        rrulelines.append(line)
-                        founddtstart = True
-                    elif name in ("RRULE", "RDATE", "EXRULE", "EXDATE"):
-                        rrulelines.append(line)
-                    elif name == "TZOFFSETFROM":
-                        if parms:
-                            raise ValueError(f"unsupported {name} parm: {parms[0]} ")
-                        tzoffsetfrom = self._parse_offset(value)
-                    elif name == "TZOFFSETTO":
-                        if parms:
-                            raise ValueError(f"unsupported TZOFFSETTO parm: {parms[0]}")
-                        tzoffsetto = self._parse_offset(value)
-                    elif name == "TZNAME":
-                        if parms:
-                            raise ValueError(f"unsupported TZNAME parm: {parms[0]}")
-                        tzname = value
-                    elif name != "COMMENT":
-                        raise ValueError(f"unsupported property: {name}")
-                elif name == "TZID":
+
+            if not invtz:
+                if name == "BEGIN" and value == "VTIMEZONE":
+                    tzid = None
+                    comps = []
+                    invtz = True
+                continue
+
+            # invitz flow
+            if name == "BEGIN":
+                if value not in ("STANDARD", "DAYLIGHT"):
+                    raise ValueError(f"unknown component: {value}")
+                comptype = value
+                founddtstart = False
+                tzoffsetfrom = tzoffsetto = tzname = None
+                rrulelines = []
+            elif name == "END":
+                if value == "VTIMEZONE":
+                    if comptype:
+                        raise ValueError(f"component not closed: {comptype}")
+                    if not tzid:
+                        raise ValueError("mandatory TZID not found")
+                    if not comps:
+                        raise ValueError("at least one component is needed")
+                    # Process vtimezone
+                    self._vtz[tzid] = _TzIcalVtz(tzid, comps)
+                    invtz = False
+                elif value == comptype:
+                    if not founddtstart:
+                        raise ValueError("mandatory DTSTART not found")
+                    if tzoffsetfrom is None:
+                        raise ValueError("mandatory TZOFFSETFROM not found")
+                    if tzoffsetto is None:
+                        raise ValueError("mandatory TZOFFSETFROM not found")
+                    # Process component
+                    rr = None
+                    if rrulelines:
+                        rr = rrule.rrulestr("\n".join(rrulelines), compatible=True, ignoretz=True, cache=True)
+                    comp = _TzIcalVtzComp(tzoffsetfrom, tzoffsetto, (comptype == "DAYLIGHT"), tzname, rr)
+                    comps.append(comp)
+                    comptype = None
+                else:
+                    raise ValueError(f"invalid component end: {value}")
+            elif comptype:
+                if name == "DTSTART":
+                    # DTSTART in VTIMEZONE takes a subset of valid RRULE
+                    # values under RFC 5545.
+                    for parm in parms:
+                        if parm != "VALUE=DATE-TIME":
+                            raise ValueError(f"Unsupported DTSTART param in VTIMEZONE: {parm}")
+                    rrulelines.append(line)
+                    founddtstart = True
+                elif name in ("RRULE", "RDATE", "EXRULE", "EXDATE"):
+                    rrulelines.append(line)
+                elif name == "TZOFFSETFROM":
                     if parms:
-                        raise ValueError(f"unsupported TZID parm: {parms[0]}")
-                    tzid = value
-                elif name not in ("TZURL", "LAST-MODIFIED", "COMMENT"):
+                        raise ValueError(f"unsupported {name} parm: {parms[0]} ")
+                    tzoffsetfrom = self._parse_offset(value)
+                elif name == "TZOFFSETTO":
+                    if parms:
+                        raise ValueError(f"unsupported TZOFFSETTO parm: {parms[0]}")
+                    tzoffsetto = self._parse_offset(value)
+                elif name == "TZNAME":
+                    if parms:
+                        raise ValueError(f"unsupported TZNAME parm: {parms[0]}")
+                    tzname = value
+                elif name != "COMMENT":
                     raise ValueError(f"unsupported property: {name}")
-            elif name == "BEGIN" and value == "VTIMEZONE":
-                tzid = None
-                comps = []
-                invtz = True
+            elif name == "TZID":
+                if parms:
+                    raise ValueError(f"unsupported TZID parm: {parms[0]}")
+                tzid = value
+            elif name not in ("TZURL", "LAST-MODIFIED", "COMMENT"):
+                raise ValueError(f"unsupported property: {name}")
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self._s!r})"
@@ -1650,7 +1651,7 @@ def resolve_imaginary(dt):
 
     .. doctest::
 
-        >>> from dateutilx import tz
+        >>> from src import tz
         >>> from datetime import datetime
         >>> NYC = tz.gettz('America/New_York')
         >>> print(tz.resolve_imaginary(datetime(2017, 3, 12, 2, 30, tzinfo=NYC)))

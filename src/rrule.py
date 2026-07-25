@@ -1,3 +1,4 @@
+# pylint: disable = r0915
 """
 The rrule module offers a small, complete, and very fast, implementation of
 the recurrence rules documented in the
@@ -8,13 +9,16 @@ including support for caching of results.
 import _thread
 import calendar
 import contextlib
-import datetime
+import datetime as dt
 import heapq
 import itertools
+import operator
 import re
 import sys
 from functools import wraps
+from itertools import product
 from math import gcd
+from typing import Any
 from warnings import warn
 
 from .helper import Day, Frequency
@@ -230,23 +234,15 @@ class RruleBase:
         started = False
 
         _output = []
+        before_cmp = operator.gt if inc else operator.ge
+        after_cmp = operator.ge if inc else operator.gt
         for i in gen:
-            if inc:
-                if i > before:
-                    break
-                if started:
-                    _output.append(i)
-                elif i >= after:
-                    started = True
-                    _output.append(i)
-            else:
-                if i >= before:
-                    break
-                if started:
-                    _output.append(i)
-                elif i > after:
-                    started = True
-                    _output.append(i)
+            if before_cmp(i, before):
+                break
+            if not started and after_cmp(i, after):
+                started = True
+            if started:
+                _output.append(i)
         return _output
 
 
@@ -274,7 +270,7 @@ class Rrule(RruleBase):
         This can lead to possibly surprising behavior when, for example, the
         start date occurs at the end of the month:
 
-        >>> from dateutilx.rrule import rrule, MONTHLY
+        >>> from src.rrule import rrule, MONTHLY
         >>> from datetime import datetime
         >>> start_date = datetime(2014, 12, 31)
         >>> list(rrule(freq=MONTHLY, count=4, dtstart=start_date))
@@ -381,6 +377,7 @@ class Rrule(RruleBase):
         dtstart=None,
         interval=1,
         wkst=None,
+        *,
         count=None,
         until=None,
         bysetpos=None,
@@ -399,11 +396,11 @@ class Rrule(RruleBase):
         global easter
         if not dtstart:
             if until and until.tzinfo:
-                dtstart = datetime.datetime.now(tz=until.tzinfo).replace(microsecond=0)
+                dtstart = dt.datetime.now(tz=until.tzinfo).replace(microsecond=0)
             else:
-                dtstart = datetime.datetime.now().replace(microsecond=0)
-        elif not isinstance(dtstart, datetime.datetime):
-            dtstart = datetime.datetime.fromordinal(dtstart.toordinal())
+                dtstart = dt.datetime.now().replace(microsecond=0)
+        elif not isinstance(dtstart, dt.datetime):
+            dtstart = dt.datetime.fromordinal(dtstart.toordinal())
         else:
             dtstart = dtstart.replace(microsecond=0)
         self._dtstart = dtstart
@@ -418,8 +415,8 @@ class Rrule(RruleBase):
         # been supplied (the string retrieval will just use .get())
         self._original_rule = {}
 
-        if until and not isinstance(until, datetime.datetime):
-            until = datetime.datetime.fromordinal(until.toordinal())
+        if until and not isinstance(until, dt.datetime):
+            until = dt.datetime.fromordinal(until.toordinal())
         self._until = until
 
         if self._dtstart and self._until:
@@ -436,7 +433,7 @@ class Rrule(RruleBase):
         if count is not None and until:
             warn(
                 "Using both 'count' and 'until' is inconsistent with RFC 5545"
-                " and has been deprecated in dateutil. Future versions will "
+                " and has been deprecated in dateutilx. Future versions will "
                 "raise an error.",
                 DeprecationWarning,
             )
@@ -478,9 +475,8 @@ class Rrule(RruleBase):
                 self._original_rule["byweekday"] = None
 
         # bymonth
-        if bymonth is None:
-            self._bymonth = None
-        else:
+        self._bymonth = None
+        if bymonth is not None:
             if isinstance(bymonth, int):
                 bymonth = (bymonth,)
 
@@ -490,9 +486,8 @@ class Rrule(RruleBase):
                 self._original_rule["bymonth"] = self._bymonth
 
         # byyearday
-        if byyearday is None:
-            self._byyearday = None
-        else:
+        self._byyearday = None
+        if byyearday is not None:
             if isinstance(byyearday, int):
                 byyearday = (byyearday,)
 
@@ -500,23 +495,21 @@ class Rrule(RruleBase):
             self._original_rule["byyearday"] = self._byyearday
 
         # byeaster
+        self._byeaster = None
         if byeaster is not None:
             if not easter:
-                from dateutilx import easter
+                from src import easter
             if isinstance(byeaster, int):
                 self._byeaster = (byeaster,)
             else:
                 self._byeaster = tuple(sorted(byeaster))
 
             self._original_rule["byeaster"] = self._byeaster
-        else:
-            self._byeaster = None
 
         # bymonthday
-        if bymonthday is None:
-            self._bymonthday = ()
-            self._bynmonthday = ()
-        else:
+        self._bymonthday = ()
+        self._bynmonthday = ()
+        if bymonthday is not None:
             if isinstance(bymonthday, int):
                 bymonthday = (bymonthday,)
 
@@ -530,9 +523,8 @@ class Rrule(RruleBase):
                 self._original_rule["bymonthday"] = tuple(itertools.chain(self._bymonthday, self._bynmonthday))
 
         # byweekno
-        if byweekno is None:
-            self._byweekno = None
-        else:
+        self._byweekno = None
+        if byweekno is not None:
             if isinstance(byweekno, int):
                 byweekno = (byweekno,)
 
@@ -541,10 +533,8 @@ class Rrule(RruleBase):
             self._original_rule["byweekno"] = self._byweekno
 
         # byweekday / bynweekday
-        if byweekday is None:
-            self._byweekday = None
-            self._bynweekday = None
-        else:
+        self._byweekday = self._bynweekday = None
+        if byweekday is not None:
             # If it's one of the valid non-sequence types, convert to a
             # single-element sequence before the iterator that builds the
             # byweekday set.
@@ -597,48 +587,37 @@ class Rrule(RruleBase):
             self._original_rule["byhour"] = self._byhour
 
         # byminute
-        if byminute is None:
-            self._byminute = {dtstart.minute} if freq < MINUTELY else None
-        else:
+        self._byminute = {dtstart.minute} if freq < MINUTELY else None
+        if byminute is not None:
             if isinstance(byminute, int):
                 byminute = (byminute,)
 
+            self._byminute = set(byminute)
             if freq == MINUTELY:
                 self._byminute = self.__construct_byset(start=dtstart.minute, byxxx=byminute, base=60)
-            else:
-                self._byminute = set(byminute)
 
             self._byminute = tuple(sorted(self._byminute))
             self._original_rule["byminute"] = self._byminute
 
         # bysecond
-        if bysecond is None:
-            self._bysecond = (dtstart.second,) if freq < SECONDLY else None
-        else:
+        self._bysecond = (dtstart.second,) if freq < SECONDLY else None
+        if bysecond is not None:
             if isinstance(bysecond, int):
                 bysecond = (bysecond,)
 
             self._bysecond = set(bysecond)
-
             if freq == SECONDLY:
                 self._bysecond = self.__construct_byset(start=dtstart.second, byxxx=bysecond, base=60)
-            else:
-                self._bysecond = set(bysecond)
 
             self._bysecond = tuple(sorted(self._bysecond))
             self._original_rule["bysecond"] = self._bysecond
 
-        if self._freq >= HOURLY:
-            self._timeset = None
-        else:
-            self._timeset = []
-            for hour in self._byhour:
-                for minute in self._byminute:
-                    self._timeset.extend(
-                        datetime.time(hour, minute, second, tzinfo=self._tzinfo) for second in self._bysecond
-                    )
-            self._timeset.sort()
-            self._timeset = tuple(self._timeset)
+        self._timeset = None
+        if self._freq < HOURLY:
+            self._timeset = tuple(
+                dt.time(hour, minute, second, tzinfo=self._tzinfo)
+                for hour, minute, second in product(self._byhour, self._byminute, self._bysecond)
+            )
 
     def __str__(self):
         """
@@ -717,6 +696,7 @@ class Rrule(RruleBase):
         new_kwargs.update(kwargs)
         return rrule(**new_kwargs)
 
+    # pylint: disable=r0911
     def _iter(self):
         def _byyear_check(i):
             return byyearday and (
@@ -764,27 +744,25 @@ class Rrule(RruleBase):
             timeset = self._timeset
         else:
             gettimeset = {HOURLY: ii.htimeset, MINUTELY: ii.mtimeset, SECONDLY: ii.stimeset}[freq]
-            if any(
-                freq >= min_freq and by_set and val not in by_set
-                for min_freq, by_set, val in [
-                    (HOURLY, self._byhour, hour),
-                    (MINUTELY, self._byminute, minute),
-                    (SECONDLY, self._bysecond, second),
-                ]
+            if (
+                (freq >= HOURLY and byhour and hour not in byhour)
+                or (freq >= MINUTELY and byminute and minute not in byminute)
+                or (freq >= SECONDLY and bysecond and second not in bysecond)
             ):
                 timeset = ()
             else:
                 timeset = gettimeset(hour, minute, second)
 
-        total = 0
-        count = self._count
+        total, count = 0, self._count
         while True:
             # Get dayset with the right frequency
             dayset, start, end = getdayset(year, month, day)
 
             # Do the "hard" work ;-)
             filtered = False
-            for i in dayset[start:end]:
+            for i in range(start, end):
+                if dayset[i] is None:
+                    continue
                 if (
                     (bymonth and ii.mmask[i] not in bymonth)
                     or (byweekno and not ii.wnomask[i])
@@ -803,24 +781,23 @@ class Rrule(RruleBase):
 
             # Output results
             if bysetpos and timeset:
-                poslist = []
+                valid_days = [i for i in dayset[start:end] if i is not None]
+                poslist = set()
+                timeset_len = len(timeset)
                 for pos in bysetpos:
                     if pos < 0:
-                        daypos, timepos = divmod(pos, len(timeset))
+                        daypos, timepos = divmod(pos, timeset_len)
                     else:
-                        daypos, timepos = divmod(pos - 1, len(timeset))
+                        daypos, timepos = divmod(pos - 1, timeset_len)
                     try:
-                        i = [x for x in dayset[start:end] if x is not None][daypos]
+                        i = valid_days[daypos]
                         time = timeset[timepos]
                     except IndexError:
-                        pass
-                    else:
-                        date = datetime.date.fromordinal(ii.yearordinal + i)
-                        res = datetime.datetime.combine(date, time)
-                        if res not in poslist:
-                            poslist.append(res)
-                poslist.sort()
-                for res in poslist:
+                        continue
+                    date = dt.date.fromordinal(ii.yearordinal + i)
+                    poslist.add(dt.datetime.combine(date, time))
+
+                for res in sorted(poslist):
                     if until and res > until:
                         self._len = total
                         return
@@ -835,29 +812,32 @@ class Rrule(RruleBase):
                         yield res
             else:
                 for i in dayset[start:end]:
-                    if i is not None:
-                        date = datetime.date.fromordinal(ii.yearordinal + i)
-                        for time in timeset:
-                            res = datetime.datetime.combine(date, time)
-                            if until and res > until:
+                    if i is None:
+                        continue
+
+                    date = dt.date.fromordinal(ii.yearordinal + i)
+                    for time in timeset:
+                        res = dt.datetime.combine(date, time)
+                        if until and res > until:
+                            self._len = total
+                            return
+
+                        if res < self._dtstart:
+                            continue
+                        if count is not None:
+                            count -= 1
+                            if count < 0:
                                 self._len = total
                                 return
 
-                            if res >= self._dtstart:
-                                if count is not None:
-                                    count -= 1
-                                    if count < 0:
-                                        self._len = total
-                                        return
-
-                                total += 1
-                                yield res
+                        total += 1
+                        yield res
 
             # Handle frequency and interval
             fixday = False
             if freq == YEARLY:
                 year += interval
-                if year > datetime.MAXYEAR:
+                if year > dt.MAXYEAR:
                     self._len = total
                     return
                 ii.rebuild(year, month)
@@ -870,7 +850,7 @@ class Rrule(RruleBase):
                     if month == 0:
                         month = 12
                         year -= 1
-                    if year > datetime.MAXYEAR:
+                    if year > dt.MAXYEAR:
                         self._len = total
                         return
                 ii.rebuild(year, month)
@@ -947,10 +927,12 @@ class Rrule(RruleBase):
                             day += div
                             fixday = True
 
-                    if (
-                        (not byhour or hour in byhour)
-                        and (not byminute or minute in byminute)
-                        and (not bysecond or second in bysecond)
+                    if all(
+                        (
+                            (not byhour or hour in byhour),
+                            (not byminute or minute in byminute),
+                            (not bysecond or second in bysecond),
+                        )
                     ):
                         valid = True
                         break
@@ -962,20 +944,15 @@ class Rrule(RruleBase):
 
                 timeset = gettimeset(hour, minute, second)
 
-            if fixday and day > 28:
-                daysinmonth = calendar.monthrange(year, month)[1]
-                if day > daysinmonth:
-                    while day > daysinmonth:
-                        day -= daysinmonth
-                        month += 1
-                        if month == 13:
-                            month = 1
-                            year += 1
-                            if year > datetime.MAXYEAR:
-                                self._len = total
-                                return
-                        daysinmonth = calendar.monthrange(year, month)[1]
-                    ii.rebuild(year, month)
+            daysinmonth = calendar.monthrange(year, month)[1]
+            if fixday and day > daysinmonth:
+                try:
+                    newdate = dt.date(year, month, 1) + dt.timedelta(days=day - 1)
+                except OverflowError:
+                    self._len = total
+                    return
+                year, month, day = newdate.year, newdate.month, newdate.day
+                ii.rebuild(year, month)
 
     def __construct_byset(self, start, byxxx, base):
         """
@@ -1013,10 +990,10 @@ class Rrule(RruleBase):
         if isinstance(byxxx, int):
             byxxx = (byxxx,)
 
+        interval_gcd = gcd(self._interval, base)
         for num in byxxx:
-            i_gcd = gcd(self._interval, base)
             # Use divmod rather than % because we need to wrap negative nums.
-            if i_gcd == 1 or divmod(num - start, i_gcd)[1] == 0:
+            if interval_gcd == 1 or divmod(num - start, interval_gcd)[1] == 0:
                 cset.add(num)
 
         if not cset:
@@ -1080,11 +1057,11 @@ class _IterInfo:
         if year != self.lastyear:
             self.yearlen = 365 + calendar.isleap(year)
             self.nextyearlen = 365 + calendar.isleap(year + 1)
-            firstyday = datetime.date(year, 1, 1)
+            firstyday = dt.date(year, 1, 1)
             self.yearordinal = firstyday.toordinal()
             self.yearweekday = firstyday.weekday()
 
-            wday = datetime.date(year, 1, 1).weekday()
+            wday = dt.date(year, 1, 1).weekday()
             if self.yearlen == 365:
                 self.mmask = M365MASK
                 self.mdaymask = MDAY365MASK
@@ -1152,7 +1129,7 @@ class _IterInfo:
                     # days from last year's last week number in
                     # this year.
                     if -1 not in rr._byweekno:
-                        lyearweekday = datetime.date(year - 1, 1, 1).weekday()
+                        lyearweekday = dt.date(year - 1, 1, 1).weekday()
                         lno1wkst = (7 - lyearweekday + rr._wkst) % 7
                         lyearlen = 365 + calendar.isleap(year - 1)
                         if lno1wkst >= 4:
@@ -1213,7 +1190,7 @@ class _IterInfo:
     def wdayset(self, year, month, day):
         # We need to handle cross-year weeks here.
         dset = [None] * (self.yearlen + 7)
-        i = datetime.date(year, month, day).toordinal() - self.yearordinal
+        i = dt.date(year, month, day).toordinal() - self.yearordinal
         start = i
         for _ in range(7):
             dset[i] = i
@@ -1227,26 +1204,23 @@ class _IterInfo:
 
     def ddayset(self, year, month, day):
         dset = [None] * self.yearlen
-        i = datetime.date(year, month, day).toordinal() - self.yearordinal
+        i = dt.date(year, month, day).toordinal() - self.yearordinal
         dset[i] = i
         return dset, i, i + 1
 
     def htimeset(self, hour, minute, second):
-        tset = []
         rr = self.rrule
-        for minute_ in rr._byminute:
-            tset.extend(datetime.time(hour, minute_, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond)
-        tset.sort()
-        return tset
+        return tuple(
+            dt.time(hour, minute_, second_, tzinfo=rr._tzinfo)
+            for minute_, second_ in product(rr._byminute, rr._bysecond)
+        )
 
     def mtimeset(self, hour, minute, second):
         rr = self.rrule
-        tset = [datetime.time(hour, minute, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond]
-        tset.sort()
-        return tset
+        return tuple(dt.time(hour, minute, second_, tzinfo=rr._tzinfo) for second_ in rr._bysecond)
 
     def stimeset(self, hour, minute, second):
-        return (datetime.time(hour, minute, second, tzinfo=self.rrule._tzinfo),)
+        return (dt.time(hour, minute, second, tzinfo=self.rrule._tzinfo),)
 
 
 class RruleSet(RruleBase):
@@ -1283,10 +1257,10 @@ class RruleSet(RruleBase):
         def __gt__(self, other):
             return self.dt > other.dt
 
-        def __eq__(self, other):
+        def __eq__(self, other: Any):
             return self.dt == other.dt
 
-        def __ne__(self, other):
+        def __ne__(self, other: Any):
             return self.dt != other.dt
 
     def __init__(self, cache=False):
@@ -1376,7 +1350,7 @@ class _RRuleStr:
         than one line and should be joined before processing.
 
     :param forceset:
-        If set ``True`` forces a :class:`dateutil.rrule.rruleset` to
+        If set ``True`` forces a :class:`dateutilx.rrule.rruleset` to
         be returned.
 
     :param compatible:
@@ -1389,16 +1363,16 @@ class _RRuleStr:
     :param tzids:
         If given, a callable or mapping used to retrieve a
         :class:`datetime.tzinfo` from a string representation.
-        Defaults to :func:`dateutil.tz.gettz`.
+        Defaults to :func:`dateutilx.tz.gettz`.
 
     :param tzinfos:
         Additional time zone names / aliases which may be present in a string
-        representation.  See :func:`dateutil.parser.parse` for more
+        representation.  See :func:`dateutilx.parser.parse` for more
         information.
 
     :return:
-        Returns a :class:`dateutil.rrule.rruleset` or
-        :class:`dateutil.rrule.rrule`
+        Returns a :class:`dateutilx.rrule.rruleset` or
+        :class:`dateutilx.rrule.rrule`
     """
 
     @staticmethod
@@ -1429,7 +1403,7 @@ class _RRuleStr:
     def _handle_until(rrkwargs, name, value, **kwargs):
         global parser
         if not parser:
-            from dateutilx import parser
+            from src import parser
         try:
             rrkwargs["until"] = parser.parse(value, ignoretz=kwargs.get("ignoretz"), tzinfos=kwargs.get("tzinfos"))
         except ValueError as e:
@@ -1488,10 +1462,10 @@ class _RRuleStr:
                 raise ValueError(f"invalid '{name}': {value}") from e
         return rrule(dtstart=dtstart, cache=cache, **rrkwargs)
 
-    def _parse_date_value(self, date_value, parms, rule_tzids, ignoretz, tzids, tzinfos):
+    def _parse_date_value(self, date_value, parms, rule_tzids, *, ignoretz, tzids, tzinfos):
         global parser
         if not parser:
-            from dateutilx import parser
+            from src import parser
 
         datevals = []
         value_found = False
@@ -1541,6 +1515,7 @@ class _RRuleStr:
         self,
         s,
         dtstart=None,
+        *,
         cache=False,
         unfold=False,
         forceset=False,
@@ -1594,12 +1569,16 @@ class _RRuleStr:
             name = parms[0]
             parms = parms[1:]
             if name == "DTSTART":
-                dtvals = self._parse_date_value(value, parms, tzid_names, ignoretz, tzids, tzinfos)
+                dtvals = self._parse_date_value(
+                    value, parms, tzid_names, ignoretz=ignoretz, tzids=tzids, tzinfos=tzinfos
+                )
                 if len(dtvals) != 1:
                     raise ValueError(f"Multiple DTSTART values specified:{value}")
                 dtstart = dtvals[0]
             elif name == "EXDATE":
-                exdatevals.extend(self._parse_date_value(value, parms, tzid_names, ignoretz, tzids, tzinfos))
+                exdatevals.extend(
+                    self._parse_date_value(value, parms, tzid_names, ignoretz=ignoretz, tzids=tzids, tzinfos=tzinfos)
+                )
             elif name == "EXRULE":
                 for parm in parms:
                     raise ValueError(f"unsupported EXRULE parm: {parm}")
@@ -1618,7 +1597,7 @@ class _RRuleStr:
 
         if forceset or len(rrulevals) > 1 or rdatevals or exrulevals or exdatevals:
             if not parser and (rdatevals or exdatevals):
-                from dateutilx import parser
+                from src import parser
             rset = RruleSet(cache=cache)
             for value in rrulevals:
                 rset.rrule(self._parse_rfc_rrule(value, dtstart=dtstart, ignoretz=ignoretz, tzinfos=tzinfos))

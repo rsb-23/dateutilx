@@ -3,7 +3,7 @@ from types import ModuleType
 
 import pytest
 
-from dateutilx.helper import is_windows_os
+from src.helper import is_windows_os
 
 HOST_IS_WINDOWS = is_windows_os()
 
@@ -32,30 +32,30 @@ def clean_import():
 
 @pytest.mark.parametrize("module", ["easter", "parser", "relativedelta", "rrule", "tz", "utils"])
 def test_lazy_import(clean_import, module):
-    """Test that dateutil.[submodule] works for all py version"""
+    """Test that dateutilx.[submodule] works for all py version"""
 
     import importlib
 
-    import dateutilx
+    import src as dateutilx
 
     mod_obj = getattr(dateutilx, module, None)
     assert isinstance(mod_obj, ModuleType)
 
-    mod_imported = importlib.import_module(f"dateutilx.{module}")
+    mod_imported = importlib.import_module(f"src.{module}")
     assert mod_obj is mod_imported
 
 
 def test_import_version_str():
-    """Test that dateutil.__version__ can be imported"""
+    """Test that dateutilx.__version__ can be imported"""
 
 
 def test_import_version_root():
-    import dateutilx
+    import src as dateutilx
 
     assert hasattr(dateutilx, "__version__")
 
 
-# Test that dateutil.easter-related imports work properly
+# Test that dateutilx.easter-related imports work properly
 def test_import_easter_direct():
     pass
 
@@ -68,7 +68,7 @@ def test_import_easter_start():
     pass
 
 
-#  Test that dateutil.parser-related imports work properly
+#  Test that dateutilx.parser-related imports work properly
 def test_import_parser_direct():
     pass
 
@@ -80,13 +80,13 @@ def test_import_parser_from():
 def test_import_parser_all():
     # All interface
     # Other public classes
-    from dateutilx.parser import parse, parser, parserinfo
+    from src.parser import parse, parser, parserinfo
 
     for var in (parse, parserinfo, parser):
         assert var is not None
 
 
-# Test that dateutil.relativedelta-related imports work properly
+# Test that dateutilx.relativedelta-related imports work properly
 def test_import_relative_delta_direct():
     pass
 
@@ -96,18 +96,18 @@ def test_import_relative_delta_from():
 
 
 def test_import_relative_delta_all():
-    from dateutilx.relativedelta import FR, MO, SA, SU, TH, TU, WE, RelativeDelta
+    from src.relativedelta import FR, MO, SA, SU, TH, TU, WE, RelativeDelta
 
     for var in (RelativeDelta, MO, TU, WE, TH, FR, SA, SU):
         assert var is not None
 
     # In the public interface but not in all
-    from dateutilx.relativedelta import weekdays
+    from src.relativedelta import weekdays
 
     assert weekdays is not None
 
 
-# Test that dateutil.rrule related imports work properly
+# Test that dateutilx.rrule related imports work properly
 def test_import_rrule_direct():
     pass
 
@@ -118,8 +118,8 @@ def test_import_rrule_from():
 
 def test_import_rrule_all():
     # fmt: off
-    from dateutilx.helper import Frequency
-    from dateutilx.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
+    from src.helper import Frequency
+    from src.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
 
     rr_all = (rrule, rruleset, rrulestr, Frequency,
               MO, TU, WE, TH, FR, SA, SU)
@@ -129,12 +129,12 @@ def test_import_rrule_all():
         assert var is not None
 
     # In the public interface but not in all
-    from dateutilx.rrule import weekdays
+    from src.rrule import weekdays
 
     assert weekdays is not None
 
 
-# Test that dateutil.tz related imports work properly
+# Test that dateutilx.tz related imports work properly
 def test_import_tztest_direct():
     pass
 
@@ -146,7 +146,7 @@ def test_import_tz_from():
 def test_import_tz_all():
     # pylint: disable=w0641
     # fmt: off
-    from dateutilx.tz import (  # noqa: F401
+    from src.tz import (  # noqa: F401
         UTC,
         TzWin,
         TzWinLocal,
@@ -175,7 +175,7 @@ def test_import_tz_all():
         assert lvars[var] is not None
 
 
-# Test that dateutil.tzwin related imports work properly
+# Test that dateutilx.tzwin related imports work properly
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_direct():
     pass
@@ -188,7 +188,7 @@ def test_import_tz_windows_from():
 
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_star():
-    from dateutilx.tzwin import TzWin, TzWinLocal
+    from src.tzwin import TzWin, TzWinLocal
 
     tzwin_all = [TzWin, TzWinLocal]
 

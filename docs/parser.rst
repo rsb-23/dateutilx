@@ -2,20 +2,20 @@
 parser
 ======
 
-.. automodule:: dateutil.parser
+.. automodule:: dateutilx.parser
 
 Functions
 ---------
 
-.. automethod:: dateutil.parser.parse
+.. automethod:: dateutilx.parser.parse
 
-.. automethod:: dateutil.parser.isoparse
+.. automethod:: dateutilx.parser.isoparse
 
 
 Classes
 -------
 
-.. autoclass:: dateutil.parser.parserinfo
+.. autoclass:: dateutilx.parser.parserinfo
   :members:
   :undoc-members:
 
@@ -23,6 +23,6 @@ Classes
 Warnings and Exceptions
 -----------------------
 
-.. autoclass:: dateutil.parser.ParserError
+.. autoclass:: dateutilx.parser.ParserError
 
-.. autoclass:: dateutil.parser.UnknownTimezoneWarning
+.. autoclass:: dateutilx.parser.UnknownTimezoneWarning

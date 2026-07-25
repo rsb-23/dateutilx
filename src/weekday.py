@@ -1,4 +1,6 @@
-from dateutilx.helper import Day
+from typing import Any
+
+from src.helper import Day
 
 
 class NthWeekday:
@@ -14,15 +16,13 @@ class NthWeekday:
     def __call__(self, n: int):
         return self if n == self.n else NthWeekday(self.weekday, n)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         try:
-            if self.weekday != other.weekday or self.n != other.n:
-                return False
+            return (self.weekday, self.n) == (other.weekday, other.n)
         except AttributeError:
             return False
-        return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         name = self.weekday.name
         return f"{name}({self.n:+d})" if self.n else name
 

@@ -10,8 +10,8 @@ import warnings
 
 import pytest
 
-from dateutilx import tz
-from dateutilx.parser._parser import _ymd
+from src import tz
+from src.parser._parser import _ymd
 
 
 @pytest.mark.smoke
@@ -44,7 +44,7 @@ def test_ymd_could_be_day():
 ###
 # Test that private interfaces in _parser are deprecated properly
 def test_parser_private_warns():
-    from dateutilx.parser import _parsetz, _timelex, _tzparser
+    from src.parser import _parsetz, _timelex, _tzparser
 
     with pytest.warns(DeprecationWarning):
         _tzparser()
@@ -57,7 +57,7 @@ def test_parser_private_warns():
 
 
 def test_parser_parser_private_not_warns():
-    from dateutilx.parser._parser import _parsetz, _timelex, _tzparser
+    from src.parser._parser import _parsetz, _timelex, _tzparser
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")

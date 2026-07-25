@@ -1,15 +1,16 @@
+# pylint: disable=c0302
 import unittest
 from datetime import date, datetime
 
 import pytest
 
-from dateutilx import tz
-from dateutilx.helper import Frequency
-from dateutilx.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
+from src import tz
+from src.helper import Frequency
+from src.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
 
 from .freezegun import freeze_time
 
-MODULE = "dateutilx.rrule"
+MODULE = "src.rrule"
 YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 
 NYC = tz.gettz("America/New_York")
@@ -2228,14 +2229,14 @@ class RRuleTest(unittest.TestCase):
             if tzstr == "America/New_York":
                 raise TzInfoError("Invalid!")
 
-        with self.assertRaises(TzInfoError):
+        with pytest.raises(TzInfoError):
             rrulestr(rrstr, tzids=tzinfos)
 
     def test_str_with_conflicting_tzid(self):
         # RFC 5545 Section 3.3.5, FORM #2: DATE WITH UTC TIME
         # https://tools.ietf.org/html/rfc5545#section-3.3.5
         # The "TZID" property parameter MUST NOT be applied to DATE-TIME
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             rrulestr("DTSTART;TZID=America/New_York:19970902T090000Z\n" + "RRULE:FREQ=YEARLY;COUNT=3\n")
 
     def test_str_type(self):
@@ -2495,11 +2496,11 @@ class RRuleTest(unittest.TestCase):
             _ = rrulestr("DTSTART:19970101T000000,19970202T000000\nRRULE:FREQ=YEARLY;COUNT=1")
 
     def test_str_invalid_until(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             list(rrulestr("DTSTART:19970902T090000\nRRULE:FREQ=YEARLY;UNTIL=TheCowsComeHome;BYDAY=1TU,-1TH\n"))
 
     def test_str_until_must_be_utc(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             list(
                 rrulestr(
                     "DTSTART;TZID=America/New_York:19970902T090000\n"
@@ -2515,7 +2516,7 @@ class RRuleTest(unittest.TestCase):
         )
 
     def test_str_empty_by_day(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             list(
                 rrulestr(
                     "DTSTART:19970902T090000\n"
@@ -2526,7 +2527,7 @@ class RRuleTest(unittest.TestCase):
             )
 
     def test_str_invalid_by_day(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             list(
                 rrulestr(
                     "DTSTART:19970902T090000\n"

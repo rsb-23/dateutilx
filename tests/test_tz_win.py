@@ -1,17 +1,19 @@
 import contextlib
 import datetime as dt
-import unittest
 from datetime import datetime, timedelta
+from unittest import TestCase
 
-from dateutilx import tz
-from dateutilx.helper import is_windows_os
-from dateutilx.parser import parse
+import pytest
+
+from src import tz
+from src.helper import is_windows_os
+from src.parser import parse
 
 from ._common import COMPARES_EQUAL, TZWinContext
 
 IS_WIN = is_windows_os()
 try:
-    from dateutilx import tzwin
+    from src import tzwin
 except ImportError as e:
     if IS_WIN:
         raise e
@@ -186,8 +188,8 @@ class TzWinFoldMixin:
             self.assertEqual(dt0, dt1)
 
 
-@unittest.skipUnless(IS_WIN, "Requires Windows")
-class TzWinTest(unittest.TestCase, TzWinFoldMixin):
+@pytest.mark.skipif(not IS_WIN, reason="Requires Windows")
+class TzWinTest(TestCase, TzWinFoldMixin):
     def setUp(self):
         self.tzclass = tzwin.TzWin
 
@@ -202,7 +204,7 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
 
         self.assertEqual(tzr.name_from_string("Samoa Daylight Time"), "Samoa Daylight Time")
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             tzr.name_from_string("@tzres.dll,100")
 
     def test_isdst_zone_with_no_daylight_saving(self):
@@ -317,8 +319,8 @@ class TzWinTest(unittest.TestCase, TzWinFoldMixin):
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).tzname(), "South Africa Standard Time")
 
 
-@unittest.skipUnless(IS_WIN, "Requires Windows")
-class TzWinLocalTest(unittest.TestCase, TzWinFoldMixin):
+@pytest.mark.skipif(not IS_WIN, reason="Requires Windows")
+class TzWinLocalTest(TestCase, TzWinFoldMixin):
     def setUp(self):
         self.tzclass = tzwin.TzWinLocal
         self.context = TZWinContext

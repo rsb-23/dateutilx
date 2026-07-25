@@ -3,12 +3,15 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from dateutilx.helper import Day
-from dateutilx.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
+from src.helper import Day
+from src.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
 
 from ._common import NOT_A_VALUE
 
 relativedelta = RelativeDelta
+
+RD_1MON = relativedelta(months=1)
+FEB_28 = date(2021, 2, 28)
 
 
 class RelativeDeltaTest(unittest.TestCase):
@@ -103,7 +106,7 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertEqual(self.today + relativedelta(day=31, weekday=FR(-1)), date(2003, 9, 26))
 
     def test_last_day_of_february(self):
-        self.assertEqual(date(2021, 2, 1) + relativedelta(day=31), date(2021, 2, 28))
+        self.assertEqual(date(2021, 2, 1) + relativedelta(day=31), FEB_28)
 
     def test_last_day_of_february_leap_year(self):
         self.assertEqual(date(2020, 2, 1) + relativedelta(day=31), date(2020, 2, 29))
@@ -178,146 +181,140 @@ class RelativeDeltaTest(unittest.TestCase):
         self.assertEqual(d1, d2)
         self.assertNotEqual(d1, d3)
 
-    def test_inequality_type_mismatch(self):
-        # Different type
-        self.assertFalse(relativedelta(year=1) == 19)
 
-    def test_inequality_unsupported_type(self):
-        self.assertIs(relativedelta(hours=3) == NOT_A_VALUE, NOT_A_VALUE)
+def test_inequality_type_mismatch():
+    # Different type
+    assert relativedelta(year=1) != 19
 
-    def test_inequality_weekdays(self):
-        # Different weekdays
-        no_wday = relativedelta(year=1997, month=4)
-        wday_mo_1 = relativedelta(year=1997, month=4, weekday=MO(+1))
-        wday_mo_2 = relativedelta(year=1997, month=4, weekday=MO(+2))
-        wday_tu = relativedelta(year=1997, month=4, weekday=TU)
 
-        self.assertTrue(wday_mo_1 == wday_mo_1)  # pylint: disable=r0124
+def test_inequality_unsupported_type():
+    assert (relativedelta(hours=3) == NOT_A_VALUE) is NOT_A_VALUE
 
-        self.assertFalse(no_wday == wday_mo_1)
-        self.assertFalse(wday_mo_1 == no_wday)
 
-        self.assertFalse(wday_mo_1 == wday_mo_2)
-        self.assertFalse(wday_mo_2 == wday_mo_1)
+def test_inequality_weekdays():
+    # Different weekdays
+    no_wday = relativedelta(year=1997, month=4)
+    wday_mo_1 = relativedelta(year=1997, month=4, weekday=MO(+1))
+    wday_mo_2 = relativedelta(year=1997, month=4, weekday=MO(+2))
+    wday_tu = relativedelta(year=1997, month=4, weekday=TU)
 
-        self.assertFalse(wday_mo_1 == wday_tu)
-        self.assertFalse(wday_tu == wday_mo_1)
+    assert wday_mo_1 == wday_mo_1  # pylint: disable=r0124
 
-    def test_month_overflow(self):
-        self.assertEqual(relativedelta(months=273), relativedelta(years=22, months=9))
+    assert no_wday != wday_mo_1
+    assert wday_mo_1 != no_wday
 
-    def test_weeks(self):
-        # Test that the weeks property is working properly.
-        rd = relativedelta(years=4, months=2, weeks=8, days=6)
-        self.assertEqual((rd.weeks, rd.days), (8, 8 * 7 + 6))
+    assert wday_mo_1 != wday_mo_2
+    assert wday_mo_2 != wday_mo_1
 
-        rd.weeks = 3
-        self.assertEqual((rd.weeks, rd.days), (3, 3 * 7 + 6))
+    assert wday_mo_1 != wday_tu
+    assert wday_tu != wday_mo_1
 
-    def test_relative_delta_repr(self):
-        self.assertEqual(
-            repr(relativedelta(years=1, months=-1, days=15)), "RelativeDelta(years=+1, months=-1, days=+15)"
-        )
 
-        self.assertEqual(repr(relativedelta(months=14, seconds=-25)), "RelativeDelta(years=+1, months=+2, seconds=-25)")
+def test_month_overflow():
+    assert relativedelta(months=273) == relativedelta(years=22, months=9)
 
-        self.assertEqual(
-            repr(relativedelta(month=3, hour=3, weekday=SU(3))), "RelativeDelta(month=3, weekday=SU(+3), hour=3)"
-        )
 
-    def test_relative_delta_invalid_datetime_object(self):
-        with self.assertRaises(TypeError):
-            relativedelta(dt1="2018-01-01", dt2="2018-01-02")
+def test_weeks():
+    # Test that the weeks property is working properly.
+    rd = relativedelta(years=4, months=2, weeks=8, days=6)
+    assert (rd.weeks, rd.days) == (8, 8 * 7 + 6)
 
-        with self.assertRaises(TypeError):
-            relativedelta(dt1=datetime(2018, 1, 1), dt2="2018-01-02")
+    rd.weeks = 3
+    assert (rd.weeks, rd.days) == (3, 3 * 7 + 6)
 
-        with self.assertRaises(TypeError):
-            relativedelta(dt1="2018-01-01", dt2=datetime(2018, 1, 2))
 
-    def test_invalid_year_day(self):
-        with self.assertRaises(ValueError):
-            relativedelta(yearday=367)
+def test_relative_delta_repr():
+    assert repr(relativedelta(years=1, months=-1, days=15)) == "RelativeDelta(years=+1, months=-1, days=+15)"
+    assert repr(relativedelta(months=14, seconds=-25)) == "RelativeDelta(years=+1, months=+2, seconds=-25)"
+    assert repr(relativedelta(month=3, hour=3, weekday=SU(3))) == "RelativeDelta(month=3, weekday=SU(+3), hour=3)"
 
-    def test_add_timedelta_to_unpopulated_relativedelta(self):
-        td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
 
-        expected = relativedelta(weeks=1, days=1, hours=1, minutes=1, seconds=1, microseconds=1001)
+def test_relative_delta_invalid_datetime_object():
+    with pytest.raises(TypeError):
+        relativedelta(dt1="2018-01-01", dt2="2018-01-02")
 
-        self.assertEqual(expected, relativedelta() + td)
+    with pytest.raises(TypeError):
+        relativedelta(dt1=datetime(2018, 1, 1), dt2="2018-01-02")
 
-    def test_add_timedelta_to_populated_relative_delta(self):
-        td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
-        # fmt: off
-        rd = relativedelta(
-            year=1, month=1, day=1, hour=1, minute=1, second=1, microsecond=1,
-            years=1, months=1, days=1, weeks=1, hours=1, minutes=1, seconds=1, microseconds=1,
-        )
-        expected = relativedelta(
-            year=1, month=1, day=1, hour=1, minute=1, second=1, microsecond=1,
-            years=1, months=1, weeks=2, days=2, hours=2, minutes=2, seconds=2, microseconds=1002,
-        )
-        # fmt: on
+    with pytest.raises(TypeError):
+        relativedelta(dt1="2018-01-01", dt2=datetime(2018, 1, 2))
 
-        self.assertEqual(expected, rd + td)
 
-    def test_hashable(self):
-        try:
-            {relativedelta(minute=1): "test"}
-        except TypeError:
-            self.fail("RelativeDelta() failed to hash!")
+def test_invalid_year_day():
+    with pytest.raises(ValueError):
+        relativedelta(yearday=367)
 
-    def test_day_of_month_plus(self):
-        assert [
-            date(2021, 1, 28) + relativedelta(months=1),
-            date(2021, 2, 27) + relativedelta(months=1),
-            date(2021, 4, 29) + relativedelta(months=1),
-            date(2021, 5, 30) + relativedelta(months=1),
-        ] == [date(2021, 2, 28), date(2021, 3, 27), date(2021, 5, 29), date(2021, 6, 30)]
 
-    def test_last_day_of_month_plus(self):
-        assert [
-            date(2021, 1, 31) + relativedelta(months=1),
-            date(2021, 1, 30) + relativedelta(months=1),
-            date(2021, 1, 29) + relativedelta(months=1),
-            date(2021, 1, 28) + relativedelta(months=1),
-            date(2021, 2, 28) + relativedelta(months=1),
-            date(2021, 4, 30) + relativedelta(months=1),
-            date(2021, 5, 31) + relativedelta(months=1),
-        ] == [
-            date(2021, 2, 28),
-            date(2021, 2, 28),
-            date(2021, 2, 28),
-            date(2021, 2, 28),
-            date(2021, 3, 28),
-            date(2021, 5, 30),
-            date(2021, 6, 30),
-        ]
+def test_add_timedelta_to_unpopulated_relativedelta():
+    td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
 
-    def test_day_of_month_minus(self):
-        assert [
-            date(2021, 2, 27) - relativedelta(months=1),
-            date(2021, 3, 30) - relativedelta(months=1),
-            date(2021, 3, 29) - relativedelta(months=1),
-            date(2021, 3, 28) - relativedelta(months=1),
-            date(2021, 5, 30) - relativedelta(months=1),
-            date(2021, 6, 29) - relativedelta(months=1),
-        ] == [
-            date(2021, 1, 27),
-            date(2021, 2, 28),
-            date(2021, 2, 28),
-            date(2021, 2, 28),
-            date(2021, 4, 30),
-            date(2021, 5, 29),
-        ]
+    expected = relativedelta(weeks=1, days=1, hours=1, minutes=1, seconds=1, microseconds=1001)
 
-    def test_last_day_of_month_minus(self):
-        assert [
-            date(2021, 2, 28) - relativedelta(months=1),
-            date(2021, 3, 31) - relativedelta(months=1),
-            date(2021, 5, 31) - relativedelta(months=1),
-            date(2021, 6, 30) - relativedelta(months=1),
-        ] == [date(2021, 1, 28), date(2021, 2, 28), date(2021, 4, 30), date(2021, 5, 30)]
+    assert expected == relativedelta() + td
+
+
+def test_add_timedelta_to_populated_relative_delta():
+    td = timedelta(days=1, seconds=1, microseconds=1, milliseconds=1, minutes=1, hours=1, weeks=1)
+    # fmt: off
+    rd = relativedelta(
+        year=1, month=1, day=1, hour=1, minute=1, second=1, microsecond=1,
+        years=1, months=1, days=1, weeks=1, hours=1, minutes=1, seconds=1, microseconds=1,
+    )
+    expected = relativedelta(
+        year=1, month=1, day=1, hour=1, minute=1, second=1, microsecond=1,
+        years=1, months=1, weeks=2, days=2, hours=2, minutes=2, seconds=2, microseconds=1002,
+    )
+    # fmt: on
+
+    assert expected == rd + td
+
+
+def test_hashable():
+    try:
+        {relativedelta(minute=1): "test"}
+    except TypeError:
+        pytest.fail("RelativeDelta() failed to hash!")
+
+
+def test_day_of_month_plus():
+    assert [
+        date(2021, 1, 28) + RD_1MON,
+        date(2021, 2, 27) + RD_1MON,
+        date(2021, 4, 29) + RD_1MON,
+        date(2021, 5, 30) + RD_1MON,
+    ] == [FEB_28, date(2021, 3, 27), date(2021, 5, 29), date(2021, 6, 30)]
+
+
+def test_last_day_of_month_plus():
+    assert [
+        date(2021, 1, 31) + RD_1MON,
+        date(2021, 1, 30) + RD_1MON,
+        date(2021, 1, 29) + RD_1MON,
+        date(2021, 1, 28) + RD_1MON,
+        FEB_28 + RD_1MON,
+        date(2021, 4, 30) + RD_1MON,
+        date(2021, 5, 31) + RD_1MON,
+    ] == [FEB_28, FEB_28, FEB_28, FEB_28, date(2021, 3, 28), date(2021, 5, 30), date(2021, 6, 30)]
+
+
+def test_day_of_month_minus():
+    assert [
+        date(2021, 2, 27) - RD_1MON,
+        date(2021, 3, 30) - RD_1MON,
+        date(2021, 3, 29) - RD_1MON,
+        date(2021, 3, 28) - RD_1MON,
+        date(2021, 5, 30) - RD_1MON,
+        date(2021, 6, 29) - RD_1MON,
+    ] == [date(2021, 1, 27), FEB_28, FEB_28, FEB_28, date(2021, 4, 30), date(2021, 5, 29)]
+
+
+def test_last_day_of_month_minus():
+    assert [
+        FEB_28 - RD_1MON,
+        date(2021, 3, 31) - RD_1MON,
+        date(2021, 5, 31) - RD_1MON,
+        date(2021, 6, 30) - RD_1MON,
+    ] == [date(2021, 1, 28), FEB_28, date(2021, 4, 30), date(2021, 5, 30)]
 
 
 class RelativeDeltaOperationTest(unittest.TestCase):
@@ -338,7 +335,7 @@ class RelativeDeltaOperationTest(unittest.TestCase):
         self.assertEqual(relativedelta(days=1) + datetime(2000, 1, 1), datetime(2000, 1, 2))
 
     def test_addition_invalid_type(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             _ = relativedelta(days=3) + 9
 
     def test_addition_unsupported_type(self):
@@ -375,7 +372,7 @@ class RelativeDeltaOperationTest(unittest.TestCase):
         self.assertRaises(TypeError, lambda x, y: x - y, (relativedelta(days=1), datetime(2000, 1, 1)))
 
     def test_subtraction_invalid_type(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             _ = relativedelta(hours=12) - 14
 
     def test_subtraction_unsupported_type(self):
@@ -397,11 +394,11 @@ class RelativeDeltaOperationTest(unittest.TestCase):
 
 class RelativeDeltaFractionTest(unittest.TestCase):
     def test_relative_delta_fractional_year(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             relativedelta(years=1.5)
 
     def test_relative_delta_fractional_month(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             relativedelta(months=1.5)
 
     def test_relative_delta_fractional_absolutes(self):

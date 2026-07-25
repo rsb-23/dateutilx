@@ -2,7 +2,7 @@
 rrule
 =====
 
-.. automodule:: dateutil.rrule
+.. automodule:: dateutilx.rrule
    :undoc-members:
 
 Classes
@@ -31,8 +31,8 @@ Prepare the environment.
 
 .. testsetup:: rrule
 
-    from dateutil.rrule import *
-    from dateutil.parser import *
+    from dateutilx.rrule import *
+    from dateutilx.parser import *
     from datetime import *
     import pprint
     import sys
@@ -40,8 +40,8 @@ Prepare the environment.
 
 .. doctest:: rrule
 
-    >>> from dateutil.rrule import *
-    >>> from dateutil.parser import *
+    >>> from dateutilx.rrule import *
+    >>> from dateutilx.parser import *
     >>> from datetime import *
 
     >>> import pprint
@@ -571,10 +571,10 @@ Daily, for 7 days, jumping Saturday and Sunday occurrences.
 
     import datetime
 
-    from dateutil.parser import parse
-    from dateutil.rrule import rrule, rruleset
-    from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY
-    from dateutil.rrule import MO, TU, WE, TH, FR, SA, SU
+    from dateutilx.parser import parse
+    from dateutilx.rrule import rrule, rruleset
+    from dateutilx.rrule import YEARLY, MONTHLY, WEEKLY, DAILY
+    from dateutilx.rrule import MO, TU, WE, TH, FR, SA, SU
 
     import pprint
     import sys
@@ -620,8 +620,8 @@ Every 10 days, 5 occurrences.
 
 .. testsetup:: rrulestr
 
-    from dateutil.parser import parse
-    from dateutil.rrule import rruleset, rrulestr
+    from dateutilx.parser import parse
+    from dateutilx.rrule import rruleset, rrulestr
 
     import pprint
     import sys
@@ -662,16 +662,16 @@ Notice that when using a single rule, it returns an
    :options: +ELLIPSIS
 
     >>> rrulestr("FREQ=DAILY;INTERVAL=10;COUNT=5")
-    <dateutil.rrule.rrule object at 0x...>
+    <dateutilx.rrule.rrule object at 0x...>
 
     >>> rrulestr("""
     ... DTSTART:19970902T090000
     ... RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5
     ... """)
-    <dateutil.rrule.rrule object at 0x...>
+    <dateutilx.rrule.rrule object at 0x...>
 
     >>> rrulestr("FREQ=DAILY;INTERVAL=10;COUNT=5", forceset=True)
-    <dateutil.rrule.rruleset object at 0x...>
+    <dateutilx.rrule.rruleset object at 0x...>
 
 
 But when an `rruleset` is needed, it is automatically used.
@@ -684,4 +684,4 @@ But when an `rruleset` is needed, it is automatically used.
     ... RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5
     ... RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
     ... """)
-    <dateutil.rrule.rruleset object at 0x...>
+    <dateutilx.rrule.rruleset object at 0x...>

@@ -28,7 +28,7 @@ def set_tzpath():
 
     print(f"Setting TZPATH to {path_components}")
 
-    from dateutilx import tz
+    from src import tz
 
     tz.TZPATHS.clear()
     tz.TZPATHS.extend(path_components)

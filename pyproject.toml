@@ -18,7 +18,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -27,7 +26,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["tzdata; sys_platform == 'win32'"]
 
 [dependency-groups]
@@ -37,21 +36,22 @@ test = ["hypothesis", "pytest", "pytest-cov"]
 
 [project.urls]
 Homepage = "https://github.com/rsb-23/dateutilx"
-Documentation = "https://dateutil.readthedocs.io/en/stable/"
+Documentation = "https://dateutilx.readthedocs.io/en/stable/"
 Source = "https://github.com/rsb-23/dateutilx"
 
 # Build Config
 [tool.hatch.version]
 source = "vcs"
 [tool.hatch.build.targets.sdist]
-include = ["src/dateutilx", "src/dateutil", "LICENSE", "README.md", "pyproject.toml"]
+include = ["src", "LICENSE", "README.md", "pyproject.toml"]
 [tool.hatch.build.targets.wheel]
-packages = ["src/dateutilx", "src/dateutil"]
+packages = ["src"]
 
+[tool.coverage.run]
+source = ["src"]
 [tool.coverage.report]
 fail_under = 85.0
-[tool.coverage.run]
-source = ["src/"]
+skip_covered = true
 
 [tool.pytest.ini_options]
 python_files = ["test_*.py", "*_test.py", "*_solution.py", ]

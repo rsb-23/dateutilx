@@ -34,12 +34,13 @@ import string
 import time
 import warnings
 from calendar import monthrange
+from collections import deque
 from decimal import Decimal
 from io import StringIO
 from warnings import warn
 
-from dateutilx import relativedelta, tz
-from dateutilx.errors import ParserError, UnknownTimezoneWarning
+from src import relativedelta, tz
+from src.errors import ParserError, UnknownTimezoneWarning
 
 from .utils import standard_dt_parser
 
@@ -65,7 +66,7 @@ class _TimeLex:
 
         self.instream = instream
         self.charstack = []
-        self.tokenstack = []
+        self.tokenstack = deque()
         self.eof = False
 
     def get_token(self):
@@ -83,7 +84,7 @@ class _TimeLex:
         demands that multiple tokens be parsed at once.
         """
         if self.tokenstack:
-            return self.tokenstack.pop(0)
+            return self.tokenstack.popleft()
 
         seenletters = False
         token = None
@@ -309,10 +310,7 @@ class ParserInfo:
         return self._hms.get(name.lower())
 
     def ampm(self, name):
-        try:
-            return self._ampm[name.lower()]
-        except KeyError:
-            return None
+        return self._ampm.get(name.lower())
 
     def pertain(self, name):
         return name.lower() in self._pertain
@@ -564,8 +562,8 @@ class Parser:
             .. doctest::
                :options: +NORMALIZE_WHITESPACE
 
-                >>> from dateutilx.parser import parse
-                >>> from dateutilx.tz import gettz
+                >>> from src.parser import parse
+                >>> from src.tz import gettz
                 >>> tzinfos = {"BRST": -7200, "CST": gettz("America/Chicago")}
                 >>> parse("2012-01-19 17:21:00 BRST", tzinfos=tzinfos)
                 datetime.datetime(2012, 1, 19, 17, 21, tzinfo=tzoffset(u'BRST', -7200))
@@ -634,7 +632,7 @@ class Parser:
         ]
         # fmt: on
 
-    def _parse(self, timestr, dayfirst=None, yearfirst=None, fuzzy=False, fuzzy_with_tokens=False):
+    def _parse(self, timestr, dayfirst=None, yearfirst=None, fuzzy: bool = False, fuzzy_with_tokens: bool = False):
         """
         Private method which performs the heavy lifting of parsing, called from
         ``parse()``, which passes on its ``kwargs`` to this function.
@@ -669,7 +667,7 @@ class Parser:
 
             .. doctest::
 
-                >>> from dateutilx.parser import parse
+                >>> from src.parser import parse
                 >>> parse("Today is January 1, 2047 at 8:21:00AM", fuzzy_with_tokens=True)
                 (datetime.datetime(2047, 1, 1, 8, 21), (u'Today is ', u' ', u'at '))
 
@@ -678,12 +676,8 @@ class Parser:
             fuzzy = True
 
         info = self.info
-
-        if dayfirst is None:
-            dayfirst = info.dayfirst
-
-        if yearfirst is None:
-            yearfirst = info.yearfirst
+        dayfirst = dayfirst or info.dayfirst
+        yearfirst = yearfirst or info.yearfirst
 
         res = self._Result()
         _tokens = _TimeLex.split(timestr)  # Splits the timestr into tokens
@@ -706,7 +700,7 @@ class Parser:
 
                 if value is not None:
                     # Numeric token
-                    i = self._parse_numeric_token(_tokens, i, info, ymd, res, fuzzy)
+                    i = self._parse_numeric_token(_tokens, i, info=info, ymd=ymd, res=res, fuzzy=fuzzy)
 
                 # Check weekday
                 elif info.weekday(_tokens[i]) is not None:
@@ -800,13 +794,14 @@ class Parser:
                     res.tzoffset = signal * (hour_offset * 3600 + min_offset * 60)
 
                     # Look for a timezone name between parenthesis
-                    if (
-                        i + 5 < len_l
-                        and info.jump(_tokens[i + 2])
-                        and _tokens[i + 3] == "("
-                        and _tokens[i + 5] == ")"
-                        and len(_tokens[i + 4]) >= 3
-                        and self._could_be_tzname(res.hour, res.tzname, None, _tokens[i + 4])
+                    if i + 5 < len_l and all(
+                        (
+                            info.jump(_tokens[i + 2]),
+                            _tokens[i + 3] == "(",
+                            _tokens[i + 5] == ")",
+                            len(_tokens[i + 4]) >= 3,
+                            self._could_be_tzname(res.hour, res.tzname, None, _tokens[i + 4]),
+                        )
                     ):
                         # -0300 (BRST)
                         res.tzname = _tokens[i + 4]
@@ -842,7 +837,7 @@ class Parser:
 
         return res, None
 
-    def _parse_numeric_token(self, tokens, idx, info, ymd, res, fuzzy):
+    def _parse_numeric_token(self, tokens, idx, *, info, ymd, res, fuzzy):
         # Token is a number
         value_repr = tokens[idx]
         try:
@@ -854,11 +849,13 @@ class Parser:
 
         len_l = len(tokens)
 
-        if (
-            len(ymd) == 3
-            and len_li in (2, 4)
-            and res.hour is None
-            and (idx + 1 >= len_l or (tokens[idx + 1] != ":" and info.hms(tokens[idx + 1]) is None))
+        if all(
+            (
+                len(ymd) == 3,
+                len_li in (2, 4),
+                res.hour is None,
+                (idx + 1 >= len_l or (tokens[idx + 1] != ":" and info.hms(tokens[idx + 1]) is None)),
+            )
         ):
             # 19990101T23[59]
             s = tokens[idx]
@@ -1271,8 +1268,8 @@ def parse(timestr, parser_info=None, **kwargs):
         .. doctest::
            :options: +NORMALIZE_WHITESPACE
 
-            >>> from dateutilx.parser import parse
-            >>> from dateutilx.tz import gettz
+            >>> from src.parser import parse
+            >>> from src.tz import gettz
             >>> tzinfos = {"BRST": -7200, "CST": gettz("America/Chicago")}
             >>> parse("2012-01-19 17:21:00 BRST", tzinfos=tzinfos)
             datetime.datetime(2012, 1, 19, 17, 21, tzinfo=tzoffset(u'BRST', -7200))
@@ -1308,7 +1305,7 @@ def parse(timestr, parser_info=None, **kwargs):
 
         .. doctest::
 
-            >>> from dateutilx.parser import parse
+            >>> from src.parser import parse
             >>> parse("Today is January 1, 2047 at 8:21:00AM", fuzzy_with_tokens=True)
             (datetime.datetime(2047, 1, 1, 8, 21), (u'Today is ', u' ', u'at '))
 
@@ -1349,8 +1346,9 @@ class _TzParser:
             self.end = self._Attr()
 
     def parse(self, tzstr):
+        tzstr_pattern = re.compile(r"([,:.]|[a-zA-Z]+|[0-9]+)")
         res = self._Result()
-        _tmp_list = [x for x in re.split(r"([,:.]|[a-zA-Z]+|[0-9]+)", tzstr) if x]
+        _tmp_list = [x for x in re.split(tzstr_pattern, tzstr) if x]
         used_idxs = []
         try:
             i, len_l = 0, len(_tmp_list)
@@ -1360,43 +1358,43 @@ class _TzParser:
                 j = i
                 while j < len_l and not [x for x in _tmp_list[j] if x in "0123456789:,-+"]:
                     j += 1
-                if j != i:
-                    if not res.stdabbr:
-                        offattr = "stdoffset"
-                        res.stdabbr = "".join(_tmp_list[i:j])
-                    else:
-                        offattr = "dstoffset"
-                        res.dstabbr = "".join(_tmp_list[i:j])
+                if j == i:
+                    break
 
-                    used_idxs.extend([*range(j)])
-                    i = j
-                    if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in "0123456789"):
-                        if _tmp_list[i] in ("+", "-"):
-                            # Yes, that's right. See the TZ variable documentation.
-                            signal = (1, -1)[_tmp_list[i] == "+"]
-                            used_idxs.append(i)
-                            i += 1
-                        else:
-                            signal = -1
-                        len_li = len(_tmp_list[i])
-                        if len_li == 4:
-                            # -0300
-                            setattr(res, offattr, (int(_tmp_list[i][:2]) * 3600 + int(_tmp_list[i][2:]) * 60) * signal)
-                        elif i + 1 < len_l and _tmp_list[i + 1] == ":":
-                            # -03:00
-                            setattr(res, offattr, (int(_tmp_list[i]) * 3600 + int(_tmp_list[i + 2]) * 60) * signal)
-                            used_idxs.append(i)
-                            i += 2
-                        elif len_li <= 2:
-                            # -[0]3
-                            setattr(res, offattr, int(_tmp_list[i][:2]) * 3600 * signal)
-                        else:
-                            return None
+                if not res.stdabbr:
+                    offattr = "stdoffset"
+                    res.stdabbr = "".join(_tmp_list[i:j])
+                else:
+                    offattr = "dstoffset"
+                    res.dstabbr = "".join(_tmp_list[i:j])
+
+                used_idxs.extend([*range(j)])
+                i = j
+                if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in "0123456789"):
+                    if _tmp_list[i] in ("+", "-"):
+                        # Yes, that's right. See the TZ variable documentation.
+                        signal = (1, -1)[_tmp_list[i] == "+"]
                         used_idxs.append(i)
                         i += 1
-                    if res.dstabbr:
-                        break
-                else:
+                    else:
+                        signal = -1
+                    len_li = len(_tmp_list[i])
+                    if len_li == 4:
+                        # -0300
+                        setattr(res, offattr, (int(_tmp_list[i][:2]) * 3600 + int(_tmp_list[i][2:]) * 60) * signal)
+                    elif i + 1 < len_l and _tmp_list[i + 1] == ":":
+                        # -03:00
+                        setattr(res, offattr, (int(_tmp_list[i]) * 3600 + int(_tmp_list[i + 2]) * 60) * signal)
+                        used_idxs.append(i)
+                        i += 2
+                    elif len_li <= 2:
+                        # -[0]3
+                        setattr(res, offattr, int(_tmp_list[i][:2]) * 3600 * signal)
+                    else:
+                        return None
+                    used_idxs.append(i)
+                    i += 1
+                if res.dstabbr:
                     break
 
             if i < len_l:

@@ -1,6 +1,4 @@
 name: Code Lint
-permissions:
-  contents: read
 
 on:
   pull_request:
@@ -25,3 +23,9 @@ jobs:
         env:
           SKIP: mypy, pylint, no-commit-to-branch, pyupgrade
         run: pre-commit run --all-files
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: { }
