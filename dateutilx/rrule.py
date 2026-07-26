@@ -301,7 +301,7 @@ class Rrule(RruleBase):
 
         .. note::
             As of version 2.5.0, the use of the keyword ``until`` in conjunction
-            with ``count`` is deprecated, to make sure ``dateutil`` is fully
+            with ``count`` is deprecated, to make sure ``dateutilx`` is fully
             compliant with `RFC-5545 Sec. 3.3.10 <https://tools.ietf.org/
             html/rfc5545#section-3.3.10>`_. Therefore, ``until`` and ``count``
             **must not** occur in the same call to ``rrule``.
@@ -313,7 +313,7 @@ class Rrule(RruleBase):
 
         .. note::
             As of version 2.5.0, the use of the keyword ``until`` in conjunction
-            with ``count`` is deprecated, to make sure ``dateutil`` is fully
+            with ``count`` is deprecated, to make sure ``dateutilx`` is fully
             compliant with `RFC-5545 Sec. 3.3.10 <https://tools.ietf.org/
             html/rfc5545#section-3.3.10>`_. Therefore, ``until`` and ``count``
             **must not** occur in the same call to ``rrule``.
@@ -622,7 +622,7 @@ class Rrule(RruleBase):
         """
         Output a string that would generate this RRULE if passed to rrulestr.
         This is mostly compatible with RFC5545, except for the
-        dateutil-specific extension BYEASTER.
+        dateutilx-specific extension BYEASTER.
         """
         # pylint: disable=w0612
         output = []

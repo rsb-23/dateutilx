@@ -1,5 +1,5 @@
 """
-It contains testcases for bugs raised in this or dateutil repo.
+It contains testcases for bugs raised in current or base repo.
 It can be later moved to respective category tests.
 ups#1: upstream, GH#1: current repo
 """

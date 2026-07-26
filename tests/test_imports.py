@@ -11,7 +11,7 @@ HOST_IS_WINDOWS = is_windows_os()
 @pytest.fixture(scope="function")
 def clean_import():
     """Create a somewhat clean import base for lazy import tests"""
-    du_modules = {mod_name: mod for mod_name, mod in sys.modules.items() if mod_name.startswith("dateutil")}
+    du_modules = {mod_name: mod for mod_name, mod in sys.modules.items() if mod_name.startswith("dateutilx")}
 
     other_modules = {mod_name for mod_name in sys.modules if mod_name not in du_modules}
 

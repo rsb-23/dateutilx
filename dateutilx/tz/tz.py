@@ -1404,7 +1404,7 @@ def __get_gettz():
             as local time.
 
         :return:
-            Returns an instance of one of ``dateutil``'s :py:class:`tzinfo`
+            Returns an instance of one of ``dateutilx``'s :py:class:`tzinfo`
             subclasses.
 
         .. versionchanged:: 2.7.0

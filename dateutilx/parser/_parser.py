@@ -1447,7 +1447,7 @@ class _TzParser:
                 # This was a made-up format that is not in normal use
                 warn(
                     f'Parsed time zone "{tzstr}"'
-                    + "is in a non-standard dateutil-specific format, which "
+                    + "is in a non-standard dateutilx-specific format, which "
                     + "is now deprecated; support for parsing this format "
                     + "will be removed in future versions. It is recommended "
                     + "that you switch to a standard format like the GNU "

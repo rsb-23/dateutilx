@@ -26,7 +26,7 @@ def _validate_fromutc_inputs(f):
 
 class _TzInfo(tzinfo):
     """
-    Base class for all ``dateutil`` ``tzinfo`` objects.
+    Base class for all ``dateutilx`` ``tzinfo`` objects.
     """
 
     def is_ambiguous(self, dt):

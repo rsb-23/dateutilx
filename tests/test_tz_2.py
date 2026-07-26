@@ -338,7 +338,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
     ],
 )
 def test_valid_dateutil_format(tz_str, expected):
-    # This tests the dateutil-specific format that is used widely in the tests
+    # This tests the dateutilx-specific format that is used widely in the tests
     # and examples. It is unclear where this format originated from.
     with pytest.warns(tz.DeprecatedTzFormatWarning):
         tzi = tz.TzStr.instance(tz_str)

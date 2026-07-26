@@ -2,7 +2,7 @@ class ParserError(ValueError):
     """Exception subclass used for any failure to parse a datetime string.
 
     This is a subclass of :py:exc:`ValueError`, and should be raised any time
-    earlier versions of ``dateutil`` would have raised ``ValueError``.
+    earlier versions of ``dateutilx`` would have raised ``ValueError``.
 
     .. versionadded:: 2.8.1
     """
