@@ -3,18 +3,13 @@ import datetime as dt
 import operator
 from math import copysign
 from types import NotImplementedType
-from typing import Self, TypeAlias
+from typing import Self
 from warnings import warn
 
 from src.weekday import Weekday, weekdays
 
-MO, TU, WE, TH, FR, SA, SU = weekdays
-
-__all__ = ["RelativeDelta", "MO", "TU", "WE", "TH", "FR", "SA", "SU"]
-Number: TypeAlias = float | int
-
-REL_FIELDS = "years", "months", "days", "hours", "minutes", "seconds", "microseconds"
-ABS_FIELDS = "year", "month", "day", "hour", "minute", "second", "microsecond"
+__all__ = ["RelativeDelta"]
+Number = float | int
 
 
 class RelativeDelta:
@@ -177,7 +172,7 @@ class RelativeDelta:
 
         # Remove the year/month delta so the timedelta is just well-defined
         # time units (seconds, days and microseconds)
-        dtm = self + dt2
+        dtm = self.__radd__(dt2)
 
         # If we've overshot our target, make an adjustment
         if dt1 < dt2:
@@ -190,7 +185,7 @@ class RelativeDelta:
         while compare(dt1, dtm):
             months += increment
             self._set_months(months)
-            dtm = self + dt2
+            dtm = self.__radd__(dt2)
 
         # Get the timedelta between the "months-adjusted" date and dt1
         delta = dt1 - dtm
@@ -227,15 +222,37 @@ class RelativeDelta:
             resolved = dt.date(2001, 1, 1) + dt.timedelta(days=yday - 1)
             self.day, self.month = resolved.day, resolved.month
 
+    def _absolutes(self) -> dict[str, Number]:
+        return {
+            "year": self.year,
+            "month": self.month,
+            "day": self.day,
+            "hour": self.hour,
+            "minute": self.minute,
+            "second": self.second,
+            "microsecond": self.microsecond,
+        }
+
+    def _relatives(self) -> dict[str, Number]:
+        return {
+            "years": self.years,
+            "months": self.months,
+            "days": self.days,
+            "hours": self.hours,
+            "minutes": self.minutes,
+            "seconds": self.seconds,
+            "microseconds": self.microseconds,
+        }
+
     def _reset(self):
         self.leapdays = 0
         self.weekday = None
         self._has_time = 0
 
-        for attr in REL_FIELDS:
+        for attr in ("years", "months", "days", "hours", "minutes", "seconds", "microseconds"):
             setattr(self, attr, 0)
 
-        for attr in ABS_FIELDS:
+        for attr in ("year", "month", "day", "hour", "minute", "second", "microsecond"):
             setattr(self, attr, None)
 
     def _fix(self):
@@ -295,8 +312,8 @@ class RelativeDelta:
 
     def _make_relativedelta(self, **kwargs) -> Self:
         """Factory method to create a new RelativeDelta with given overrides."""
-        rel_fields = {field: kwargs.get(field, getattr(self, field)) for field in REL_FIELDS}
-        abs_fields = {field: kwargs.get(field, getattr(self, field)) for field in ABS_FIELDS}
+        rel_fields = {field: kwargs.get(field, val) for field, val in self._relatives().items()}
+        abs_fields = {field: kwargs.get(field, val) for field, val in self._absolutes().items()}
         return self.__class__(
             **rel_fields,
             **abs_fields,
@@ -337,8 +354,8 @@ class RelativeDelta:
     def __add__(self, other):
         if isinstance(other, RelativeDelta):
             kwargs = {
-                field: getattr(self, field) if getattr(other, field) is None else getattr(other, field)
-                for field in ABS_FIELDS
+                field: val if getattr(other, field) is None else getattr(other, field)
+                for field, val in self._absolutes().items()
             }
             return self._make_relativedelta(
                 years=other.years + self.years,
@@ -407,10 +424,7 @@ class RelativeDelta:
         if not isinstance(other, RelativeDelta):
             return NotImplemented  # In case the other object defines __rsub__
 
-        kwargs = {
-            field: getattr(other, field) if getattr(self, field) is None else getattr(self, field)
-            for field in ABS_FIELDS
-        }
+        kwargs = {field: getattr(other, field) if val is None else val for field, val in self._absolutes().items()}
         return self._make_relativedelta(
             years=self.years - other.years,
             months=self.months - other.months,
@@ -424,25 +438,28 @@ class RelativeDelta:
         )
 
     def __abs__(self):
-        fields = {field: abs(getattr(self, field)) for field in REL_FIELDS}
+        fields = {field: abs(val) for field, val in self._relatives().items()}
         return self._make_relativedelta(**fields)
 
     def __neg__(self):
-        fields = {field: -getattr(self, field) for field in REL_FIELDS}
+        fields = {field: -val for field, val in self._relatives().items()}
         return self._make_relativedelta(**fields)
 
-    def __bool__(self):
-        s_fields = (getattr(self, field) for field in REL_FIELDS)
-        attribs = (getattr(self, field) for field in ABS_FIELDS)
-        return any((*s_fields, self.leapdays, self.weekday, *(x is not None for x in attribs)))
+    def __bool__(self) -> bool:
+        return (
+            any(value for value in self._relatives().values())
+            or bool(self.leapdays)
+            or bool(self.weekday)
+            or any(value is not None for value in self._absolutes().values())
+        )
 
-    def __mul__(self, other) -> NotImplementedType | Self:
+    def __mul__(self, other) -> Self | NotImplementedType:
         try:
             f = float(other)
         except TypeError:
             return NotImplemented
 
-        fields = {field: int(getattr(self, field) * f) for field in REL_FIELDS}
+        fields = {field: int(val * f) for field, val in self._relatives().items()}
         return self._make_relativedelta(**fields)
 
     __rmul__ = __mul__
@@ -463,8 +480,10 @@ class RelativeDelta:
                 return False
 
         return (
-            all((getattr(self, field) == getattr(other, field) for field in REL_FIELDS + ABS_FIELDS))
+            all((a == b for a, b in zip(self._relatives().values(), other._relatives().values())))
+            and all((a == b for a, b in zip(self._absolutes().values(), other._absolutes().values())))
             and self.leapdays == other.leapdays
+            and self.weekday == other.weekday
         )
 
     def __hash__(self):

@@ -14,7 +14,8 @@ import pytest
 from src import tz
 from src.helper import is_windows_os
 from src.parser import parse
-from src.relativedelta import SU, RelativeDelta
+from src.relativedelta import RelativeDelta
+from src.weekday import SU
 
 from ._common import COMPARES_EQUAL, PicklableMixin, TZEnvContext
 from ._data import (

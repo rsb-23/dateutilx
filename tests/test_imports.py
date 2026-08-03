@@ -96,10 +96,9 @@ def test_import_relative_delta_from():
 
 
 def test_import_relative_delta_all():
-    from src.relativedelta import FR, MO, SA, SU, TH, TU, WE, RelativeDelta
+    from src.relativedelta import RelativeDelta
 
-    for var in (RelativeDelta, MO, TU, WE, TH, FR, SA, SU):
-        assert var is not None
+    assert RelativeDelta is not None
 
     # In the public interface but not in all
     from src.relativedelta import weekdays

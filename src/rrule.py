@@ -1001,7 +1001,7 @@ class Rrule(RruleBase):
 
         return cset
 
-    def __mod_distance(self, value, byxxx, base):
+    def __mod_distance(self, value, byxxx, base) -> tuple[int, int]:
         """
         Calculates the next value in a sequence where the `FREQ` parameter is
         specified along with a `BYXXX` parameter at the same "level"
@@ -1032,7 +1032,7 @@ class Rrule(RruleBase):
             accumulator += div
             if value in byxxx:
                 return accumulator, value
-        return None
+        raise ValueError("No valid values found")
 
 
 # pylint: disable=E0203

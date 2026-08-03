@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.helper import is_windows_os
+from src.weekday import SU
 
 from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
@@ -888,7 +889,8 @@ class TzRange(TzRangeBase):
 
     def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, *, start=None, end=None):
         # global relativedelta
-        from src.relativedelta import SU, RelativeDelta
+        from src.relativedelta import RelativeDelta
+        from src.weekday import SU
 
         self._std_abbr = stdabbr
         self._dst_abbr = dstabbr
@@ -1058,11 +1060,11 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
             if not isend:
                 kwargs["month"] = 4
                 kwargs["day"] = 1
-                kwargs["weekday"] = relativedelta.SU(+1)
+                kwargs["weekday"] = SU(+1)
             else:
                 kwargs["month"] = 10
                 kwargs["day"] = 31
-                kwargs["weekday"] = relativedelta.SU(-1)
+                kwargs["weekday"] = SU(-1)
 
         kwargs["seconds"] = x.time if x.time is not None else 7200  # Default is 2AM.
 

@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 import pytest
 
 from src import tz
-from src.relativedelta import SU, TH, RelativeDelta
+from src.relativedelta import RelativeDelta
+from src.weekday import SU, TH
 
 from ._common import COMPARES_EQUAL
 from .test_tz import TzFoldMixin

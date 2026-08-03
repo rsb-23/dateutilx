@@ -37,6 +37,3 @@ class Weekday(NthWeekday):
 
 
 MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(Weekday(x) for x in range(7))
-
-# Alias
-weekday = Weekday
