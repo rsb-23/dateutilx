@@ -1,6 +1,4 @@
 name: Unit Tests
-permissions:
-  contents: read
 
 on:
   pull_request:
@@ -41,3 +39,9 @@ jobs:
       - uses: *test-runner
         with:
           python-version: ${{ matrix.python-version }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: { }
