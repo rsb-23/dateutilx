@@ -7,12 +7,12 @@ from relative deltas), local machine timezone, fixed offset timezone, and UTC
 timezone.
 """
 
-import _thread
 import bisect
 import contextlib
 import datetime
 import os
 import struct
+import threading
 import time
 import weakref
 from collections import OrderedDict
@@ -1096,7 +1096,7 @@ class _TzIcalVtz(_TzInfo):
         self._tzid = tzid
         self._comps = comps or []
         self._cache = OrderedDict()
-        self._cache_lock = _thread.allocate_lock()
+        self._cache_lock = threading.Lock()
 
     def _find_comp(self, dt):
         if len(self._comps) == 1:
@@ -1438,7 +1438,7 @@ def __get_gettz():
             self.__instances = weakref.WeakValueDictionary()
             self.__strong_cache_size = 8
             self.__strong_cache = OrderedDict()
-            self._cache_lock = _thread.allocate_lock()
+            self._cache_lock = threading.Lock()
 
         def __call__(self, name=None):
             with self._cache_lock:

@@ -6,7 +6,6 @@ the recurrence rules documented in the
 including support for caching of results.
 """
 
-import _thread
 import calendar
 import contextlib
 import datetime as dt
@@ -15,6 +14,7 @@ import itertools
 import operator
 import re
 import sys
+import threading
 from functools import wraps
 from itertools import product
 from math import gcd
@@ -79,7 +79,7 @@ class RruleBase:
     def __init__(self, cache=False):
         if cache:
             self._cache = []
-            self._cache_lock = _thread.allocate_lock()
+            self._cache_lock = threading.Lock()
             self._invalidate_cache()
         else:
             self._cache = None

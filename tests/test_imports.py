@@ -147,8 +147,6 @@ def test_import_tz_all():
     # fmt: off
     from dateutilx.tz import (  # noqa: F401
         UTC,
-        TzWin,
-        TzWinLocal,
         datetime_ambiguous,
         datetime_exists,
         gettz,
@@ -161,6 +159,7 @@ def test_import_tz_all():
         tzstr,
         tzutc,
     )
+    from dateutilx.tz.win import TzWin, TzWinLocal  # noqa
 
     tz_all = ["tzutc", "tzoffset", "tzlocal", "tzfile", "tzrange",
               "tzstr", "tzical", "gettz", "datetime_ambiguous",
@@ -187,7 +186,7 @@ def test_import_tz_windows_from():
 
 @pytest.mark.skipif(not HOST_IS_WINDOWS, reason="Requires Windows")
 def test_import_tz_windows_star():
-    from dateutilx.tzwin import TzWin, TzWinLocal
+    from dateutilx.tz.win import TzWin, TzWinLocal
 
     tzwin_all = [TzWin, TzWinLocal]
 

@@ -12,13 +12,12 @@ from .tz import (
     gettz,
     resolve_imaginary,
 )
-from .win import TzWin, TzWinLocal, tzwin, tzwinlocal
 
 # fmt: off
 __all__ = ["TzFile", "TzIcal", "TzLocal", "TzOffset", "TzRange", "TzStr", "TzUTC",
            "tzutc", "gettz", "datetime_ambiguous", "datetime_exists",
            "resolve_imaginary", "UTC", "DeprecatedTzFormatWarning",
-           "TzWin", "TzWinLocal"]
+          ]
 # fmt: on
 
 

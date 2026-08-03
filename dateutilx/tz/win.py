@@ -9,7 +9,4 @@ if is_windows_os():
 else:
     TzRes = TzWin = TzWinLocal = None
 
-# Alias
-tzres = TzRes
-tzwin = TzWin
-tzwinlocal = TzWinLocal
+__all__ = ["TzRes", "TzWin", "TzWinLocal"]

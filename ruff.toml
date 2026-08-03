@@ -1,7 +1,7 @@
 include = ["pyproject.toml", "dateutilx/**/*.py", "tests/**/*.py"]
 line-length = 120
 output-format = "concise"
-target-version = "py310"
+target-version = "py311"
 
 [format]
 docstring-code-line-length = 100

@@ -502,15 +502,13 @@ class RelativeDelta:
             return NotImplemented
         return not self.__eq__(other)
 
-    def __div__(self, other) -> NotImplementedType | Self:
+    def __truediv__(self, other) -> NotImplementedType | Self:
         try:
             reciprocal = 1 / float(other)
         except TypeError:
             return NotImplemented
 
         return self.__mul__(reciprocal)
-
-    __truediv__ = __div__
 
     def __repr__(self):
         _tmp_list = []
