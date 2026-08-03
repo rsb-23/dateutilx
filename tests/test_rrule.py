@@ -4,13 +4,13 @@ from datetime import date, datetime
 
 import pytest
 
-from src import tz
-from src.helper import Frequency
-from src.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
+from dateutilx import tz
+from dateutilx.helper import Frequency
+from dateutilx.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
 
 from .freezegun import freeze_time
 
-MODULE = "src.rrule"
+MODULE = "dateutilx.rrule"
 YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY = Frequency
 
 NYC = tz.gettz("America/New_York")

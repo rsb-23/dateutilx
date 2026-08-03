@@ -270,7 +270,7 @@ class Rrule(RruleBase):
         This can lead to possibly surprising behavior when, for example, the
         start date occurs at the end of the month:
 
-        >>> from src.rrule import rrule, MONTHLY
+        >>> from dateutilx.rrule import rrule, MONTHLY
         >>> from datetime import datetime
         >>> start_date = datetime(2014, 12, 31)
         >>> list(rrule(freq=MONTHLY, count=4, dtstart=start_date))
@@ -498,7 +498,7 @@ class Rrule(RruleBase):
         self._byeaster = None
         if byeaster is not None:
             if not easter:
-                from src import easter
+                from dateutilx import easter
             if isinstance(byeaster, int):
                 self._byeaster = (byeaster,)
             else:
@@ -1403,7 +1403,7 @@ class _RRuleStr:
     def _handle_until(rrkwargs, name, value, **kwargs):
         global parser
         if not parser:
-            from src import parser
+            from dateutilx import parser
         try:
             rrkwargs["until"] = parser.parse(value, ignoretz=kwargs.get("ignoretz"), tzinfos=kwargs.get("tzinfos"))
         except ValueError as e:
@@ -1465,7 +1465,7 @@ class _RRuleStr:
     def _parse_date_value(self, date_value, parms, rule_tzids, *, ignoretz, tzids, tzinfos):
         global parser
         if not parser:
-            from src import parser
+            from dateutilx import parser
 
         datevals = []
         value_found = False
@@ -1597,7 +1597,7 @@ class _RRuleStr:
 
         if forceset or len(rrulevals) > 1 or rdatevals or exrulevals or exdatevals:
             if not parser and (rdatevals or exdatevals):
-                from src import parser
+                from dateutilx import parser
             rset = RruleSet(cache=cache)
             for value in rrulevals:
                 rset.rrule(self._parse_rfc_rrule(value, dtstart=dtstart, ignoretz=ignoretz, tzinfos=tzinfos))

@@ -1,4 +1,4 @@
-include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py"]
+include = ["pyproject.toml", "dateutilx/**/*.py", "tests/**/*.py"]
 line-length = 120
 output-format = "concise"
 target-version = "py310"

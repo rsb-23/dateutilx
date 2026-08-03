@@ -6,7 +6,7 @@ from types import NotImplementedType
 from typing import Self
 from warnings import warn
 
-from src.weekday import Weekday, weekdays
+from dateutilx.weekday import Weekday, weekdays
 
 __all__ = ["RelativeDelta"]
 Number = float | int
@@ -86,7 +86,7 @@ class RelativeDelta:
     For example
 
     >>> from datetime import datetime
-    >>> from src.relativedelta import RelativeDelta, MO
+    >>> from dateutilx.relativedelta import RelativeDelta, MO
     >>> dt_ = datetime(2018, 4, 9, 13, 37, 0)
     >>> delta = RelativeDelta(hours=25, day=1, weekday=MO(1))
     >>> dt_ + delta

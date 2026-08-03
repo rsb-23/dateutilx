@@ -3,9 +3,9 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from src.helper import Day
-from src.relativedelta import RelativeDelta
-from src.weekday import FR, MO, SU, TU, WE
+from dateutilx.helper import Day
+from dateutilx.relativedelta import RelativeDelta
+from dateutilx.weekday import FR, MO, SU, TU, WE
 
 from ._common import NOT_A_VALUE
 

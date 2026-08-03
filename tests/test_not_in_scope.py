@@ -6,8 +6,8 @@ from datetime import datetime
 
 import pytest
 
-from src.errors import ParserError
-from src.parser import parse
+from dateutilx.errors import ParserError
+from dateutilx.parser import parse
 
 
 class TestParseUnimplementedCases:

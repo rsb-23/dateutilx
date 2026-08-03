@@ -5,15 +5,15 @@ from unittest import TestCase
 
 import pytest
 
-from src import tz
-from src.helper import is_windows_os
-from src.parser import parse
+from dateutilx import tz
+from dateutilx.helper import is_windows_os
+from dateutilx.parser import parse
 
 from ._common import COMPARES_EQUAL, TZWinContext
 
 IS_WIN = is_windows_os()
 try:
-    from src import tzwin
+    from dateutilx import tzwin
 except ImportError as e:
     if IS_WIN:
         raise e
