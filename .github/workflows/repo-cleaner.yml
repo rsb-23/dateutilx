@@ -15,7 +15,6 @@ jobs:
           retain_days: 15
           keep_minimum_runs: 5
 
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

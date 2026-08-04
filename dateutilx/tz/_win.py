@@ -255,16 +255,16 @@ class TzWinLocal(TzWinBase):
     """
     Class representing the local time zone information in the Windows registry
 
-    While :class:`dateutilx.tz.tzlocal` makes system calls (via the :mod:`time`
+    While :class:`dateutilx.tz.TzLocal` makes system calls (via the :mod:`time`
     module) to retrieve time zone information, ``tzwinlocal`` retrieves the
     rules directly from the Windows registry and creates an object like
     :class:`dateutilx.tz.tzwin`.
 
     Because Windows does not have an equivalent of :func:`time.tzset`, on
-    Windows, :class:`dateutilx.tz.tzlocal` instances will always reflect the
+    Windows, :class:`dateutilx.tz.TzLocal` instances will always reflect the
     time zone settings *at the time that the process was started*, meaning
     changes to the machine's time zone settings during the run of a program
-    on Windows will **not** be reflected by :class:`dateutilx.tz.tzlocal`.
+    on Windows will **not** be reflected by :class:`dateutilx.tz.TzLocal`.
     Because ``tzwinlocal`` reads the registry directly, it is unaffected by
     this issue.
     """

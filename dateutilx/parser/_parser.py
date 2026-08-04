@@ -1132,9 +1132,9 @@ class Parser:
         if isinstance(tzdata, datetime.tzinfo) or tzdata is None:
             tzinfo = tzdata
         elif isinstance(tzdata, str):
-            tzinfo = tz.tzstr(tzdata)
+            tzinfo = tz.TzStr(tzdata)
         elif isinstance(tzdata, int):
-            tzinfo = tz.tzoffset(tzname, tzdata)
+            tzinfo = tz.TzOffset(tzname, tzdata)
         else:
             raise TypeError("Offset must be tzinfo subclass, tz string, or int offset.")
         return tzinfo
@@ -1146,7 +1146,7 @@ class Parser:
             aware = self._assign_tzname(aware, res.tzname)
 
         elif res.tzname and res.tzname in time.tzname:
-            aware = naive.replace(tzinfo=tz.tzlocal())
+            aware = naive.replace(tzinfo=tz.TzLocal())
 
             # Handle ambiguous local datetime
             aware = self._assign_tzname(aware, res.tzname)
@@ -1159,7 +1159,7 @@ class Parser:
             aware = naive.replace(tzinfo=tz.UTC)
 
         elif res.tzoffset:
-            aware = naive.replace(tzinfo=tz.tzoffset(res.tzname, res.tzoffset))
+            aware = naive.replace(tzinfo=tz.TzOffset(res.tzname, res.tzoffset))
 
         elif not res.tzname:
             # i.e. no timezone information was found.

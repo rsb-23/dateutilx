@@ -112,9 +112,6 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
         return f"{self.__name__}()"
 
 
-#: Convenience constant providing a :class:`tzutc()` instance
-#:
-#: .. versionadded:: 2.7.0
 UTC = TzUTC()
 
 
@@ -243,7 +240,7 @@ class TzLocal(_TzInfo):
         # The code above yields the following result:
         #
         # >>> import tz, datetime
-        # >>> t = tz.tzlocal()
+        # >>> t = tz.TzLocal()
         # >>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
         # 'BRDT'
         # >>> datetime.datetime(2003,2,16,0,tzinfo=t).tzname()

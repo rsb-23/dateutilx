@@ -1,5 +1,4 @@
 from .tz import (
-    UTC,
     TzFile,
     TzIcal,
     TzLocal,
@@ -15,21 +14,14 @@ from .tz import (
 
 # fmt: off
 __all__ = ["TzFile", "TzIcal", "TzLocal", "TzOffset", "TzRange", "TzStr", "TzUTC",
-           "tzutc", "gettz", "datetime_ambiguous", "datetime_exists",
+           "gettz", "datetime_ambiguous", "datetime_exists",
            "resolve_imaginary", "UTC", "DeprecatedTzFormatWarning",
           ]
 # fmt: on
 
 
+UTC = TzUTC()
+
+
 class DeprecatedTzFormatWarning(Warning):
     """Warning raised when time zones are parsed from deprecated formats."""
-
-
-# Alias
-tzstr = TzStr
-tzfile = TzFile
-tzical = TzIcal
-tzlocal = TzLocal
-tzoffset = TzOffset
-tzrange = TzRange
-tzutc = TzUTC

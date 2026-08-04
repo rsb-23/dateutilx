@@ -2201,13 +2201,13 @@ class RRuleTest(unittest.TestCase):
     def test_str_with_tzid_callable(self):
         rrstr = "DTSTART;TZID=UTC+04:19970902T090000\n" + "RRULE:FREQ=YEARLY;COUNT=3"
 
-        tz_ = tz.tzstr("UTC+04")
+        tz_ = tz.TzStr("UTC+04")
 
         def parse_tzstr(tzstr):
             if tzstr is None:
                 raise ValueError("Invalid tzstr")
 
-            return tz.tzstr(tzstr)
+            return tz.TzStr(tzstr)
 
         rr = rrulestr(rrstr, tzids=parse_tzstr)
 

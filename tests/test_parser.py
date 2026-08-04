@@ -378,7 +378,7 @@ class TestTzinfoInputTypes:
     def test_valid_tzinfo_unicode_input(self):
         dstr = "2014 January 19 09:00 UTC"
         tzinfos = {"UTC": "UTC+0"}
-        expected = datetime(2014, 1, 19, 9, tzinfo=tz.tzstr("UTC+0"))
+        expected = datetime(2014, 1, 19, 9, tzinfo=tz.TzStr("UTC+0"))
         res = parse(dstr, tzinfos=tzinfos)
         self.assert_equal_same_tz(res, expected)
 
@@ -388,14 +388,14 @@ class TestTzinfoInputTypes:
         def tzinfos(*args):  # noqa
             return "UTC+0"
 
-        expected = datetime(2014, 1, 19, 9, tzinfo=tz.tzstr("UTC+0"))
+        expected = datetime(2014, 1, 19, 9, tzinfo=tz.TzStr("UTC+0"))
         res = parse(dstr, tzinfos=tzinfos)
         self.assert_equal_same_tz(res, expected)
 
     def test_valid_tzinfo_int_input(self):
         dstr = "2014 January 19 09:00 UTC"
         tzinfos = {"UTC": -28800}
-        expected = datetime(2014, 1, 19, 9, tzinfo=tz.tzoffset("UTC", -28800))
+        expected = datetime(2014, 1, 19, 9, tzinfo=tz.TzOffset("UTC", -28800))
         res = parse(dstr, tzinfos=tzinfos)
         self.assert_equal_same_tz(res, expected)
 
@@ -740,7 +740,7 @@ class TestTZVar:
         # When dates are specified "EST" even when they should be "EDT" in the
         # local time zone, we should still assign the local time zone
         with TZEnvContext("EST+5EDT,M3.2.0/2,M11.1.0/2"):
-            dt_exp = datetime(2011, 8, 1, 12, 30, tzinfo=tz.tzlocal())
+            dt_exp = datetime(2011, 8, 1, 12, 30, tzinfo=tz.TzLocal())
             dt = parse("2011-08-01T12:30 EST")
 
             assert dt.tzname() == "EDT"
@@ -749,7 +749,7 @@ class TestTZVar:
     def test_tzlocal_in_gmt(self):
         # GH #318
         with TZEnvContext("GMT0BST,M3.5.0,M10.5.0"):
-            # This is an imaginary datetime in tz.tzlocal() but should still
+            # This is an imaginary datetime in tz.TzLocal() but should still
             # parse using the GMT-as-alias-for-UTC rule
             dt = parse("2004-05-01T12:00 GMT")
             dt_exp = datetime(2004, 5, 1, 12, tzinfo=tz.UTC)
@@ -759,11 +759,11 @@ class TestTZVar:
     def test_tzlocal_parse_fold(self):
         # One manifestion of GH #318
         with TZEnvContext("EST+5EDT,M3.2.0/2,M11.1.0/2"):
-            dt_exp = datetime(2011, 11, 6, 1, 30, tzinfo=tz.tzlocal())
+            dt_exp = datetime(2011, 11, 6, 1, 30, tzinfo=tz.TzLocal())
             dt_exp = dt_exp.replace(fold=1)
             dt = parse("2011-11-06T01:30 EST")
 
-            # Because this is ambiguous, until `tz.tzlocal() is tz.tzlocal()`
+            # Because this is ambiguous, until `tz.TzLocal() is tz.TzLocal()`
             # we'll just check the attributes we care about rather than
             # dt == dt_exp
             assert dt.tzname() == dt_exp.tzname()

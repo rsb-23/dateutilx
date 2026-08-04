@@ -14,7 +14,7 @@ def _generate_tzoffsets(limited):
         h, m = hmtuple
         m_td = (-1 if h < 0 else 1) * m
 
-        tzo = tz.tzoffset(None, timedelta(hours=h, minutes=m_td))
+        tzo = tz.TzOffset(None, timedelta(hours=h, minutes=m_td))
         return tzo, fmt.format(h, m)
 
     out = []
@@ -259,7 +259,7 @@ def test_iso_ordinal(isoord, dt_expected):
         (b"2014-02-04T12:30:15.224z", datetime(2014, 2, 4, 12, 30, 15, 224000, UTC)),
         (
             b"2014-02-04T12:30:15.224+05:00",
-            datetime(2014, 2, 4, 12, 30, 15, 224000, tzinfo=tz.tzoffset(None, timedelta(hours=5))),
+            datetime(2014, 2, 4, 12, 30, 15, 224000, tzinfo=tz.TzOffset(None, timedelta(hours=5))),
         ),
     ],
 )
@@ -339,7 +339,7 @@ def test_parse_tzstr(tzoffset):
 def test_parse_tzstr_zero_as_utc(tzstr, zero_as_utc):
     tzi = isoparser().parse_tzstr(tzstr, zero_as_utc=zero_as_utc)
     assert tzi == UTC
-    assert isinstance(tzi, tz.tzutc) == zero_as_utc
+    assert isinstance(tzi, tz.TzUTC) == zero_as_utc
 
 
 @pytest.mark.parametrize(

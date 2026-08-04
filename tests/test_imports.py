@@ -147,22 +147,22 @@ def test_import_tz_all():
     # fmt: off
     from dateutilx.tz import (  # noqa: F401
         UTC,
+        TzFile,
+        TzIcal,
+        TzLocal,
+        TzOffset,
+        TzRange,
+        TzStr,
+        TzUTC,
         datetime_ambiguous,
         datetime_exists,
         gettz,
         resolve_imaginary,
-        tzfile,
-        tzical,
-        tzlocal,
-        tzoffset,
-        tzrange,
-        tzstr,
-        tzutc,
     )
     from dateutilx.tz.win import TzWin, TzWinLocal  # noqa
 
-    tz_all = ["tzutc", "tzoffset", "tzlocal", "tzfile", "tzrange",
-              "tzstr", "tzical", "gettz", "datetime_ambiguous",
+    tz_all = ["TzUTC", "TzOffset", "TzLocal", "TzFile", "TzRange",
+              "TzStr", "TzIcal", "gettz", "datetime_ambiguous",
               "datetime_exists", "resolve_imaginary", "UTC"]
     # fmt: on
 

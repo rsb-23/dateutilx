@@ -18,7 +18,7 @@ NEGATIVE_EPOCHALYPSE = datetime.fromtimestamp(0) - timedelta(seconds=2147483648)
 @example(dt=datetime(1901, 12, 13, 18, 19, 3))  # Very old
 def test_gettz_returns_local(gettz_arg, dt):
     act_tz = tz.gettz(gettz_arg)
-    if isinstance(act_tz, tz.tzlocal):
+    if isinstance(act_tz, tz.TzLocal):
         return
 
     dt_act = dt.astimezone(act_tz)
