@@ -173,7 +173,6 @@ class NotAValueClass:
     __add__ = __radd__ = _op
     __sub__ = __rsub__ = _op
     __mul__ = __rmul__ = _op
-    __div__ = __rdiv__ = _op
     __truediv__ = __rtruediv__ = _op
     __floordiv__ = __rfloordiv__ = _op
 

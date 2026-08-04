@@ -5,20 +5,14 @@ from unittest import TestCase
 
 import pytest
 
-from src import tz
-from src.helper import is_windows_os
-from src.parser import parse
+from dateutilx import tz
+from dateutilx.parser import parse
+from dateutilx.tz.win import TzRes, TzWin, TzWinLocal
+from dateutilx.utils import is_windows_os
 
 from ._common import COMPARES_EQUAL, TZWinContext
 
 IS_WIN = is_windows_os()
-try:
-    from src import tzwin
-except ImportError as e:
-    if IS_WIN:
-        raise e
-    tzwin = None
-
 UTC = tz.UTC
 
 ESTs = "Eastern Standard Time"
@@ -191,15 +185,15 @@ class TzWinFoldMixin:
 @pytest.mark.skipif(not IS_WIN, reason="Requires Windows")
 class TzWinTest(TestCase, TzWinFoldMixin):
     def setUp(self):
-        self.tzclass = tzwin.TzWin
+        self.tzclass = TzWin
 
     def test_tz_res_load_name(self):
         # This may not work right on non-US locales.
-        tzr = tzwin.TzRes()
+        tzr = TzRes()
         self.assertEqual(tzr.load_name(112), "Eastern Standard Time")
 
     def test_tz_res_name_from_string(self):
-        tzr = tzwin.TzRes()
+        tzr = TzRes()
         self.assertEqual(tzr.name_from_string("@tzres.dll,-221"), "Alaskan Daylight Time")
 
         self.assertEqual(tzr.name_from_string("Samoa Daylight Time"), "Samoa Daylight Time")
@@ -218,7 +212,7 @@ class TzWinTest(TestCase, TzWinFoldMixin):
 
     def test_tzwin_name(self):
         # https://github.com/dateutil/dateutil/issues/143
-        tw = tz.tzwin("Eastern Standard Time")
+        tw = TzWin("Eastern Standard Time")
 
         # Cover the transitions for at least two years.
         transition_dates = [
@@ -236,7 +230,7 @@ class TzWinTest(TestCase, TzWinFoldMixin):
             self.assertEqual(t_date.replace(tzinfo=tw).tzname(), expected)
 
     def test_tzwin_repr(self):
-        tw = tz.tzwin("Yakutsk Standard Time")
+        tw = TzWin("Yakutsk Standard Time")
         self.assertEqual(repr(tw), "tzwin(" + repr("Yakutsk Standard Time") + ")")
 
     def test_tz_win_equality(self):
@@ -251,8 +245,8 @@ class TzWinTest(TestCase, TzWinFoldMixin):
 
         for tzwin_name in tzwin_names:
             # Get two different instances to compare
-            tw1 = tz.tzwin(tzwin_name)
-            tw2 = tz.tzwin(tzwin_name)
+            tw1 = TzWin(tzwin_name)
+            tw2 = TzWin(tzwin_name)
 
             self.assertEqual(tw1, tw2)
 
@@ -268,15 +262,15 @@ class TzWinTest(TestCase, TzWinFoldMixin):
 
         for tzwn1, tzwn2 in tzwin_names:
             # Get two different instances to compare
-            tw1 = tz.tzwin(tzwn1)
-            tw2 = tz.tzwin(tzwn2)
+            tw1 = TzWin(tzwn1)
+            tw2 = TzWin(tzwn2)
 
             self.assertNotEqual(tw1, tw2)
 
     def test_tz_win_equality_invalid(self):
         # Compare to objects that do not implement comparison with this
         # (should default to False)
-        EST = tz.tzwin("Eastern Standard Time")
+        EST = TzWin("Eastern Standard Time")
         self.assertFalse(EST == UTC)
         self.assertFalse(EST == 1)
         self.assertFalse(UTC == EST)
@@ -287,42 +281,42 @@ class TzWinTest(TestCase, TzWinFoldMixin):
     def test_tz_win_inequality_unsupported(self):
         # Compare it to an object that is promiscuous about equality, but for
         # which tzwin does not implement an equality operator.
-        EST = tz.tzwin("Eastern Standard Time")
+        EST = TzWin("Eastern Standard Time")
         self.assertTrue(EST == COMPARES_EQUAL)
         self.assertFalse(EST != COMPARES_EQUAL)
 
     def test_tzwin_time_only_dst(self):
         # For zones with DST, .dst() should return None
-        tw_est = tz.tzwin("Eastern Standard Time")
+        tw_est = TzWin("Eastern Standard Time")
         self.assertIs(dt.time(14, 10, tzinfo=tw_est).dst(), None)
 
         # This zone has no DST, so .dst() can return 0
-        tw_sast = tz.tzwin("South Africa Standard Time")
+        tw_sast = TzWin("South Africa Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).dst(), timedelta(0))
 
     def test_tzwin_time_only_utc_offset(self):
         # For zones with DST, .utcoffset() should return None
-        tw_est = tz.tzwin("Eastern Standard Time")
+        tw_est = TzWin("Eastern Standard Time")
         self.assertIs(dt.time(14, 10, tzinfo=tw_est).utcoffset(), None)
 
         # This zone has no DST, so .utcoffset() returns standard offset
-        tw_sast = tz.tzwin("South Africa Standard Time")
+        tw_sast = TzWin("South Africa Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).utcoffset(), timedelta(hours=2))
 
     def test_tzwin_time_only_tzname(self):
         # For zones with DST, the name defaults to standard time
-        tw_est = tz.tzwin("Eastern Standard Time")
+        tw_est = TzWin("Eastern Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_est).tzname(), "Eastern Standard Time")
 
         # For zones with no DST, this should work normally.
-        tw_sast = tz.tzwin("South Africa Standard Time")
+        tw_sast = TzWin("South Africa Standard Time")
         self.assertEqual(dt.time(14, 10, tzinfo=tw_sast).tzname(), "South Africa Standard Time")
 
 
 @pytest.mark.skipif(not IS_WIN, reason="Requires Windows")
 class TzWinLocalTest(TestCase, TzWinFoldMixin):
     def setUp(self):
-        self.tzclass = tzwin.TzWinLocal
+        self.tzclass = TzWinLocal
         self.context = TZWinContext
 
     def get_args(self, tzname):
@@ -376,8 +370,8 @@ class TzWinLocalTest(TestCase, TzWinFoldMixin):
             self.assertEqual(str(tw), "tzwinlocal(" + repr("Pacific Standard Time") + ")")
 
     def test_tzwin_local_equality(self):
-        tw_est = tz.tzwin("Eastern Standard Time")
-        tw_pst = tz.tzwin("Pacific Standard Time")
+        tw_est = TzWin("Eastern Standard Time")
+        tw_pst = TzWin("Pacific Standard Time")
 
         with TZWinContext("Eastern Standard Time"):
             twl1 = self.tzclass()
@@ -390,7 +384,7 @@ class TzWinLocalTest(TestCase, TzWinFoldMixin):
         with TZWinContext("Pacific Standard Time"):
             twl1 = self.tzclass()
             twl2 = self.tzclass()
-            tw = tz.tzwin("Pacific Standard Time")
+            tw = TzWin("Pacific Standard Time")
 
             self.assertEqual(twl1, twl2)
             self.assertEqual(twl1, tw)

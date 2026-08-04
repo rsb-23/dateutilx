@@ -10,8 +10,8 @@ import warnings
 
 import pytest
 
-from src import tz
-from src.parser._parser import _ymd
+from dateutilx import tz
+from dateutilx.parser._parser import _ymd
 
 
 @pytest.mark.smoke
@@ -44,7 +44,7 @@ def test_ymd_could_be_day():
 ###
 # Test that private interfaces in _parser are deprecated properly
 def test_parser_private_warns():
-    from src.parser import _parsetz, _timelex, _tzparser
+    from dateutilx.parser import _parsetz, _timelex, _tzparser
 
     with pytest.warns(DeprecationWarning):
         _tzparser()
@@ -57,7 +57,7 @@ def test_parser_private_warns():
 
 
 def test_parser_parser_private_not_warns():
-    from src.parser._parser import _parsetz, _timelex, _tzparser
+    from dateutilx.parser._parser import _parsetz, _timelex, _tzparser
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")
@@ -75,10 +75,10 @@ def test_parser_parser_private_not_warns():
 @pytest.mark.tzstr
 def test_tzstr_internal_timedeltas():
     with pytest.warns(tz.DeprecatedTzFormatWarning):
-        tz1 = tz.tzstr("EST5EDT,5,4,0,7200,11,-3,0,7200")
+        tz1 = tz.TzStr("EST5EDT,5,4,0,7200,11,-3,0,7200")
 
     with pytest.warns(tz.DeprecatedTzFormatWarning):
-        tz2 = tz.tzstr("EST5EDT,4,1,0,7200,10,-1,0,7200")
+        tz2 = tz.TzStr("EST5EDT,4,1,0,7200,10,-1,0,7200")
 
     assert tz1._start_delta != tz2._start_delta
     assert tz1._end_delta != tz2._end_delta

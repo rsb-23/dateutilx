@@ -6,7 +6,6 @@ the recurrence rules documented in the
 including support for caching of results.
 """
 
-import _thread
 import calendar
 import contextlib
 import datetime as dt
@@ -15,14 +14,14 @@ import itertools
 import operator
 import re
 import sys
+import threading
 from functools import wraps
 from itertools import product
 from math import gcd
 from typing import Any
 from warnings import warn
 
-from .helper import Day, Frequency
-from .weekday import Weekday, weekdays
+from dateutilx.utils import Day, Frequency, Weekday, weekdays
 
 # fmt: off
 __all__ = [
@@ -79,7 +78,7 @@ class RruleBase:
     def __init__(self, cache=False):
         if cache:
             self._cache = []
-            self._cache_lock = _thread.allocate_lock()
+            self._cache_lock = threading.Lock()
             self._invalidate_cache()
         else:
             self._cache = None
@@ -270,7 +269,7 @@ class Rrule(RruleBase):
         This can lead to possibly surprising behavior when, for example, the
         start date occurs at the end of the month:
 
-        >>> from src.rrule import rrule, MONTHLY
+        >>> from dateutilx.rrule import rrule, MONTHLY
         >>> from datetime import datetime
         >>> start_date = datetime(2014, 12, 31)
         >>> list(rrule(freq=MONTHLY, count=4, dtstart=start_date))
@@ -498,7 +497,7 @@ class Rrule(RruleBase):
         self._byeaster = None
         if byeaster is not None:
             if not easter:
-                from src import easter
+                from dateutilx import easter
             if isinstance(byeaster, int):
                 self._byeaster = (byeaster,)
             else:
@@ -1001,7 +1000,7 @@ class Rrule(RruleBase):
 
         return cset
 
-    def __mod_distance(self, value, byxxx, base):
+    def __mod_distance(self, value, byxxx, base) -> tuple[int, int]:
         """
         Calculates the next value in a sequence where the `FREQ` parameter is
         specified along with a `BYXXX` parameter at the same "level"
@@ -1032,7 +1031,7 @@ class Rrule(RruleBase):
             accumulator += div
             if value in byxxx:
                 return accumulator, value
-        return None
+        raise ValueError("No valid values found")
 
 
 # pylint: disable=E0203
@@ -1403,7 +1402,7 @@ class _RRuleStr:
     def _handle_until(rrkwargs, name, value, **kwargs):
         global parser
         if not parser:
-            from src import parser
+            from dateutilx import parser
         try:
             rrkwargs["until"] = parser.parse(value, ignoretz=kwargs.get("ignoretz"), tzinfos=kwargs.get("tzinfos"))
         except ValueError as e:
@@ -1465,7 +1464,7 @@ class _RRuleStr:
     def _parse_date_value(self, date_value, parms, rule_tzids, *, ignoretz, tzids, tzinfos):
         global parser
         if not parser:
-            from src import parser
+            from dateutilx import parser
 
         datevals = []
         value_found = False
@@ -1597,7 +1596,7 @@ class _RRuleStr:
 
         if forceset or len(rrulevals) > 1 or rdatevals or exrulevals or exdatevals:
             if not parser and (rdatevals or exdatevals):
-                from src import parser
+                from dateutilx import parser
             rset = RruleSet(cache=cache)
             for value in rrulevals:
                 rset.rrule(self._parse_rfc_rrule(value, dtstart=dtstart, ignoretz=ignoretz, tzinfos=tzinfos))

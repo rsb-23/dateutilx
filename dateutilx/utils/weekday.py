@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.helper import Day
+from .constants import Day
 
 
 class NthWeekday:
@@ -22,6 +22,9 @@ class NthWeekday:
         except AttributeError:
             return False
 
+    def __hash__(self):
+        return hash((self.weekday, self.n))
+
     def __repr__(self) -> str:
         name = self.weekday.name
         return f"{name}({self.n:+d})" if self.n else name
@@ -30,13 +33,9 @@ class NthWeekday:
 # pylint: disable=r0903
 class Weekday(NthWeekday):
     def __init__(self, wkday: int, n: int | None = None):
+        if not 0 <= wkday <= 6:
+            raise ValueError(f"Weekday must be between 0 and 6, got {wkday}")
         super().__init__(wkday=Day(wkday), n=n)
-
-    def __hash__(self):
-        return hash((self.weekday, self.n))
 
 
 MO, TU, WE, TH, FR, SA, SU = weekdays = tuple(Weekday(x) for x in range(7))
-
-# Alias
-weekday = Weekday

@@ -3,14 +3,15 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from src.helper import Day
-from src.relativedelta import FR, MO, SU, TU, WE, RelativeDelta
+from dateutilx.relativedelta import RelativeDelta
+from dateutilx.utils import Day
+from dateutilx.utils.weekday import FR, MO, SU, TU, WE
 
 from ._common import NOT_A_VALUE
 
 relativedelta = RelativeDelta
 
-RD_1MON = relativedelta(months=1)
+RD_1MON = RelativeDelta(months=1)
 FEB_28 = date(2021, 2, 28)
 
 

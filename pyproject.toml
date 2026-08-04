@@ -43,12 +43,12 @@ Source = "https://github.com/rsb-23/dateutilx"
 [tool.hatch.version]
 source = "vcs"
 [tool.hatch.build.targets.sdist]
-include = ["src", "LICENSE", "README.md", "pyproject.toml"]
+include = ["dateutilx", "LICENSE", "README.md", "pyproject.toml"]
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["dateutilx"]
 
 [tool.coverage.run]
-source = ["src"]
+source = ["dateutilx"]
 [tool.coverage.report]
 fail_under = 85.0
 skip_covered = true

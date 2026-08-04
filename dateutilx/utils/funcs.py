@@ -1,11 +1,9 @@
-"""
-This module offers general convenience and utility functions for dealing with
-datetimes.
-
-.. versionadded:: 2.7.0
-"""
-
 import datetime as dt
+import sys
+
+
+def is_windows_os() -> bool:
+    return sys.platform.startswith("win")
 
 
 def today(tzinfo=None):
@@ -33,9 +31,9 @@ def default_tzinfo(dt, tzinfo):
 
     .. doctest::
 
-        >>> from src.tz import tzoffset
-        >>> from src.parser import parse
-        >>> from src.utils import default_tzinfo
+        >>> from dateutilx.tz import tzoffset
+        >>> from dateutilx.parser import parse
+        >>> from dateutilx.utils import default_tzinfo
         >>> dflt_tz = tzoffset("EST", -18000)
         >>> print(default_tzinfo(parse('2014-01-01 12:30 UTC'), dflt_tz))
         2014-01-01 12:30:00+00:00

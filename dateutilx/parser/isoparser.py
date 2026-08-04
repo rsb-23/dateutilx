@@ -12,7 +12,7 @@ import datetime as dt
 import re
 from functools import wraps
 
-from src.tz import UTC, TzOffset
+from dateutilx.tz import UTC, TzOffset
 
 __all__ = ["isoparse", "isoparser"]
 
@@ -107,10 +107,10 @@ class IsoParser:
         - `±HHMM`
         - `±HH`
 
-        Offsets will be represented as :class:`dateutilx.tz.tzoffset` objects,
+        Offsets will be represented as :class:`dateutilx.tz.TzOffset` objects,
         with the exception of UTC, which will be represented as
-        :class:`dateutilx.tz.tzutc`. Time zone offsets equivalent to UTC (such
-        as `+00:00`) will also be represented as :class:`dateutilx.tz.tzutc`.
+        :class:`dateutilx.tz.TzUTC`. Time zone offsets equivalent to UTC (such
+        as `+00:00`) will also be represented as :class:`dateutilx.tz.TzUTC`.
 
         :param dt_str:
             A string or stream containing only an ISO-8601 datetime string
@@ -188,11 +188,11 @@ class IsoParser:
             A string representing an ISO time zone offset
 
         :param zero_as_utc:
-            Whether to return :class:`dateutilx.tz.tzutc` for zero-offset zones
+            Whether to return :class:`dateutilx.tz.TzUTC` for zero-offset zones
 
         :return:
-            Returns :class:`dateutilx.tz.tzoffset` for offsets and
-            :class:`dateutilx.tz.tzutc` for ``Z`` and (if ``zero_as_utc`` is
+            Returns :class:`dateutilx.tz.TzOffset` for offsets and
+            :class:`dateutilx.tz.TzUTC` for ``Z`` and (if ``zero_as_utc`` is
             specified) offsets equivalent to UTC.
         """
         return self._parse_tzstr(tzstr, zero_as_utc=zero_as_utc)

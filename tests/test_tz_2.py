@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src import tz
-from src.relativedelta import SU, TH, RelativeDelta
+from dateutilx import tz
+from dateutilx.relativedelta import RelativeDelta
+from dateutilx.utils.weekday import SU, TH
 
 from ._common import COMPARES_EQUAL
 from .test_tz import TzFoldMixin
@@ -41,83 +42,83 @@ class TZStrTest(unittest.TestCase, TzFoldMixin):
             "Europe/London": self.TZ_LON,
         }
 
-        return tz.tzstr(tzname_map[tzname])
+        return tz.TzStr(tzname_map[tzname])
 
     def test_str_str(self):
-        # Test that tz.tzstr() won't throw an error if given a str instead
+        # Test that tz.TzStr() won't throw an error if given a str instead
         # of a unicode literal.
-        self.assertEqual(datetime(2003, 4, 6, 1, 59, tzinfo=tz.tzstr("EST5EDT")).tzname(), "EST")
-        self.assertEqual(datetime(2003, 4, 6, 2, 00, tzinfo=tz.tzstr("EST5EDT")).tzname(), "EDT")
+        self.assertEqual(datetime(2003, 4, 6, 1, 59, tzinfo=tz.TzStr("EST5EDT")).tzname(), "EST")
+        self.assertEqual(datetime(2003, 4, 6, 2, 00, tzinfo=tz.TzStr("EST5EDT")).tzname(), "EDT")
 
     def test_str_inequality(self):
-        TZS1 = tz.tzstr("EST5EDT4")
+        TZS1 = tz.TzStr("EST5EDT4")
 
         # Standard abbreviation different
-        TZS2 = tz.tzstr("ET5EDT4")
+        TZS2 = tz.TzStr("ET5EDT4")
         self.assertNotEqual(TZS1, TZS2)
 
         # DST abbreviation different
-        TZS3 = tz.tzstr("EST5EMT")
+        TZS3 = tz.TzStr("EST5EMT")
         self.assertNotEqual(TZS1, TZS3)
 
         # STD offset different
-        TZS4 = tz.tzstr("EST4EDT4")
+        TZS4 = tz.TzStr("EST4EDT4")
         self.assertNotEqual(TZS1, TZS4)
 
         # DST offset different
-        TZS5 = tz.tzstr("EST5EDT3")
+        TZS5 = tz.TzStr("EST5EDT3")
         self.assertNotEqual(TZS1, TZS5)
 
     def test_str_inequality_start_end(self):
-        TZS1 = tz.tzstr("EST5EDT4")
+        TZS1 = tz.TzStr("EST5EDT4")
 
         # Start delta different
-        TZS2 = tz.tzstr("EST5EDT4,M4.2.0/02:00:00,M10-5-0/02:00")
+        TZS2 = tz.TzStr("EST5EDT4,M4.2.0/02:00:00,M10-5-0/02:00")
         self.assertNotEqual(TZS1, TZS2)
 
         # End delta different
-        TZS3 = tz.tzstr("EST5EDT4,M4.2.0/02:00:00,M11-5-0/02:00")
+        TZS3 = tz.TzStr("EST5EDT4,M4.2.0/02:00:00,M11-5-0/02:00")
         self.assertNotEqual(TZS1, TZS3)
 
     def test_posix_offset(self):
-        TZ1 = tz.tzstr("UTC-3")
+        TZ1 = tz.TzStr("UTC-3")
         self.assertEqual(datetime(2015, 1, 1, tzinfo=TZ1).utcoffset(), timedelta(hours=-3))
 
-        TZ2 = tz.tzstr("UTC-3", posix_offset=True)
+        TZ2 = tz.TzStr("UTC-3", posix_offset=True)
         self.assertEqual(datetime(2015, 1, 1, tzinfo=TZ2).utcoffset(), timedelta(hours=+3))
 
     def test_str_inequality_unsupported(self):
-        TZS = tz.tzstr("EST5EDT")
+        TZS = tz.TzStr("EST5EDT")
 
         self.assertFalse(TZS == 4)
         self.assertTrue(TZS == COMPARES_EQUAL)
         self.assertFalse(TZS != COMPARES_EQUAL)
 
     def test_tz_str_repr(self):
-        TZS1 = tz.tzstr("EST5EDT4")
-        TZS2 = tz.tzstr("EST")
+        TZS1 = tz.TzStr("EST5EDT4")
+        TZS2 = tz.TzStr("EST")
 
         self.assertEqual(repr(TZS1), "TzStr(" + repr("EST5EDT4") + ")")
         self.assertEqual(repr(TZS2), "TzStr(" + repr("EST") + ")")
 
     def test_tz_str_failure(self):
         with pytest.raises(ValueError):
-            tz.tzstr("InvalidString;439999")
+            tz.TzStr("InvalidString;439999")
 
     def test_tz_str_singleton(self):
-        tz1 = tz.tzstr("EST5EDT")
-        tz2 = tz.tzstr("CST4CST")
-        tz3 = tz.tzstr("EST5EDT")
+        tz1 = tz.TzStr("EST5EDT")
+        tz2 = tz.TzStr("CST4CST")
+        tz3 = tz.TzStr("EST5EDT")
 
         self.assertIsNot(tz1, tz2)
         self.assertIs(tz1, tz3)
 
     def test_tz_str_singleton_posix(self):
-        tz_t1 = tz.tzstr("GMT+3", posix_offset=True)
-        tz_f1 = tz.tzstr("GMT+3", posix_offset=False)
+        tz_t1 = tz.TzStr("GMT+3", posix_offset=True)
+        tz_f1 = tz.TzStr("GMT+3", posix_offset=False)
 
-        tz_t2 = tz.tzstr("GMT+3", posix_offset=True)
-        tz_f2 = tz.tzstr("GMT+3", posix_offset=False)
+        tz_t2 = tz.TzStr("GMT+3", posix_offset=True)
+        tz_f2 = tz.TzStr("GMT+3", posix_offset=False)
 
         self.assertIs(tz_t1, tz_t2)
         self.assertIsNot(tz_t1, tz_f1)
@@ -125,9 +126,9 @@ class TZStrTest(unittest.TestCase, TzFoldMixin):
         self.assertIs(tz_f1, tz_f2)
 
     def test_tz_str_instance(self):
-        tz1 = tz.tzstr("EST5EDT")
-        tz2 = tz.tzstr.instance("EST5EDT")
-        tz3 = tz.tzstr.instance("EST5EDT")
+        tz1 = tz.TzStr("EST5EDT")
+        tz2 = tz.TzStr.instance("EST5EDT")
+        tz3 = tz.TzStr.instance("EST5EDT")
 
         assert tz1 is not tz2
         assert tz2 is not tz3
@@ -139,22 +140,22 @@ class TZStrTest(unittest.TestCase, TzFoldMixin):
 @pytest.mark.smoke
 @pytest.mark.tzstr
 def test_tzstr_weakref():
-    tz_t1 = tz.tzstr("EST5EDT")
-    tz_t2_ref = weakref.ref(tz.tzstr("EST5EDT"))
+    tz_t1 = tz.TzStr("EST5EDT")
+    tz_t2_ref = weakref.ref(tz.TzStr("EST5EDT"))
     assert tz_t1 is tz_t2_ref()
 
     del tz_t1
     gc.collect()
 
     assert tz_t2_ref() is not None
-    assert tz.tzstr("EST5EDT") is tz_t2_ref()
+    assert tz.TzStr("EST5EDT") is tz_t2_ref()
 
     for offset in range(5, 15):
-        tz.tzstr(f"GMT+{offset}")
+        tz.TzStr(f"GMT+{offset}")
     gc.collect()
 
     assert tz_t2_ref() is None
-    assert tz.tzstr("EST5EDT") is not tz_t2_ref()
+    assert tz.TzStr("EST5EDT") is not tz_t2_ref()
 
 
 @pytest.mark.tzstr
@@ -162,10 +163,10 @@ def test_tzstr_weakref():
     "tz_str,expected",
     [
         # From https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html
-        ("", tz.tzrange(None)),  # TODO: Should change this so tz.tzrange('') works
+        ("", tz.TzRange(None)),  # TODO: Should change this so tz.TzRange('') works
         (
             "EST+5EDT,M3.2.0/2,M11.1.0/12",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 -18000,
                 "EDT",
@@ -176,7 +177,7 @@ def test_tzstr_weakref():
         ),
         (
             "WART4WARST,J1/0,J365/25",  # This is DST all year, Western Argentina Summer Time
-            tz.tzrange(
+            tz.TzRange(
                 "WART",
                 timedelta(hours=-4),
                 "WARST",
@@ -186,7 +187,7 @@ def test_tzstr_weakref():
         ),
         (
             "IST-2IDT,M3.4.4/26,M10.5.0",  # Israel Standard / Daylight Time
-            tz.tzrange(
+            tz.TzRange(
                 "IST",
                 timedelta(hours=2),
                 "IDT",
@@ -196,7 +197,7 @@ def test_tzstr_weakref():
         ),
         (
             "WGT3WGST,M3.5.0/2,M10.5.0/1",
-            tz.tzrange(
+            tz.TzRange(
                 "WGT",
                 timedelta(hours=-3),
                 "WGST",
@@ -205,14 +206,14 @@ def test_tzstr_weakref():
             ),
         ),
         # Different offset specifications
-        ("WGT0300WGST", tz.tzrange("WGT", timedelta(hours=-3), "WGST")),
-        ("WGT03:00WGST", tz.tzrange("WGT", timedelta(hours=-3), "WGST")),
-        ("AEST-1100AEDT", tz.tzrange("AEST", timedelta(hours=11), "AEDT")),
-        ("AEST-11:00AEDT", tz.tzrange("AEST", timedelta(hours=11), "AEDT")),
+        ("WGT0300WGST", tz.TzRange("WGT", timedelta(hours=-3), "WGST")),
+        ("WGT03:00WGST", tz.TzRange("WGT", timedelta(hours=-3), "WGST")),
+        ("AEST-1100AEDT", tz.TzRange("AEST", timedelta(hours=11), "AEDT")),
+        ("AEST-11:00AEDT", tz.TzRange("AEST", timedelta(hours=11), "AEDT")),
         # Different time formats
         (
             "EST5EDT,M3.2.0/4:00,M11.1.0/3:00",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -222,7 +223,7 @@ def test_tzstr_weakref():
         ),
         (
             "EST5EDT,M3.2.0/04:00,M11.1.0/03:00",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -232,7 +233,7 @@ def test_tzstr_weakref():
         ),
         (
             "EST5EDT,M3.2.0/0400,M11.1.0/0300",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -243,7 +244,7 @@ def test_tzstr_weakref():
     ],
 )
 def test_valid_gnu_tzstr(tz_str, expected):
-    tzi = tz.tzstr(tz_str)
+    tzi = tz.TzStr(tz_str)
 
     assert tzi == expected
 
@@ -254,7 +255,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
     [
         (
             "EST5EDT,5,4,0,7200,11,3,0,7200",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -264,7 +265,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,-4,0,7200,11,3,0,7200",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -274,7 +275,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,4,0,7200,11,-3,0,7200",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -284,7 +285,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,4,0,7200,11,-3,0,7200,3600",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -294,7 +295,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,4,0,7200,11,-3,0,7200,3600",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -304,7 +305,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,4,0,7200,11,-3,0,7200,-3600",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -315,7 +316,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,4,0,7200,11,-3,0,7200,+7200",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -326,7 +327,7 @@ def test_valid_gnu_tzstr(tz_str, expected):
         ),
         (
             "EST5EDT,5,4,0,7200,11,-3,0,7200,+3600",
-            tz.tzrange(
+            tz.TzRange(
                 "EST",
                 timedelta(hours=-5),
                 "EDT",
@@ -340,7 +341,7 @@ def test_valid_dateutil_format(tz_str, expected):
     # This tests the dateutil-specific format that is used widely in the tests
     # and examples. It is unclear where this format originated from.
     with pytest.warns(tz.DeprecatedTzFormatWarning):
-        tzi = tz.tzstr.instance(tz_str)
+        tzi = tz.TzStr.instance(tz_str)
 
     assert tzi == expected
 
@@ -359,7 +360,7 @@ def test_valid_dateutil_format(tz_str, expected):
 )
 def test_invalid_gnu_tzstr(tz_str):
     with pytest.raises(ValueError):
-        tz.tzstr(tz_str)
+        tz.TzStr(tz_str)
 
 
 # Different representations of the same default rule set
@@ -375,7 +376,7 @@ DEFAULT_TZSTR_RULES_EQUIV_2003 = [
 @pytest.mark.tzstr
 @pytest.mark.parametrize("tz_str", DEFAULT_TZSTR_RULES_EQUIV_2003)
 def test_tzstr_default_start(tz_str):
-    tzi = tz.tzstr(tz_str)
+    tzi = tz.TzStr(tz_str)
     dt_std = datetime(2003, 4, 6, 1, 59, tzinfo=tzi)
     dt_dst = datetime(2003, 4, 6, 2, 00, tzinfo=tzi)
 
@@ -386,7 +387,7 @@ def test_tzstr_default_start(tz_str):
 @pytest.mark.tzstr
 @pytest.mark.parametrize("tz_str", DEFAULT_TZSTR_RULES_EQUIV_2003)
 def test_tzstr_default_end(tz_str):
-    tzi = tz.tzstr(tz_str)
+    tzi = tz.TzStr(tz_str)
     dt_dst = datetime(2003, 10, 26, 0, 59, tzinfo=tzi)
     dt_dst_ambig = datetime(2003, 10, 26, 1, 00, tzinfo=tzi)
     dt_std_ambig = dt_dst_ambig.replace(fold=1)
@@ -402,8 +403,8 @@ def test_tzstr_default_end(tz_str):
 @pytest.mark.parametrize("tzstr_1", ["EST5EDT", "EST5EDT4,M4.1.0/02:00:00,M10-5-0/02:00"])
 @pytest.mark.parametrize("tzstr_2", ["EST5EDT", "EST5EDT4,M4.1.0/02:00:00,M10-5-0/02:00"])
 def test_tzstr_default_cmp(tzstr_1, tzstr_2):
-    tz1 = tz.tzstr(tzstr_1)
-    tz2 = tz.tzstr(tzstr_2)
+    tz1 = tz.TzStr(tzstr_1)
+    tz2 = tz.TzStr(tzstr_2)
 
     assert tz1 == tz2
 
@@ -460,7 +461,7 @@ def test_resolve_imaginary_ambiguous(dt):
         datetime(2018, 12, 2, 9, 30, tzinfo=tz.gettz("Europe/London")),
         datetime(2017, 6, 2, 16, 30, tzinfo=tz.gettz("Australia/Sydney")),
         datetime(2025, 9, 25, 1, 17, tzinfo=tz.UTC),
-        datetime(2025, 9, 25, 1, 17, tzinfo=tz.tzoffset("EST", -18000)),
+        datetime(2025, 9, 25, 1, 17, tzinfo=tz.TzOffset("EST", -18000)),
         datetime(2019, 3, 4, tzinfo=None),
     ],
 )

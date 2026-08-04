@@ -7,19 +7,19 @@ from relative deltas), local machine timezone, fixed offset timezone, and UTC
 timezone.
 """
 
-import _thread
 import bisect
 import contextlib
 import datetime
 import os
 import struct
+import threading
 import time
 import weakref
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any
 
-from src.helper import is_windows_os
+from dateutilx.utils import Day, is_windows_os, weekdays
 
 from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
@@ -29,6 +29,7 @@ rrule = None  # pylint: disable=c0103
 ZERO = datetime.timedelta(0)
 EPOCH = datetime.datetime(1970, 1, 1, 0, 0)
 EPOCHORDINAL = EPOCH.toordinal()
+SU = weekdays[Day.SU]
 
 
 class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
@@ -40,7 +41,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
     .. doctest::
 
         >>> import datetime as dt
-        >>> from src.tz import *
+        >>> from dateutilx.tz import *
 
         >>> dt.datetime.now()
         datetime.datetime(2003, 9, 27, 9, 40, 1, 521290)
@@ -57,7 +58,7 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
 
         .. doctest::
 
-            >>> from src.tz import tzutc, UTC
+            >>> from dateutilx.tz import tzutc, UTC
             >>> tzutc() is tzutc()
             True
             >>> tzutc() is UTC
@@ -111,9 +112,6 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
         return f"{self.__name__}()"
 
 
-#: Convenience constant providing a :class:`tzutc()` instance
-#:
-#: .. versionadded:: 2.7.0
 UTC = TzUTC()
 
 
@@ -242,7 +240,7 @@ class TzLocal(_TzInfo):
         # The code above yields the following result:
         #
         # >>> import tz, datetime
-        # >>> t = tz.tzlocal()
+        # >>> t = tz.TzLocal()
         # >>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
         # 'BRDT'
         # >>> datetime.datetime(2003,2,16,0,tzinfo=t).tzname()
@@ -344,9 +342,6 @@ class _TzFile:
     ttinfo_first: Any | None = None
 
 
-_tzfile = _TzFile
-
-
 class TzFile(_TzInfo):
     """
     This is a ``tzinfo`` subclass that allows one to use the ``tzfile(5)``
@@ -384,7 +379,7 @@ class TzFile(_TzInfo):
 
     .. testsetup:: tzfile
 
-        from src.tz import gettz
+        from dateutilx.tz import gettz
         from datetime import datetime
 
     .. doctest:: tzfile
@@ -446,7 +441,7 @@ class TzFile(_TzInfo):
     def _set_tzdata(self, tzobj):
         """Set the time zone data of this object from a _tzfile object"""
         # Copy the relevant attributes over as private attributes
-        for attr in _tzfile.__slots__:
+        for attr in _TzFile.__slots__:
             setattr(self, f"_{attr}", getattr(tzobj, attr))
 
     def _read_tzfile(self, fileobj):
@@ -867,14 +862,14 @@ class TzRange(TzRangeBase):
 
     .. testsetup:: tzrange
 
-        >>> from src.tz import tzrange, tzstr
+        >>> from dateutilx.tz import tzrange, tzstr
 
     .. doctest:: tzrange
 
         >>> tzstr('EST5EDT') == tzrange("EST", -18000, "EDT")
         True
 
-        >>> from src.relativedelta import *
+        >>> from dateutilx.relativedelta import *
         >>> range1 = tzrange("EST", -18000, "EDT")
         >>> range2 = tzrange("EST", -18000, "EDT", -14400,
         ...                  RelativeDelta(hours=+2, month=4, day=1,
@@ -888,7 +883,8 @@ class TzRange(TzRangeBase):
 
     def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, *, start=None, end=None):
         # global relativedelta
-        from src.relativedelta import SU, RelativeDelta
+        from dateutilx.relativedelta import RelativeDelta
+        from dateutilx.utils.weekday import SU
 
         self._std_abbr = stdabbr
         self._dst_abbr = dstabbr
@@ -1009,7 +1005,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
 
     def __init__(self, s, posix_offset=False):
         global parser
-        from src.parser import _parser as parser
+        from dateutilx.parser import _parser as parser
 
         self._s = s
 
@@ -1038,7 +1034,7 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
         self.hasdst = bool(self._start_delta)
 
     def _delta(self, x, isend=0):
-        from src import relativedelta
+        from dateutilx import relativedelta
 
         kwargs = {}
         if x.month is not None:
@@ -1058,11 +1054,11 @@ class TzStr(TzRange, metaclass=_TzStrFactory):
             if not isend:
                 kwargs["month"] = 4
                 kwargs["day"] = 1
-                kwargs["weekday"] = relativedelta.SU(+1)
+                kwargs["weekday"] = SU(+1)
             else:
                 kwargs["month"] = 10
                 kwargs["day"] = 31
-                kwargs["weekday"] = relativedelta.SU(-1)
+                kwargs["weekday"] = SU(-1)
 
         kwargs["seconds"] = x.time if x.time is not None else 7200  # Default is 2AM.
 
@@ -1094,7 +1090,7 @@ class _TzIcalVtz(_TzInfo):
         self._tzid = tzid
         self._comps = comps or []
         self._cache = OrderedDict()
-        self._cache_lock = _thread.allocate_lock()
+        self._cache_lock = threading.Lock()
 
     def _find_comp(self, dt):
         if len(self._comps) == 1:
@@ -1176,7 +1172,7 @@ class TzIcal:
     def __init__(self, fileobj):
         global rrule
         if not rrule:
-            from src import rrule
+            from dateutilx import rrule
 
         if isinstance(fileobj, str):
             self._s = fileobj
@@ -1436,7 +1432,7 @@ def __get_gettz():
             self.__instances = weakref.WeakValueDictionary()
             self.__strong_cache_size = 8
             self.__strong_cache = OrderedDict()
-            self._cache_lock = _thread.allocate_lock()
+            self._cache_lock = threading.Lock()
 
         def __call__(self, name=None):
             with self._cache_lock:
@@ -1651,7 +1647,7 @@ def resolve_imaginary(dt):
 
     .. doctest::
 
-        >>> from src import tz
+        >>> from dateutilx import tz
         >>> from datetime import datetime
         >>> NYC = tz.gettz('America/New_York')
         >>> print(tz.resolve_imaginary(datetime(2017, 3, 12, 2, 30, tzinfo=NYC)))
