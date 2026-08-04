@@ -1,6 +1,6 @@
 from typing import Any
 
-from dateutilx.helper import Day
+from .constants import Day
 
 
 class NthWeekday:

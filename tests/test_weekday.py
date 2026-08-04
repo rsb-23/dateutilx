@@ -2,7 +2,7 @@ import unittest
 
 import pytest
 
-from dateutilx.weekday import FR, MO, SA, SU, TH, TU, WE, Weekday
+from dateutilx.utils.weekday import FR, MO, SA, SU, TH, TU, WE, Weekday
 
 
 class WeekdayTest(unittest.TestCase):

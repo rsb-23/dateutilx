@@ -6,9 +6,9 @@ from unittest import TestCase
 import pytest
 
 from dateutilx import tz
-from dateutilx.helper import is_windows_os
 from dateutilx.parser import parse
 from dateutilx.tz.win import TzRes, TzWin, TzWinLocal
+from dateutilx.utils import is_windows_os
 
 from ._common import COMPARES_EQUAL, TZWinContext
 

@@ -5,7 +5,7 @@ from dateutilx.utils import default_tzinfo, today, within_delta
 
 from .freezegun import freeze_time
 
-MODULE = "dateutilx.utils"
+MODULE = "dateutilx.utils.funcs"
 UTC = tz.UTC
 NYC = tz.gettz("America/New_York")
 

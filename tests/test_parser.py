@@ -7,9 +7,9 @@ import pytest
 
 from dateutilx import tz
 from dateutilx.errors import ParserError, UnknownTimezoneWarning
-from dateutilx.helper import is_windows_os
 from dateutilx.parser import parse, parser, parserinfo
 from dateutilx.tz import TzOffset
+from dateutilx.utils import is_windows_os
 
 from ._common import TZEnvContext
 

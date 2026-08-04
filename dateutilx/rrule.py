@@ -21,8 +21,7 @@ from math import gcd
 from typing import Any
 from warnings import warn
 
-from .helper import Day, Frequency
-from .weekday import Weekday, weekdays
+from dateutilx.utils import Day, Frequency, Weekday, weekdays
 
 # fmt: off
 __all__ = [

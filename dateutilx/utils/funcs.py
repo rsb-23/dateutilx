@@ -1,11 +1,9 @@
-"""
-This module offers general convenience and utility functions for dealing with
-datetimes.
-
-.. versionadded:: 2.7.0
-"""
-
 import datetime as dt
+import sys
+
+
+def is_windows_os() -> bool:
+    return sys.platform.startswith("win")
 
 
 def today(tzinfo=None):

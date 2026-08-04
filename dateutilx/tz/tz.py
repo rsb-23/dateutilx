@@ -19,8 +19,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any
 
-from dateutilx.helper import is_windows_os
-from dateutilx.weekday import SU
+from dateutilx.utils import Day, is_windows_os, weekdays
 
 from ._common import TzRangeBase, _TzInfo, _validate_fromutc_inputs
 from ._factories import _TzOffsetFactory, _TzSingleton, _TzStrFactory
@@ -30,6 +29,7 @@ rrule = None  # pylint: disable=c0103
 ZERO = datetime.timedelta(0)
 EPOCH = datetime.datetime(1970, 1, 1, 0, 0)
 EPOCHORDINAL = EPOCH.toordinal()
+SU = weekdays[Day.SU]
 
 
 class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
@@ -342,9 +342,6 @@ class _TzFile:
     ttinfo_first: Any | None = None
 
 
-_tzfile = _TzFile
-
-
 class TzFile(_TzInfo):
     """
     This is a ``tzinfo`` subclass that allows one to use the ``tzfile(5)``
@@ -444,7 +441,7 @@ class TzFile(_TzInfo):
     def _set_tzdata(self, tzobj):
         """Set the time zone data of this object from a _tzfile object"""
         # Copy the relevant attributes over as private attributes
-        for attr in _tzfile.__slots__:
+        for attr in _TzFile.__slots__:
             setattr(self, f"_{attr}", getattr(tzobj, attr))
 
     def _read_tzfile(self, fileobj):
@@ -887,7 +884,7 @@ class TzRange(TzRangeBase):
     def __init__(self, stdabbr, stdoffset=None, dstabbr=None, dstoffset=None, *, start=None, end=None):
         # global relativedelta
         from dateutilx.relativedelta import RelativeDelta
-        from dateutilx.weekday import SU
+        from dateutilx.utils.weekday import SU
 
         self._std_abbr = stdabbr
         self._dst_abbr = dstabbr

@@ -3,7 +3,7 @@ from types import ModuleType
 
 import pytest
 
-from dateutilx.helper import is_windows_os
+from dateutilx.utils import is_windows_os
 
 HOST_IS_WINDOWS = is_windows_os()
 
@@ -117,8 +117,8 @@ def test_import_rrule_from():
 
 def test_import_rrule_all():
     # fmt: off
-    from dateutilx.helper import Frequency
     from dateutilx.rrule import FR, MO, SA, SU, TH, TU, WE, rrule, rruleset, rrulestr
+    from dateutilx.utils import Frequency
 
     rr_all = (rrule, rruleset, rrulestr, Frequency,
               MO, TU, WE, TH, FR, SA, SU)

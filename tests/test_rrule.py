@@ -5,8 +5,8 @@ from datetime import date, datetime
 import pytest
 
 from dateutilx import tz
-from dateutilx.helper import Frequency
 from dateutilx.rrule import FR, MO, SU, TH, TU, rrule, rruleset, rrulestr
+from dateutilx.utils import Frequency
 
 from .freezegun import freeze_time
 

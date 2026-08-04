@@ -7,7 +7,7 @@ import pytest
 
 from dateutilx import tz
 from dateutilx.relativedelta import RelativeDelta
-from dateutilx.weekday import SU, TH
+from dateutilx.utils.weekday import SU, TH
 
 from ._common import COMPARES_EQUAL
 from .test_tz import TzFoldMixin

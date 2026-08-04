@@ -12,10 +12,10 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from dateutilx import tz
-from dateutilx.helper import is_windows_os
 from dateutilx.parser import parse
 from dateutilx.relativedelta import RelativeDelta
-from dateutilx.weekday import SU
+from dateutilx.utils import is_windows_os
+from dateutilx.utils.weekday import SU
 
 from ._common import COMPARES_EQUAL, PicklableMixin, TZEnvContext
 from ._data import (

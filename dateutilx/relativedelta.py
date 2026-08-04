@@ -6,7 +6,7 @@ from types import NotImplementedType
 from typing import Self
 from warnings import warn
 
-from dateutilx.weekday import Weekday, weekdays
+from dateutilx.utils import Weekday, weekdays
 
 __all__ = ["RelativeDelta"]
 Number = float | int
