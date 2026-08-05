@@ -18,11 +18,3 @@ Classes
 .. autoclass:: dateutilx.parser.parserinfo
   :members:
   :undoc-members:
-
-
-Warnings and Exceptions
------------------------
-
-.. autoclass:: dateutilx.parser.ParserError
-
-.. autoclass:: dateutilx.parser.UnknownTimezoneWarning

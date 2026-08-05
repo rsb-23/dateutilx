@@ -4,4 +4,4 @@
 Changelog
 =========
 
-.. include:: ../NEWS
+.. .. include:: ../NEWS

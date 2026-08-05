@@ -3,8 +3,6 @@ class ParserError(ValueError):
 
     This is a subclass of :py:exc:`ValueError`, and should be raised any time
     earlier versions of ``dateutilx`` would have raised ``ValueError``.
-
-    .. versionadded:: 2.8.1
     """
 
     def __str__(self):
@@ -19,7 +17,4 @@ class ParserError(ValueError):
 
 
 class UnknownTimezoneWarning(RuntimeWarning):
-    """Raised when the parser finds a timezone it cannot parse into a tzinfo.
-
-    .. versionadded:: 2.7.0
-    """
+    """Raised when the parser finds a timezone it cannot parse into a tzinfo."""

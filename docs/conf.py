@@ -12,7 +12,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 
 # -- General configuration ------------------------------------------------
 
@@ -22,7 +21,13 @@ import sys
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.doctest", "sphinx.ext.viewcode", "sphinx.ext.intersphinx"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
+    "enum_tools.autoenum",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -172,25 +177,10 @@ html_static_path = []
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "dateutildoc"
+htmlhelp_basename = "dateutilxdoc"
 
 # -- Options for autodoc -------------------------------------------------
 
-autodoc_mock_imports = ["ctypes.wintypes", "six.moves.winreg"]
-
-# Need to mock this out specifically to avoid errors
-import ctypes  # noqa
-
-
-def pointer_mock(*args, **kwargs):
-    try:
-        return ctypes.POINTER(*args, **kwargs)
-    except Exception:
-        return None
-
-
-ctypes.POINTER = pointer_mock
-sys.modules["ctypes"] = ctypes
 
 # -- Configure intersphinx ------------------------------------------------
 

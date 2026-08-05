@@ -1,10 +1,9 @@
-.. dateutil documentation master file, created by
-   sphinx-quickstart on Thu Nov 20 23:18:41 2014.
+.. dateutilx documentation master file, modified on Wed Aug 05 14:11:00 2026.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 
-.. include:: ../README.rst
+.. .. include:: ../README.rst
 
 Documentation
 =============
@@ -22,13 +21,13 @@ Contents:
    :maxdepth: 2
 
    easter
+   errors
    parser
    relativedelta
    rrule
    tz
    tz.win <tzwin>
    utils
-   zoneinfo
 
 Indices and tables
 ==================

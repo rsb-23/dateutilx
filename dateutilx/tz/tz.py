@@ -1569,10 +1569,7 @@ def datetime_exists(dt, tz=None):
         ``None`` or not provided, the datetime's own time zone will be used.
 
     :return:
-        Returns a boolean value whether or not the "wall time" exists in
-        ``tz``.
-
-    .. versionadded:: 2.7.0
+        Returns a boolean value whether or not the "wall time" exists in ``tz``.
     """
     if tz is None:
         if dt.tzinfo is None:
@@ -1604,10 +1601,7 @@ def datetime_ambiguous(dt, tz=None):
         ``None`` or not provided, the datetime's own time zone will be used.
 
     :return:
-        Returns a boolean value whether or not the "wall time" is ambiguous in
-        ``tz``.
-
-    .. versionadded:: 2.6.0
+        Returns a boolean value whether or not the "wall time" is ambiguous in ``tz``.
     """
     if tz is None:
         if dt.tzinfo is None:
@@ -1670,8 +1664,6 @@ def resolve_imaginary(dt):
         Returns an existing :class:`datetime.datetime`. If ``dt`` was not
         imaginary, the datetime returned is guaranteed to be the same object
         passed to the function.
-
-    .. versionadded:: 2.7.0
     """
     if dt.tzinfo is not None and not datetime_exists(dt):
         curr_offset = (dt + datetime.timedelta(hours=24)).utcoffset()
