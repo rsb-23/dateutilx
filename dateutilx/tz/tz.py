@@ -11,6 +11,7 @@ import bisect
 import contextlib
 import datetime
 import os
+import string
 import struct
 import threading
 import time
@@ -191,7 +192,7 @@ class TzLocal(_TzInfo):
 
         self._dst_saved = self._dst_offset - self._std_offset
         self._hasdst = bool(self._dst_saved)
-        self._tznames = tuple(time.tzname)
+        self._tznames = time.tzname
 
     def utcoffset(self, dt):
         if dt is None and self._hasdst:
@@ -1537,7 +1538,7 @@ def __get_gettz():
                                 # one offset. For short values of "name", an
                                 # explicit for loop seems to be the fastest way
                                 # To determine if a string contains a digit
-                                if c in "0123456789":
+                                if c in string.digits:
                                     with contextlib.suppress(ValueError):
                                         tz = TzStr(name)
                                     break

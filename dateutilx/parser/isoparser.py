@@ -10,6 +10,7 @@ ISO-8601 specification.
 import calendar
 import datetime as dt
 import re
+import string
 from functools import wraps
 
 from dateutilx.tz import UTC, TzOffset
@@ -49,7 +50,7 @@ class IsoParser:
             For strict ISO-8601 adherence, pass ``'T'``.
         """
         if sep is not None:
-            if len(sep) != 1 or ord(sep) >= 128 or sep in "0123456789":
+            if len(sep) != 1 or ord(sep) >= 128 or sep in string.digits:
                 raise ValueError("Separator must be a single, non-numeric " + "ASCII character")
 
             sep = sep.encode("ascii")
@@ -389,7 +390,7 @@ class IsoParser:
         else:
             minutes = int(tzstr[(4 if tzstr[3:4] == self._TIME_SEP else 3) :])
 
-        if zero_as_utc and hours == 0 and minutes == 0:
+        if zero_as_utc and hours == minutes == 0:
             return UTC
 
         if minutes > 59:

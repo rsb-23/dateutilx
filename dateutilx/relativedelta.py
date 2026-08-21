@@ -393,7 +393,7 @@ class RelativeDelta:
                 month += 12
         day = min(calendar.monthrange(year, month)[1], self.day or other.day)
         repl = {"year": year, "month": month, "day": day}
-        for attr in ["hour", "minute", "second", "microsecond"]:
+        for attr in ("hour", "minute", "second", "microsecond"):
             value = getattr(self, attr)
             if value is not None:
                 repl[attr] = value
@@ -512,11 +512,11 @@ class RelativeDelta:
 
     def __repr__(self):
         _tmp_list = []
-        for attr in ["years", "months", "days", "leapdays", "hours", "minutes", "seconds", "microseconds"]:
+        for attr in ("years", "months", "days", "leapdays", "hours", "minutes", "seconds", "microseconds"):
             value = getattr(self, attr)
             if value:
                 _tmp_list.append(f"{attr}={value:+g}")
-        for attr in ["year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"]:
+        for attr in ("year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"):
             value = getattr(self, attr)
             if value is not None:
                 _tmp_list.append(f"{attr}={value!r}")
