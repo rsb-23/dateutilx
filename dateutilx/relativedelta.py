@@ -212,14 +212,15 @@ class RelativeDelta:
 
         yday = nlyearday or yearday
 
-        if yearday and not nlyearday and yearday > 59:
+        if yearday and not nlyearday and (59 < yearday < 366):
+            # Shifting for leapday except Dec 32/31
             self.leapdays = -1
 
         if yday:
             if not 1 <= yday <= 366:
                 raise ValueError(f"invalid year day ({yday})")
 
-            resolved = dt.date(2001, 1, 1) + dt.timedelta(days=yday - 1)
+            resolved = dt.date(2001, 1, 1) + dt.timedelta(days=min(yday, 365) - 1)
             self.day, self.month = resolved.day, resolved.month
 
     def _absolutes(self) -> dict[str, Number]:
