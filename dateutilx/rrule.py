@@ -106,21 +106,20 @@ class RruleBase:
         i = 0
         gen = self._cache_gen
         cache = self._cache
-        acquire = self._cache_lock.acquire
-        release = self._cache_lock.release
+
         while gen:
             if i == len(cache):
-                acquire()
-                if self._cache_complete:
-                    break
-                try:
-                    for _ in range(10):
-                        cache.append(next(gen))
-                except StopIteration:
-                    self._cache_gen = gen = None
-                    self._cache_complete = True
-                    break
-                release()
+                with self._cache_lock:
+                    if self._cache_complete:
+                        break
+                    try:
+                        for _ in range(10):
+                            cache.append(next(gen))
+                    except StopIteration:
+                        self._cache_gen = gen = None
+                        self._cache_complete = True
+                        break
+
             yield cache[i]
             i += 1
         while i < self._len:

@@ -172,7 +172,7 @@ class RelativeDelta:
 
         # Remove the year/month delta so the timedelta is just well-defined
         # time units (seconds, days and microseconds)
-        dtm = self.__radd__(dt2)
+        dtm = self + dt2
 
         # If we've overshot our target, make an adjustment
         if dt1 < dt2:
@@ -185,7 +185,7 @@ class RelativeDelta:
         while compare(dt1, dtm):
             months += increment
             self._set_months(months)
-            dtm = self.__radd__(dt2)
+            dtm = self + dt2
 
         # Get the timedelta between the "months-adjusted" date and dt1
         delta = dt1 - dtm
