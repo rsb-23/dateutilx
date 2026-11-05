@@ -68,7 +68,9 @@ class TzUTC(datetime.tzinfo, metaclass=_TzSingleton):
 
     __name__ = "tzutc"
     __hash__ = None
-    __reduce__ = object.__reduce__
+
+    def __reduce__(self):
+        return self.__class__, tuple()
 
     def utcoffset(self, dt):
         return ZERO
@@ -173,7 +175,8 @@ class TzOffset(datetime.tzinfo, metaclass=_TzOffsetFactory):
     def __repr__(self):
         return f"{self.__class__.__name__}({self._name!r}, {int(self._offset.total_seconds())})"
 
-    __reduce__ = object.__reduce__
+    def __reduce__(self):
+        return self.__class__, (self._name, self._offset)
 
 
 class TzLocal(_TzInfo):
@@ -1231,6 +1234,9 @@ class TzIcal:
             s = s[1:]
         else:
             signal = +1
+
+        if not (s.isascii() and s.isdigit()):
+            raise ValueError("invalid offset: " + s)
 
         if len(s) == 4:
             return (int(s[:2]) * 3600 + int(s[2:]) * 60) * signal

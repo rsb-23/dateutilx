@@ -1160,6 +1160,14 @@ class TZICalTest(unittest.TestCase, TzFoldMixin):
         self.assertEqual(keys, ["US-Eastern", "US-Pacific"])
 
 
+# last one is Non-ASCII (Arabic-Indic) digits
+@pytest.mark.parametrize("offset", ["+-500", "--500", "+ 500", "-05 0", "+\u0660\u0665\u0660\u0660"])
+def test_tzical_offset_non_digit(offset):
+    tz_str = TZICAL_EST5EDT.replace("TZOFFSETTO:-0500", "TZOFFSETTO:" + offset)
+    with pytest.raises(ValueError):
+        tz.TzIcal(StringIO(tz_str))
+
+
 class TZTest(unittest.TestCase):
     def test_file_start1(self):
         tzc = tz.TzFile(BytesIO(base64.b64decode(TZFILE_EST5EDT)))

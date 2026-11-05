@@ -301,6 +301,7 @@ def test_bytes(isostr, dt):
         ("2014_W01-1", ValueError),  # Invalid separator
         ("2014W01-1", ValueError),  # Inconsistent use of dashes
         ("2014-W011", ValueError),  # Inconsistent use of dashes
+        ("20200728121240", ValueError),  # Seconds too short
     ],
 )
 def test_iso_raises(isostr, exception):
@@ -322,6 +323,15 @@ def test_iso_with_sep_raises(sep_act, valid_sep, exception):
 def test_isoparser_invalid_sep(sep):
     with pytest.raises(ValueError):
         isoparser(sep=sep)
+
+
+@pytest.mark.xfail(reason="Bytes separators are not supported", raises=TypeError)
+def test_isoparser_byte_sep():
+    dt = datetime(2017, 12, 6, 12, 30, 45)
+    dt_str = dt.isoformat(sep="T")
+
+    dt_rt = isoparser(sep=b"T").isoparse(dt_str)
+    assert dt == dt_rt
 
 
 # Test parse_tzstr
@@ -350,6 +360,11 @@ def test_parse_tzstr_zero_as_utc(tzstr, zero_as_utc):
         ("_00:00", ValueError),  # Invalid sign
         ("+25:00", ValueError),  # Offset too large
         ("00:0000", ValueError),  # String too long
+        ("+01:0", ValueError),  # Minutes too short
+        ("+01000", ValueError),  # Minutes too long
+        ("+ 1:00", ValueError),  # Whitespace in hours
+        ("+-1:00", ValueError),  # Sign in hours
+        ("+01:-5", ValueError),  # Sign in minutes
     ],
 )
 def test_parse_tzstr_fails(tzstr, exception):
