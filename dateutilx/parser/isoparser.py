@@ -10,6 +10,7 @@ ISO-8601 specification.
 import calendar
 import datetime as dt
 import re
+import string
 from functools import wraps
 
 from dateutilx.tz import UTC, TzOffset
@@ -49,7 +50,7 @@ class IsoParser:
             For strict ISO-8601 adherence, pass ``'T'``.
         """
         if sep is not None:
-            if len(sep) != 1 or ord(sep) >= 128 or sep in "0123456789":
+            if len(sep) != 1 or ord(sep) >= 128 or sep in string.digits:
                 raise ValueError("Separator must be a single, non-numeric " + "ASCII character")
 
             sep = sep.encode("ascii")
@@ -202,6 +203,13 @@ class IsoParser:
     _TIME_SEP = b":"
     _FRACTION_REGEX = re.compile(b"[.,]([0-9]+)")
 
+    def _parse_digits(self, s, pos, n):
+        """Parse exactly ``n`` ASCII digits starting at ``pos``."""
+        digits = s[pos : pos + n]
+        if len(digits) != n or not digits.isdigit():
+            raise ValueError("Expected {} digits, got {!r}".format(n, digits.decode("ascii")))
+        return int(digits)
+
     def _parse_isodate(self, dt_str: str) -> tuple:
         if len(dt_str) < 4:
             raise ValueError("ISO string too short")
@@ -216,7 +224,7 @@ class IsoParser:
         components = [1, 1, 1]
 
         # Year
-        components[0] = int(dt_str[:4])
+        components[0] = self._parse_digits(dt_str, 0, 4)
         pos = 4
         if pos >= len_str:
             return components, pos
@@ -229,7 +237,7 @@ class IsoParser:
         if len_str - pos < 2:
             raise ValueError("Invalid common month")
 
-        components[1] = int(dt_str[pos : pos + 2])
+        components[1] = self._parse_digits(dt_str, pos, 2)
         pos += 2
 
         if pos >= len_str:
@@ -245,12 +253,12 @@ class IsoParser:
         # Day
         if len_str - pos < 2:
             raise ValueError("Invalid common day")
-        components[2] = int(dt_str[pos : pos + 2])
+        components[2] = self._parse_digits(dt_str, pos, 2)
         return components, pos + 2
 
     def _parse_isodate_uncommon(self, dt_str: str) -> tuple:
         # All ISO formats start with the year
-        year = int(dt_str[:4])
+        year = self._parse_digits(dt_str, 0, 4)
 
         has_sep = dt_str[4:5] == self._DATE_SEP
 
@@ -258,7 +266,7 @@ class IsoParser:
         if dt_str[pos : pos + 1] == b"W":
             # YYYY-?Www-?D?
             pos += 1
-            weekno = int(dt_str[pos : pos + 2])
+            weekno = self._parse_digits(dt_str, pos, 2)
             pos += 2
 
             dayno = 1
@@ -268,7 +276,7 @@ class IsoParser:
 
                 pos += has_sep
 
-                dayno = int(dt_str[pos : pos + 1])
+                dayno = self._parse_digits(dt_str, pos, 1)
                 pos += 1
 
             base_date = self._calculate_weekdate(year, weekno, dayno)
@@ -277,7 +285,7 @@ class IsoParser:
             if len(dt_str) - pos < 3:
                 raise ValueError("Invalid ordinal day")
 
-            ordinal_day = int(dt_str[pos : pos + 3])
+            ordinal_day = self._parse_digits(dt_str, pos, 3)
             pos += 3
 
             if ordinal_day < 1 or ordinal_day > (365 + calendar.isleap(year)):
@@ -347,7 +355,7 @@ class IsoParser:
 
             if comp < 3:
                 # Hour, minute, second
-                components[comp] = int(timestr[pos : pos + 2])
+                components[comp] = self._parse_digits(timestr, pos, 2)
                 pos += 2
 
             if comp == 3:
@@ -383,13 +391,16 @@ class IsoParser:
         else:
             raise ValueError("Time zone offset requires sign")
 
-        hours = int(tzstr[1:3])
+        hours = self._parse_digits(tzstr, 1, 2)
         if len(tzstr) == 3:
             minutes = 0
         else:
-            minutes = int(tzstr[(4 if tzstr[3:4] == self._TIME_SEP else 3) :])
+            pos = 4 if tzstr[3:4] == self._TIME_SEP else 3
+            if len(tzstr) != pos + 2:
+                raise ValueError("Invalid minutes in time zone offset")
+            minutes = self._parse_digits(tzstr, pos, 2)
 
-        if zero_as_utc and hours == 0 and minutes == 0:
+        if zero_as_utc and hours == minutes == 0:
             return UTC
 
         if minutes > 59:

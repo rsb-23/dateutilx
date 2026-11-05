@@ -36,6 +36,7 @@ UTC = tz.UTC
 
 # Helper functions
 mark_tzlocal_nix = pytest.mark.skipif(IS_WIN, reason="requires Unix")(pytest.mark.tzlocal)
+tz_us_east = tz.gettz("America/New_York")
 
 
 class TzFoldMixin:
@@ -681,15 +682,15 @@ class GettzTest(unittest.TestCase, TzFoldMixin):
 
     def test_portugal_dst(self):
         # In 1996, Portugal changed from CET to WET
-        PORTUGAL = self.gettz("Portugal")
+        portugal = self.gettz("Europe/Lisbon")
 
-        t_cet = datetime(1996, 3, 31, 1, 59, tzinfo=PORTUGAL)
+        t_cet = datetime(1996, 3, 31, 1, 59, tzinfo=portugal)
 
         self.assertEqual(t_cet.tzname(), "CET")
         self.assertEqual(t_cet.utcoffset(), timedelta(hours=1))
         self.assertEqual(t_cet.dst(), timedelta(0))
 
-        t_west = datetime(1996, 3, 31, 2, 1, tzinfo=PORTUGAL)
+        t_west = datetime(1996, 3, 31, 2, 1, tzinfo=portugal)
 
         self.assertEqual(t_west.tzname(), "WEST")
         self.assertEqual(t_west.utcoffset(), timedelta(hours=1))
@@ -1159,6 +1160,14 @@ class TZICalTest(unittest.TestCase, TzFoldMixin):
         self.assertEqual(keys, ["US-Eastern", "US-Pacific"])
 
 
+# last one is Non-ASCII (Arabic-Indic) digits
+@pytest.mark.parametrize("offset", ["+-500", "--500", "+ 500", "-05 0", "+\u0660\u0665\u0660\u0660"])
+def test_tzical_offset_non_digit(offset):
+    tz_str = TZICAL_EST5EDT.replace("TZOFFSETTO:-0500", "TZOFFSETTO:" + offset)
+    with pytest.raises(ValueError):
+        tz.TzIcal(StringIO(tz_str))
+
+
 class TZTest(unittest.TestCase):
     def test_file_start1(self):
         tzc = tz.TzFile(BytesIO(base64.b64decode(TZFILE_EST5EDT)))
@@ -1402,31 +1411,19 @@ class DatetimeAmbiguousTest(unittest.TestCase):
         self.assertFalse(tz.datetime_ambiguous(datetime(2018, 10, 1, 12, 30), tz=tzi))
 
     def test_support_ambiguity_fold_naive(self):
-        tzi = tz.gettz("US/Eastern")
-
         dt = datetime(2011, 11, 6, 1, 30)
-
-        self.assertTrue(tz.datetime_ambiguous(dt, tz=tzi))
+        self.assertTrue(tz.datetime_ambiguous(dt, tz=tz_us_east))
 
     def test_support_ambiguity_fold_aware(self):
-        tzi = tz.gettz("US/Eastern")
-
-        dt = datetime(2011, 11, 6, 1, 30, tzinfo=tzi)
-
+        dt = datetime(2011, 11, 6, 1, 30, tzinfo=tz_us_east)
         self.assertTrue(tz.datetime_ambiguous(dt))
 
     def test_support_ambiguity_unambiguous_aware(self):
-        tzi = tz.gettz("US/Eastern")
-
         dt = datetime(2011, 11, 6, 4, 30)
-
-        self.assertFalse(tz.datetime_ambiguous(dt, tz=tzi))
+        self.assertFalse(tz.datetime_ambiguous(dt, tz=tz_us_east))
 
     def test_support_ambiguity_unambiguous_naive(self):
-        tzi = tz.gettz("US/Eastern")
-
-        dt = datetime(2011, 11, 6, 4, 30, tzinfo=tzi)
-
+        dt = datetime(2011, 11, 6, 4, 30, tzinfo=tz_us_east)
         self.assertFalse(tz.datetime_ambiguous(dt))
 
     def _get_ambig_error_tzinfo(self, dt_start, dt_end, dst_only=False):
@@ -1494,9 +1491,7 @@ class DatetimeAmbiguousTest(unittest.TestCase):
         dt = datetime(2011, 11, 6, 1, 30, tzinfo=tz.gettz("Australia/Sydney"))
 
         self.assertFalse(tz.datetime_ambiguous(dt))
-
-        tzi = tz.gettz("US/Eastern")
-        self.assertTrue(tz.datetime_ambiguous(dt, tz=tzi))
+        self.assertTrue(tz.datetime_ambiguous(dt, tz=tz_us_east))
 
 
 class DatetimeExistsTest(unittest.TestCase):
@@ -1533,9 +1528,8 @@ class DatetimeExistsTest(unittest.TestCase):
         self.assertTrue(tz.datetime_exists(dt))
 
     def test_specified_tz_overrides_attached(self):
-        est = tz.gettz("US/Eastern")
+        est = tz_us_east
         aest = tz.gettz("Australia/Sydney")
 
         dt = datetime(2012, 10, 7, 2, 30, tzinfo=est)  # This time exists
-
         self.assertFalse(tz.datetime_exists(dt, tz=aest))

@@ -425,8 +425,8 @@ class ImaginaryDateTest(unittest.TestCase):
         dt_exp = datetime(2018, 3, 25, 2, 30, tzinfo=tzi)
         self.assertEqual(dt_act, dt_exp)
 
-    def test_keiv_forward(self):
-        tzi = tz.gettz("Europe/Kiev")
+    def test_kyiv_forward(self):
+        tzi = tz.gettz("Europe/Kyiv")
         dt = datetime(2018, 3, 25, 3, 30, tzinfo=tzi)
         dt_act = tz.resolve_imaginary(dt)
         dt_exp = datetime(2018, 3, 25, 4, 30, tzinfo=tzi)

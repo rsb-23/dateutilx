@@ -172,7 +172,7 @@ class RelativeDelta:
 
         # Remove the year/month delta so the timedelta is just well-defined
         # time units (seconds, days and microseconds)
-        dtm = self.__radd__(dt2)
+        dtm = self + dt2
 
         # If we've overshot our target, make an adjustment
         if dt1 < dt2:
@@ -185,7 +185,7 @@ class RelativeDelta:
         while compare(dt1, dtm):
             months += increment
             self._set_months(months)
-            dtm = self.__radd__(dt2)
+            dtm = self + dt2
 
         # Get the timedelta between the "months-adjusted" date and dt1
         delta = dt1 - dtm
@@ -212,14 +212,15 @@ class RelativeDelta:
 
         yday = nlyearday or yearday
 
-        if yearday and not nlyearday and yearday > 59:
+        if yearday and not nlyearday and (59 < yearday < 366):
+            # Shifting for leapday except Dec 32/31
             self.leapdays = -1
 
         if yday:
             if not 1 <= yday <= 366:
                 raise ValueError(f"invalid year day ({yday})")
 
-            resolved = dt.date(2001, 1, 1) + dt.timedelta(days=yday - 1)
+            resolved = dt.date(2001, 1, 1) + dt.timedelta(days=min(yday, 365) - 1)
             self.day, self.month = resolved.day, resolved.month
 
     def _absolutes(self) -> dict[str, Number]:
@@ -393,7 +394,7 @@ class RelativeDelta:
                 month += 12
         day = min(calendar.monthrange(year, month)[1], self.day or other.day)
         repl = {"year": year, "month": month, "day": day}
-        for attr in ["hour", "minute", "second", "microsecond"]:
+        for attr in ("hour", "minute", "second", "microsecond"):
             value = getattr(self, attr)
             if value is not None:
                 repl[attr] = value
@@ -512,11 +513,11 @@ class RelativeDelta:
 
     def __repr__(self):
         _tmp_list = []
-        for attr in ["years", "months", "days", "leapdays", "hours", "minutes", "seconds", "microseconds"]:
+        for attr in ("years", "months", "days", "leapdays", "hours", "minutes", "seconds", "microseconds"):
             value = getattr(self, attr)
             if value:
                 _tmp_list.append(f"{attr}={value:+g}")
-        for attr in ["year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"]:
+        for attr in ("year", "month", "day", "weekday", "hour", "minute", "second", "microsecond"):
             value = getattr(self, attr)
             if value is not None:
                 _tmp_list.append(f"{attr}={value!r}")

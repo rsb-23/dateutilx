@@ -106,21 +106,20 @@ class RruleBase:
         i = 0
         gen = self._cache_gen
         cache = self._cache
-        acquire = self._cache_lock.acquire
-        release = self._cache_lock.release
+
         while gen:
             if i == len(cache):
-                acquire()
-                if self._cache_complete:
-                    break
-                try:
-                    for _ in range(10):
-                        cache.append(next(gen))
-                except StopIteration:
-                    self._cache_gen = gen = None
-                    self._cache_complete = True
-                    break
-                release()
+                with self._cache_lock:
+                    if self._cache_complete:
+                        break
+                    try:
+                        for _ in range(10):
+                            cache.append(next(gen))
+                    except StopIteration:
+                        self._cache_gen = gen = None
+                        self._cache_complete = True
+                        break
+
             yield cache[i]
             i += 1
         while i < self._len:
@@ -459,7 +458,7 @@ class Rrule(RruleBase):
         if self._bysetpos:
             self._original_rule["bysetpos"] = self._bysetpos
 
-        if byweekno is None and byyearday is None and bymonthday is None and byweekday is None and byeaster is None:
+        if all(x is None for x in (byweekno, byyearday, bymonthday, byweekday, byeaster)):
             if freq == YEARLY:
                 if bymonth is None:
                     bymonth = dtstart.month
@@ -660,7 +659,7 @@ class Rrule(RruleBase):
             original_rule = self._original_rule
 
         partfmt = "{name}={vals}"
-        for name, key in [
+        for name, key in (
             ("BYSETPOS", "bysetpos"),
             ("BYMONTH", "bymonth"),
             ("BYMONTHDAY", "bymonthday"),
@@ -671,7 +670,7 @@ class Rrule(RruleBase):
             ("BYMINUTE", "byminute"),
             ("BYSECOND", "bysecond"),
             ("BYEASTER", "byeaster"),
-        ]:
+        ):
             value = original_rule.get(key)
             if value:
                 parts.append(partfmt.format(name=name, vals=(",".join(str(v) for v in value))))

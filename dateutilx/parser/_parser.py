@@ -391,15 +391,16 @@ class _YMD(list):
         return 1 <= value <= monthrange(year, month)[1]
 
     def append(self, val, label=None):
+        _valid_labels = (None, "Y")
         if hasattr(val, "__len__"):
             if val.isdigit() and len(val) > 2:
                 self.century_specified = True
-                if label not in [None, "Y"]:  # pragma: no cover
+                if label not in _valid_labels:  # pragma: no cover
                     raise ValueError(label)
                 label = "Y"
         elif val > 100:
             self.century_specified = True
-            if label not in [None, "Y"]:  # pragma: no cover
+            if label not in _valid_labels:  # pragma: no cover
                 raise ValueError(label)
             label = "Y"
 
@@ -426,7 +427,7 @@ class _YMD(list):
         if len(self) == 3 and len(strids) == 2:
             # we can back out the remaining stridx value
             missing = [x for x in range(3) if x not in strids.values()]
-            key = [x for x in ["y", "m", "d"] if x not in strids]
+            key = [x for x in ("y", "m", "d") if x not in strids]
             assert len(missing) == len(key) == 1
             key = key[0]
             val = missing[0]
@@ -1022,8 +1023,7 @@ class Parser:
     def _could_be_tzname(self, hour, tzname, tzoffset, token):
         return (
             hour is not None
-            and tzname is None
-            and tzoffset is None
+            and tzname is tzoffset is None
             and len(token) <= 5
             and (all(x in string.ascii_uppercase for x in token) or token in self.info.UTCZONE)
         )
@@ -1370,7 +1370,7 @@ class _TzParser:
 
                 used_idxs.extend([*range(j)])
                 i = j
-                if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in "0123456789"):
+                if i < len_l and (_tmp_list[i] in ("+", "-") or _tmp_list[i][0] in string.digits):
                     if _tmp_list[i] in ("+", "-"):
                         # Yes, that's right. See the TZ variable documentation.
                         signal = (1, -1)[_tmp_list[i] == "+"]
@@ -1462,7 +1462,7 @@ class _TzParser:
                     for x in _tmp_list[i:]
                     if x not in (",", "/", "J", "M", ".", "-", ":")
                     for y in x
-                    if y not in "0123456789"
+                    if y not in string.digits
                 ]
             ):
                 for x in (res.start, res.end):

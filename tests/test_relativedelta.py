@@ -1,3 +1,4 @@
+import calendar
 import unittest
 from datetime import date, datetime, timedelta
 
@@ -186,6 +187,7 @@ class RelativeDeltaTest(unittest.TestCase):
 def test_inequality_type_mismatch():
     # Different type
     assert relativedelta(year=1) != 19
+    assert relativedelta(year=1) is not None
 
 
 def test_inequality_unsupported_type():
@@ -316,6 +318,13 @@ def test_last_day_of_month_minus():
         date(2021, 5, 31) - RD_1MON,
         date(2021, 6, 30) - RD_1MON,
     ] == [date(2021, 1, 28), FEB_28, date(2021, 4, 30), date(2021, 5, 30)]
+
+
+@pytest.mark.parametrize("year", [1900, 2000, 2001, 2024])
+def test_yearday_is_ordinal_day(year):
+    first = date(year, 1, 1)
+    days = range(1, 366 + calendar.isleap(year))
+    assert [first + RelativeDelta(yearday=n) for n in days] == [first + timedelta(days=n - 1) for n in days]
 
 
 class RelativeDeltaOperationTest(unittest.TestCase):
